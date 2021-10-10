@@ -235,26 +235,26 @@ class Figuur(pycom.BasisObject):
 
     def bewaar_als_svg(self):
         FILENAME = 'tmp.svg'
-        plt.savefig(FILENAME)
+        # plt.savefig(FILENAME)
 
-        class TkFileDialog(tk.Frame):
-            def __init__(self, root):
-                tk.Frame.__init__(self, root)
-                button_opt = {'fill': tk.BOTH, 'padx': 5, 'pady': 5}
-                tk.Button(self, text='bewaar figuur als SVG bestand', command=self.asksaveasfilename).pack(**button_opt)
-                self.file_opt = options = {}
-                options['filetypes'] = [('all files', '.*'), ('SVG bestand', '.svg')]
-                options['initialfile'] = 'figuur.svg'
-                options['parent'] = root
+        # class TkFileDialog(tk.Frame):
+        #     def __init__(self, root):
+        #         tk.Frame.__init__(self, root)
+        #         button_opt = {'fill': tk.BOTH, 'padx': 5, 'pady': 5}
+        #         tk.Button(self, text='bewaar figuur als SVG bestand', command=self.asksaveasfilename).pack(**button_opt)
+        #         self.file_opt = options = {}
+        #         options['filetypes'] = [('all files', '.*'), ('SVG bestand', '.svg')]
+        #         options['initialfile'] = 'figuur.svg'
+        #         options['parent'] = root
 
-            def asksaveasfilename(self):
-                new_filename = asksaveasfile(**self.file_opt)
+        #     def asksaveasfilename(self):
+        #         new_filename = asksaveasfile(**self.file_opt)
 
-                if new_filename:
-                    shutil.copyfile(FILENAME, new_filename)
+        #         if new_filename:
+        #             shutil.copyfile(FILENAME, new_filename)
 
-        root = tk.Tk()
-        TkFileDialog(root).pack()
-        root.mainloop()
+        # root = tk.Tk()
+        # TkFileDialog(root).pack()
+        # root.mainloop()
 
-        os.remove(FILENAME)
+        # os.remove(FILENAME)

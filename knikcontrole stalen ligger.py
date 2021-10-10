@@ -167,7 +167,7 @@ doc.model.Figuur(
         breedte = 2,
         kleur = 'green',
         naam = 'sinus parabool',
-    )().bewaar_als_svg()
+    )()
 
 doc.model.Figuur(
         raster=True,
