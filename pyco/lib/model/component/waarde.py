@@ -7,7 +7,62 @@ import pyco.model as pycom
 import pyco.functies as pycof
 
 class Waarde(pycom.BasisObject):
-    """Object met een waarde (getal) met bijhorende eenheid."""
+    """
+    Bevat een getal en bijhorende eenheid.
+
+    AANMAKEN WAARDE
+        w = Waarde(getal)
+        w = Waarde(getal, eenheid_tekst)
+
+    AANPASSEN EENHEID           pas wanneer waarde wordt getoond als tekst
+        w = w['N/mm2']          kan voor alle eenheden
+        w = w.N_mm2             kan voor een aantal standaard gevallen
+
+    AANPASSEN AFRONDING         pas wanneer waarde wordt getoond als tekst
+        w = w[0]                kan voor alle aantallen decimalen
+        w = w._0                kan voor 0 t/m 9 decimalen
+
+    OMZETTEN WAARDE NAAR TEKST  resulteert in nieuw string object
+        tekst = str(w)          of automatisch met print(w)
+
+    OMZETTEN WAARDE NAAR GETAL  resulteert in nieuw float object
+        getal = w('cm')
+
+    MOGELIJKE BEWERKINGEN       resulteert in nieuw Waarde object
+        w3 = w1 + w2            waarde optellen bij waarde
+        w3 = w1 - w2            waarde aftrekken van waarde
+        w3 = w1 * w2            waarde vermenigvuldigen met waarde
+        w3 = w1 / w2            waarde delen door waarde
+        w2 = n * w1             getal vermenigvuldigen met waarde
+        w2 = w1 * n             waarde vermenigvuldigen met getal
+        w2 = n / w1             getal delen door waarde
+        w2 = w1 / n             waarde delen door getal
+        w2 = w1 ** n            waarde tot de macht een getal
+
+    TEKST EENHEID
+        gebruik een getal achter naam eenheid voor 'tot de macht'
+        gebruik / (maximaal één keer) om teller en noemer te introduceren
+        gebruik * om eenheden te combineren (zowel in teller als noemer)
+        bijvoorbeeld: "m3*kPa/s4*m"
+
+    STANDAARD EENHEDEN          deze kan je combineren
+        dimensieloos            -
+        massa                   ag fg pg ng mug mg cg g hg kg Mg Gg Tg Pg Eg
+                                ton kton Mton ounce pound kip stone grain
+        lengte                  am fm pm nm mum mm cm dm m dam hm km Mm Gm Tm
+                                Pm Em in ft yard zeemijl mijl
+        tijd                    as(.attos) fs ps ns mus ms cs ds s das hs ks
+                                Ms Gs Ts Ps Es min(.minuut) h d
+        temperatuur             C K F  (als temperatuur in teller, samen met
+                                andere eenheden, dan niet om te rekenen)
+        hoek                    rad deg gon
+        kracht                  N kN MN GN TN  (of massa*lengte/tijd^2)
+        spanning                Pa kPa MPa GPa TPa  (of kracht/oppervlakte)
+        moment                  Nm kNm MNm Nmm kNmm MNmm  (of kracht*lengte)
+        oppervlakte             ca a ha  (of lengte^2)
+        inhoud                  ml cl dl l dal hl kl gallon pint floz tbs tsp
+                                bbl cup  (of lengte^3)
+    """
 
     # factoren horende bij basiseenheden, om eenheidsbreuk samen te stellen
     # verschillende priemgetallen, zodat product een uniek resultaat geeft
@@ -244,6 +299,7 @@ class Waarde(pycom.BasisObject):
             self.config = config
 
     def _init_waarde_getal(self, waarde: Union[int, float]):
+        """Initieert alleen een getal."""
         self.is_getal = True
         self.waarde = float(waarde)
         self.eenheidbreuk = Fraction(1)
@@ -253,6 +309,7 @@ class Waarde(pycom.BasisObject):
         }
 
     def _init_waarde_eenheidtekst(self, waarde: Union[int, float], eenheid: str):
+        """Initieert een eenheid met tekst."""
         self.is_getal = True
         self.decimalen = self.STANDAARD_AANTAL_DECIMALEN
         self.waarde, self.eenheidbreuk = self._bereken_nieuwe_waarde(eenheid, float(waarde))
@@ -262,6 +319,7 @@ class Waarde(pycom.BasisObject):
         }
 
     def _init_waarde_eenheidbreuk(self, waarde: Union[int, float], eenheid: Fraction):
+        """Initieert een eenheid met Fraction breuk object."""
         self.is_getal = True
         self.waarde = waarde
         self.eenheidbreuk = eenheid
@@ -271,6 +329,7 @@ class Waarde(pycom.BasisObject):
         }
 
     def _init_waarde_object_eenheidtekst(self, waarde, eenheid: str):
+        """Initieert getal met Waarde object en eenheid met tekst."""
         if not isinstance(waarde, Waarde):
             raise TypeError('waarde is niet van type Waarde')
         self.is_getal = True
@@ -281,6 +340,7 @@ class Waarde(pycom.BasisObject):
         }
 
     def _init_waarde_object_eenheidbreuk(self, waarde, eenheid: Fraction):
+        """Initieert getal met Waarde object en eenheid met Fraction breuk object."""
         if not isinstance(waarde, Waarde):
             raise TypeError('waarde is niet van type Waarde')
         self.is_getal = True
@@ -292,6 +352,7 @@ class Waarde(pycom.BasisObject):
         }
 
     def _init_waarde_object_zonder_eenheid(self, waarde):
+        """Initieert getal met Waarde object zonder eenheid."""
         if not isinstance(waarde, Waarde):
             raise TypeError('waarde is niet van type Waarde')
         self.is_getal = waarde.is_getal
@@ -309,11 +370,8 @@ class Waarde(pycom.BasisObject):
         }
 
     @property
-    def eenheden(self):
-        return dict(((eh_k, eh_v[0]) for eh_k, eh_v in self.EENHEID.items()))
-
-    @property
     def eenheidnaam(self):
+        """Genereert een naam voor eenheid op basis van eenheidbreuk."""
 
         def priemBASIS(n):
             i = 2
@@ -390,6 +448,7 @@ class Waarde(pycom.BasisObject):
                     return eh_afk
 
     def _bereken_nieuwe_waarde(self, eenheid, invoer_waarde):
+        """Genereert een interne waarde (getal) op basis van eenheid en invoerwaarde."""
         waarde = invoer_waarde
         if not isinstance(eenheid, str) or not eenheid:
             raise ValueError('eenheid moet een (niet leeg) stuk tekst zijn')
@@ -451,6 +510,7 @@ class Waarde(pycom.BasisObject):
         return waarde, eenheidbreuk
 
     def _bereken_inverse_waarde(self, eenheid, oude_waarde, oude_eenheidbreuk):
+        """Genereert een waarde (getal) op basis van een eenheid."""
         waarde = oude_waarde
         if not isinstance(eenheid, str) or not eenheid:
             raise ValueError('eenheid moet een (niet leeg) stuk tekst zijn')
@@ -513,16 +573,18 @@ class Waarde(pycom.BasisObject):
         return waarde
 
     def _export_waarde(self, eenheid=None):
+        """Exporteert interne waarde (getal) gegeven een eenheid."""
         if eenheid is None or eenheid == '' or eenheid == '-':
             return self.waarde
         else:
             return self._bereken_inverse_waarde(eenheid, self.waarde, self.eenheidbreuk)
 
     def __call__(self, eenheid=None):
+        """Zet waarde om naar getal."""
         return self._export_waarde(eenheid)
 
     def __add__(self, andere_waarde):
-        """
+        """Telt twee waarden bij elkaar op.
 
         >> Waarde(120, 'mm') + Waarde(30, 'cm')
         Waarde(0.42, 'm')
@@ -538,7 +600,7 @@ class Waarde(pycom.BasisObject):
 
 
     def __sub__(self, andere_waarde):
-        """
+        """Trekt waarde van andere waarde af.
 
         >> Waarde(520, 'mm') - Waarde(30, 'cm')
         Waarde(0.22, 'm')
@@ -553,7 +615,7 @@ class Waarde(pycom.BasisObject):
         return Waarde(waarde, self.eenheidbreuk, config = self.config)
 
     def __mul__(self, andere_waarde):
-        """
+        """Vermenigvuldigd waarde met andere waarde of getal.
 
         >> Waarde(3, 'm') * Waarde(4, 's')
         Waarde(12.0, 'm*s')
@@ -574,7 +636,7 @@ class Waarde(pycom.BasisObject):
         return Waarde(waarde, eenheidbreuk, config = None)
 
     def __truediv__(self, andere_waarde):
-        """
+        """Deelt waarde door andere waarde of getal.
 
         >> Waarde(20, 'ha') / Waarde(5, 'km')
         Waarde(40.0, 'm')
@@ -597,7 +659,7 @@ class Waarde(pycom.BasisObject):
         return Waarde(waarde, eenheidbreuk, config = None)
 
     def __pow__(self, macht):
-        """
+        """Doet waarde tot de macht een andere waarde.
 
         >> Waarde(2, 'm') ** 3
         Waarde(8.0, 'm3')
@@ -611,7 +673,7 @@ class Waarde(pycom.BasisObject):
         return Waarde(waarde, eenheidbreuk, config = None)
 
     def __rmul__(self, scalar):
-        """
+        """Vermenigvuldigd getal met waarde.
 
         >> 2 * Waarde(4, 's')
         Waarde(8.0, 's')
@@ -625,7 +687,7 @@ class Waarde(pycom.BasisObject):
         return Waarde(waarde, eenheidbreuk, config = self.config)
 
     def __rtruediv__(self, scalar):
-        """
+        """Deelt getal met waarde.
 
         >> 2 / Waarde(4, 's')
         Waarde(0.5, '1/s')
@@ -686,6 +748,7 @@ class Waarde(pycom.BasisObject):
     #==========================================================================
 
     def _verander_aantal_decimalen(self, decimalen:int):
+        """Helper functie voor eigenschappen qua standaard eenheid."""
         if not isinstance(decimalen, int):
             raise ValueError('aantal decimalen is geen geheel getal')
         self.config['aantal_decimalen'] = decimalen
@@ -693,6 +756,7 @@ class Waarde(pycom.BasisObject):
 
 
     def _verander_eenheid(self, eenheid:str):
+        """Helper functie voor eigenschappen qua afronding."""
         if not self.is_getal:
             raise ValueError('huide waarde is geen getal: {}'.format(self.waarde))
         if self.eenheidbreuk == Fraction(1):
@@ -707,6 +771,7 @@ class Waarde(pycom.BasisObject):
         return self
 
     def __getitem__(self, param:Union[int, str]):
+        """Aanpassen van standaard eenheid of afronding."""
         if isinstance(param, int):
             return self._verander_aantal_decimalen(param)
         elif isinstance(param, str):

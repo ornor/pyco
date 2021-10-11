@@ -41,27 +41,6 @@ print('sigma =', sigma)
 # met een getal kan je ook rekenen met niet standaard functies zoals math.sin()
 print('spanning heeft getal (kN/mm2):', sigma('kN/mm2'))
 
+# ps. waardes worden intern NOOIT afgerond; alleen bij omzetten naar tekst
 
-# =============================================================================
-
-
-"""
-AANMAKEN WAARDE
-    w = Waarde(getal)
-    w = Waarde(getal, eenheid_tekst)
-
-AANPASSEN EENHEID           (pas wanneer waarde wordt getoond als tekst)
-    w = w['mm']
-    w = w.mm                (kan voor standaard eenheden)
-
-AANPASSEN AFRONDING         (pas wanneer waarde wordt getoond als tekst)
-    w = w[0]
-    w = w._0                (kan voor 0 t/m 9)
-
-OMZETTEN WAARDE NAAR TEKST
-    tekst = str(w)
-
-OMZETTEN WAARDE NAAR GETAL  (float object)
-    getal = w('cm')
-
-"""
+x.print_help()

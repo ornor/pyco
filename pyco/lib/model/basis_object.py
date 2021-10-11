@@ -19,3 +19,11 @@ class BasisObject(object):
         """
         self._documentatie = other.strip() if isinstance(other, str) else ''
         return self
+
+    @classmethod
+    def print_help(cls):
+        ruler = 80*'-'
+        name = cls.__name__
+        underline = '+--' + len(name)*'-' + '--+'
+        docstr = cls.__doc__
+        print(f"\n{ruler}\n\n    {underline}\n    |  {name}  |\n    {underline}\n{docstr}\n{ruler}")
