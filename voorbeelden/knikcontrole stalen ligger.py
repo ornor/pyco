@@ -90,7 +90,7 @@ class knikcontrole:
     """
 
     knikdata = doc.data.KnikfactorStaal()
-    #knikdata.plot()
+    knikdata.plot()
     chi = x(knikdata.interpoleer('lambda_rel', lambda_rel, kromme)) >> """
     Knikcoëfficiënt
     """
