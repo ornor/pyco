@@ -7,7 +7,7 @@ x = doc.model.Waarde
 @doc
 class knikcontrole:
 
-    N_Ed = x(120).kN >> """
+    N_Ed = x(120).kN   >>"""
     Rekenwaarde optredende normaalkracht
     """
 
@@ -15,7 +15,7 @@ class knikcontrole:
     Lengte element
     """
 
-    L_cr_factor = x(1.0) >> """
+    L_cr_factor = x(1.0)   >>"""
     Factor type oplegging:
     vast-los            -> 2.0
     scharnier-scharnier -> 1.0
@@ -23,55 +23,55 @@ class knikcontrole:
     vast-vast           -> 0.5
     """
 
-    A = x(2124).mm2 >> """
+    A = x(2124).mm2   >>"""
     Oppervlakte profiel
     """
 
-    b = x(100).mm >> """
+    b = x(100).mm   >>"""
     Breedte profiel
     """
 
-    h = x(96).mm >> """
+    h = x(96).mm   >>"""
     Hoogte profiel
     """
 
-    I_z = x(134e4).mm4 >> """
+    I_z = x(134e4).mm4   >>"""
     Traagheidsmoment zwakke as
     """
 
-    t_f = x(8).mm >> """
+    t_f = x(8).mm   >>"""
     Dikte flens
     """
 
-    E = x(210e3).MPa >> """
+    E = x(210e3).MPa   >>"""
     Elasticiteitsmodulus
     """
 
-    f_yk = x(235).MPa >> """
+    f_yk = x(235).MPa   >>"""
     Karakteristieke vloeigrens staal
     """
 
-    gamma_m = x(1.0) >> """
+    gamma_m = x(1.0)   >>"""
     Materiaalfactor
     """
 
-    I_z = x(fn.sqrt(I_z('mm4') / A('mm2'))).mm >> """
+    I_z = x(fn.sqrt(I_z('mm4') / A('mm2'))).mm   >>"""
     Traagheidsstraal: sqrt(I_z / A)
     """
 
-    L_cr = L * L_cr_factor >> """
+    L_cr = L * L_cr_factor   >>"""
     Kniklengte: L * L_cr_factor
     """
 
-    lambda_abs = L_cr / I_z >> """
+    lambda_abs = L_cr / I_z   >>"""
     Absolute slankheid: L_cr / I_z
     """
 
-    lambda_1 = x(fn.pi * fn.sqrt(E('MPa') / f_yk('MPa'))) >> """
+    lambda_1 = x(fn.pi * fn.sqrt(E('MPa') / f_yk('MPa')))   >>"""
     Invloed staalsterkte: pi * sqrt(E / E_yk)
     """
 
-    lambda_rel = lambda_abs / lambda_1 >> """
+    lambda_rel = lambda_abs / lambda_1   >>"""
     Relatieve slankheid: lambda_abs / lambda_1
     """
 
@@ -85,21 +85,21 @@ class knikcontrole:
             kr = 'c' if f_yk('MPa') < 420 else 'a'
         else:
             kr = 'd' if f_yk('MPa') < 420 else 'c'
-    kromme = x(kr) >> """
+    kromme = x(kr)    >>"""
     Type knikkromme
     """
 
     knikdata = doc.data.KnikfactorStaal()
     knikdata.plot()
-    chi = x(knikdata.interpoleer('lambda_rel', lambda_rel, kromme)) >> """
+    chi = x(knikdata.interpoleer('lambda_rel', lambda_rel, kromme))   >>"""
     Knikcoëfficiënt
     """
 
-    N_Rd = x(chi * A * f_yk / gamma_m).kN._0 >> """
+    N_Rd = x(chi * A * f_yk / gamma_m).kN._0   >>"""
     Opneembare normaalkracht: chi * A * F_yk / gamma_m
     """
 
-    uc = N_Ed / N_Rd >> """
+    uc = N_Ed / N_Rd   >>"""
     Unity check knikcontrole: N_Ed / N_Rd
     """
 
