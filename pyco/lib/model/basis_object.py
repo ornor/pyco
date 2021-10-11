@@ -22,8 +22,11 @@ class BasisObject(object):
 
     @classmethod
     def print_help(cls):
-        ruler = 80*'-'
         name = cls.__name__
         underline = '+--' + len(name)*'-' + '--+'
-        docstr = cls.__doc__
-        print(f"\n{ruler}\n\n    {underline}\n    |  {name}  |\n    {underline}\n{docstr}\n{ruler}")
+        docstr = ''
+        for line in cls.__doc__.split('\n'):
+            line = line[4:] if line[:4] == '    ' else line
+            docstr += line + '\n'
+        fstr = f"\n{underline}\n|  {name}  |\n{underline}\n{docstr}"
+        print(fstr)
