@@ -3,10 +3,10 @@ from pyco.interface import Document
 doc = Document()
 x = doc.model.Waarde
 
-b = x(23).cm._0
+b = x(23, 'cm')
 print('b', b)
 
-h = x(341).mm
+h = x(341).mm._0
 print('h', h)
 
 A = b * h
