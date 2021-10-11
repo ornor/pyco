@@ -6,6 +6,25 @@ import pyco.data as pycod
 import inspect
 
 class Document(pycom.BasisObject):
+    """
+    Verzorgt in- en uitvoer van document.
+
+    doc = pyco.interface.Document()
+    x = doc.model.Waarde
+
+    @doc
+    class berekening:
+
+        a = x(120).cm  >>  \"\"\"
+        eerste parameter
+        \"\"\"
+
+        b = x(4).m  >>  \"\"\"
+        volgende parameter
+        \"\"\"
+
+    doc.print_rapport()
+    """
 
     toepassing = pycot
     model = pycom
@@ -23,23 +42,6 @@ class Document(pycom.BasisObject):
         return obj
 
     def __call__(self, obj):
-        """"
-        Decorator functie registreert klasse.
-
-        doc = pyco.interface.Document()
-        x = doc.model.Waarde
-
-        @doc
-        class berekening:
-
-            # eerste parameter
-            a = x(120).cm
-
-            # volgende parameter
-            b = x(4).m
-
-        doc.print_rapport()
-        """
         return self._registreer(obj)
 
     def _iter_klasse_objecten(self, filter_obj_type=None):
