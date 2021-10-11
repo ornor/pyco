@@ -25,8 +25,7 @@ class BasisObject(object):
         name = cls.__name__
         underline = '+--' + len(name)*'-' + '--+'
         docstr = ''
-        for line in cls.__doc__.split('\n'):
+        for line in cls.__doc__.strip().split('\n'):
             line = line[4:] if line[:4] == '    ' else line
             docstr += line + '\n'
-        fstr = f"\n{underline}\n|  {name}  |\n{underline}\n{docstr}"
-        print(fstr)
+        print(f"\n{underline}\n|  {name}  |\n{underline}\n\n{docstr}")

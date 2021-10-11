@@ -70,3 +70,5 @@ doc.model.Figuur(
         functie = lambda x: 0.1*x**2 + 5*fn.sin(x) + 2,
         x = (-4, 10),
     )()
+
+doc.model.Figuur.print_help()

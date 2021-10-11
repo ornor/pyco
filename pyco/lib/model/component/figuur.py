@@ -10,10 +10,6 @@ import matplotlib.patches as mpatches
 from typing import Union
 
 import numpy as np
-import os
-import shutil
-import tkinter as tk
-from tkinter.filedialog import asksaveasfile
 
 # verbergen van waarschuwingen van Matplotlib
 import warnings
@@ -21,6 +17,84 @@ warnings.filterwarnings('ignore')
 
 
 class Figuur(pycom.BasisObject):
+    """
+    Tekent een figuur met behulp van matplotlib bibliotheek.
+
+    WERKWIJZE                   plaats functies achter elkaar
+    f = Figuur(                 # configuratie
+            breedte=7,
+            hoogte=7,
+        ).lijn(                 # onderdeel 1
+            coordinaten=((2, 0), (3, 7)),
+        ).fx(                   # onderdeel 2  etc.
+            functie = lambda x: x**2,
+            x = (-2, 3),
+        )()                     # afronden -> laat plot zien
+
+    CONFIGURATIE
+        Figuur(
+            breedte=7,
+            hoogte=7,
+            raster=True,
+            legenda=True,
+            titel='Kunst',
+            x_as_titel='variabele $x$',
+            y_as_titel='resultaat $y$',
+            gelijke_assen=True,
+            verberg_assen=False,
+            x_as_log=False,
+            y_as_log=False,
+        )
+
+    ONDERDELEN
+        .lijn(
+            coordinaten=((2, 0), (3, 7), (-2, 4), (2, 0)),
+            breedte=3,
+            kleur='red',
+            vullen=False,
+            arcering='/',
+            naam='dit is een lijn',
+        )
+
+        .punt(
+            coordinaten=((2, 0), (3, 7), (-2, 4)),
+            breedte=10,
+            kleur='gold',
+            stijl='>',
+            naam='dit zijn punten',
+        )
+
+        .tekst(
+            coordinaten=((2, 0), (3, 7), (-2, 4)),
+            teksten=list('punt 1', 'punt 2', 'punt 3'),
+            kleur='brown',
+            tekst_grootte='large', # {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}
+            tekst_font='sans-serif', # {FONTNAME, 'serif', 'sans-serif', 'cursive', 'fantasy', 'monospace'}
+            tekst_stijl='normal', # {'normal', 'italic', 'oblique'}
+            tekst_gewicht='bold', # {'ultralight', 'light', 'normal', 'regular', 'book', 'medium', 'roman', 'semibold', 'demibold', 'demi', 'bold', 'heavy', 'extra bold', 'black'}
+            hor_uitlijnen='center', # {'center', 'right', 'left'}
+            vert_uitlijnen='center', # {'center', 'top', 'bottom', 'baseline', 'center_baseline'}
+            roteren=30, # in graden
+        )
+
+        .kolom(
+            coordinaten=((3, 8), (6, 4), (8, 1)),
+            kleur='pink',
+            breedte=0.4,
+            lijn_kleur='peru',
+            lijn_breedte=2,
+            naam='bar plot',
+        )
+
+        .fx(
+            functie = lambda x: x**2 + 3*math.sin(x),
+            x = (-2, 3),
+            breedte = 2,
+            kleur = 'green',
+            naam = 'sinus parabool',
+        )
+
+    """
 
     def __init__(self,
                  breedte=8,
@@ -77,6 +151,7 @@ class Figuur(pycom.BasisObject):
         #     self.ax.spines['top'].set_visible(False)
 
     def _check_coordinaten(self, coordinaten:Union[list, tuple]):
+        """Controleert coordinaten en bepaalt globaal minimum en maximum."""
         if not isinstance(coordinaten, list) and not isinstance(coordinaten, tuple):
             raise ValueError('coordinaten is geen lijst of tupel')
         for coordinaat in coordinaten:
@@ -109,6 +184,7 @@ class Figuur(pycom.BasisObject):
              vullen=False,
              arcering='',
              naam:str=None):
+        """Trekt een lijn door middel van coordinaten."""
 
         coordinaten = self._check_coordinaten(coordinaten)
         codes = [mpath.Path.MOVETO, *[mpath.Path.LINETO for _ in range(len(coordinaten)-1)]]
@@ -128,6 +204,7 @@ class Figuur(pycom.BasisObject):
              kleur='black',
              stijl='o',
              naam:str=None):
+        """Plot punten door middel van coordinaten."""
 
         coordinaten = self._check_coordinaten(coordinaten)
         X = [x for x, _ in coordinaten]
@@ -150,6 +227,7 @@ class Figuur(pycom.BasisObject):
              hor_uitlijnen:str='center', # {'center', 'right', 'left'}
              vert_uitlijnen:str='center', # {'center', 'top', 'bottom', 'baseline', 'center_baseline'}
              roteren:Union[float, int, str]=0): # float in degrees
+        """Laat teksten zien op posities gegeven door coordinaten."""
 
         coordinaten = self._check_coordinaten(coordinaten)
         X = [x for x, _ in coordinaten]
@@ -176,6 +254,7 @@ class Figuur(pycom.BasisObject):
              lijn_kleur:str='black',
              lijn_breedte:Union[float, int]=0,
              naam:str=None):
+        """Plot verticale kolommen door middel van coordinaten (positie, hoogte)."""
 
         waardes = self._check_coordinaten(coordinaten)
         X = [x for x, _ in waardes]
@@ -196,6 +275,7 @@ class Figuur(pycom.BasisObject):
            kleur='black',
            naam:str=None,
            aantal_punten=100):
+        """Plot een wiskundige functie bij bepaald domein."""
 
         if len(x) != 2:
             raise ValueError('x waarde moet een lijst of tupel zijn met 2 getallen')
@@ -213,6 +293,7 @@ class Figuur(pycom.BasisObject):
         return self
 
     def __call__(self):
+        """Rond figuur af en laat deze zien."""
         min_x = self.min_x if self.min_x is not None else 0
         max_x = self.max_x if self.max_x is not None else 1
         min_y = self.min_y if self.min_y is not None else 0
@@ -233,28 +314,36 @@ class Figuur(pycom.BasisObject):
 
         return self
 
-    def bewaar_als_svg(self):
-        FILENAME = 'tmp.svg'
-        # plt.savefig(FILENAME)
+# -----------------------------------------------------------------------------
 
-        # class TkFileDialog(tk.Frame):
-        #     def __init__(self, root):
-        #         tk.Frame.__init__(self, root)
-        #         button_opt = {'fill': tk.BOTH, 'padx': 5, 'pady': 5}
-        #         tk.Button(self, text='bewaar figuur als SVG bestand', command=self.asksaveasfilename).pack(**button_opt)
-        #         self.file_opt = options = {}
-        #         options['filetypes'] = [('all files', '.*'), ('SVG bestand', '.svg')]
-        #         options['initialfile'] = 'figuur.svg'
-        #         options['parent'] = root
+# import os
+# import shutil
+# import tkinter as tk
+# from tkinter.filedialog import asksaveasfile
 
-        #     def asksaveasfilename(self):
-        #         new_filename = asksaveasfile(**self.file_opt)
+    # def bewaar_als_svg(self):
+    #     """Laat een popup venster zien om figuur op te slaan als SVG bestand."""
+    #     FILENAME = 'tmp.svg'
+    #     plt.savefig(FILENAME)
 
-        #         if new_filename:
-        #             shutil.copyfile(FILENAME, new_filename)
+    #     class TkFileDialog(tk.Frame):
+    #         def __init__(self, root):
+    #             tk.Frame.__init__(self, root)
+    #             button_opt = {'fill': tk.BOTH, 'padx': 5, 'pady': 5}
+    #             tk.Button(self, text='bewaar figuur als SVG bestand', command=self.asksaveasfilename).pack(**button_opt)
+    #             self.file_opt = options = {}
+    #             options['filetypes'] = [('all files', '.*'), ('SVG bestand', '.svg')]
+    #             options['initialfile'] = 'figuur.svg'
+    #             options['parent'] = root
 
-        # root = tk.Tk()
-        # TkFileDialog(root).pack()
-        # root.mainloop()
+    #         def asksaveasfilename(self):
+    #             new_filename = asksaveasfile(**self.file_opt)
 
-        # os.remove(FILENAME)
+    #             if new_filename:
+    #                 shutil.copyfile(FILENAME, new_filename)
+
+    #     root = tk.Tk()
+    #     TkFileDialog(root).pack()
+    #     root.mainloop()
+
+    #     os.remove(FILENAME)
