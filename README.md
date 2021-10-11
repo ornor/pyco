@@ -1,4 +1,6 @@
-# Pyco, by Jaap van Veldhoven
+# pyco
+
+Jaap van Veldhoven, 2021
 
 Python bibliotheek voor Civiele Techniek onderwijs
 
