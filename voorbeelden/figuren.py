@@ -2,7 +2,6 @@ from pyco.interface import Document
 
 doc = Document()
 fn = doc.functies
-x = doc.model.Waarde
 
 twee_punten = {
     'punt 1: $\\theta_\\pi$': (4, 2),
