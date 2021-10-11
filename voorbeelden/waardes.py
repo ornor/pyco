@@ -1,4 +1,7 @@
-from pyco.model import Waarde as x
+from pyco.interface import Document
+
+doc = Document()
+x = doc.model.Waarde
 
 b = x(23).cm._0
 print('b', b)

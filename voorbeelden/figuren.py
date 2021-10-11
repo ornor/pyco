@@ -1,12 +1,15 @@
-from pyco.model import Figuur
-import pyco.functies as fn
+from pyco.interface import Document
+
+doc = Document()
+fn = doc.functies
+x = doc.model.Waarde
 
 twee_punten = {
     'punt 1: $\\theta_\\pi$': (4, 2),
     'punt 2: $\\omega_3$': (-1, 6.5),
 }
 
-Figuur(
+doc.model.Figuur(
         breedte=7,
         hoogte=7,
         raster=True,
@@ -62,7 +65,7 @@ Figuur(
         naam = 'sinus parabool',
     )()
 
-Figuur(
+doc.model.Figuur(
         raster=True,
     ).fx(
         functie = lambda x: 0.1*x**2 + 5*fn.sin(x) + 2,
