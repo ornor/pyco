@@ -1,8 +1,6 @@
 from typing import Union, List, Dict
 
 import pyco.model as pycom
-import pyco.functies as pycof
-
 
 class Ligger(pycom.BasisObject):
     """Met deze toepassing kan een ligger worden doorgerekend.
@@ -76,8 +74,8 @@ class Ligger(pycom.BasisObject):
 
         # als 'x' is een lijst en 'naam' is opgegeven, dan dient
         #   'naam' als een prefix voor de auto knoopnummering van lijst
-        if pycof.is_tekst_en_niet_leeg(naam) \
-                and pycof.is_lijst_of_tupel_en_niet_leeg(x):
+        if isinstance(naam, str) and naam != '' \
+                and (isinstance(x, list) or isinstance(x, tuple)) and len(x) > 0:
             gevonden_knoopnamen = []
 
             def vind_knoopnaam() -> str:
@@ -101,13 +99,13 @@ class Ligger(pycom.BasisObject):
 
         # als 'naam' een dictionary is, dan wordt deze ingelezen als invoer
         #   van meerdere knopen; 'x' wordt genegeerd
-        if pycof.is_map_en_niet_leeg(naam):
+        if isinstance(naam, dict) and len(naam) > 0:
             # vervang de waarde 'x' door een map
             x = naam
 
         # als 'x' een dictionary is, dan wordt deze ingelezen als invoer
         #   van meerdere knopen; 'naam' wordt genegeerd
-        if pycof.is_map_en_niet_leeg(x):
+        if isinstance(x, dict) and len(x) > 0:
             knopen_map = x
             knopen_objecten = {}
             for knoop_k, knoop_v in knopen_map.items():
@@ -120,7 +118,7 @@ class Ligger(pycom.BasisObject):
             raise ValueError('naam en x-waarde zijn verplicht')
 
         # als 'x' alleen een getal is, gebruik standaard knoopeenheid
-        if pycof.is_getal(x):
+        if isinstance(x, int) or isinstance(x, float):
             x = pycom.Waarde(x, self._knoop_eenheid)
 
         knoop = pycom.Knoop(x=x)

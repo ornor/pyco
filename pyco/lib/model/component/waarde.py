@@ -4,7 +4,6 @@ from fractions import Fraction
 from typing import Union
 
 import pyco.model as pycom
-import pyco.functies as pycof
 
 class Waarde(pycom.BasisObject):
     """
@@ -272,7 +271,7 @@ class Waarde(pycom.BasisObject):
                  eenheid: Union[str, Fraction] = None, config:dict = None):
         super().__init__()
 
-        if not pycof.is_getal(waarde):
+        if not (isinstance(waarde, int) or isinstance(waarde, float)):
             if isinstance(waarde, Waarde):
                 if eenheid is None:
                     self._init_waarde_object_zonder_eenheid(waarde)
@@ -288,7 +287,7 @@ class Waarde(pycom.BasisObject):
                 self._init_waarde_tekst(waarde)
         elif isinstance(eenheid, Fraction):
             self._init_waarde_eenheidbreuk(waarde, eenheid)
-        elif pycof.is_tekst(eenheid):
+        elif isinstance(eenheid, str):
             if eenheid is None or eenheid == '':
                 eenheid = '-'
             self._init_waarde_eenheidtekst(waarde, eenheid)

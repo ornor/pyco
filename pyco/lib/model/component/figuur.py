@@ -1,7 +1,4 @@
-# import pyco.toepassing as pycot
 import pyco.model as pycom
-# import pyco.functies as pycof
-# import pyco.data as pycod
 
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath

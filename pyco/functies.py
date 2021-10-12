@@ -1,29 +1,5 @@
 import math
 
-def is_getal(obj):
-    return isinstance(obj, int) or isinstance(obj, float)
-
-def is_getal_en_niet_nul(obj):
-    return (isinstance(obj, int) or isinstance(obj, float)) and float(obj) != 0.0
-
-def is_tekst(obj):
-    return isinstance(obj, str)
-
-def is_tekst_en_niet_leeg(obj):
-    return isinstance(obj, str) and obj != ''
-
-def is_lijst_of_tupel(obj):
-    return isinstance(obj, list) or isinstance(obj, tuple)
-
-def is_lijst_of_tupel_en_niet_leeg(obj):
-    return (isinstance(obj, list) or isinstance(obj, tuple)) and len(obj) > 0
-
-def is_map(obj):
-    return isinstance(obj, dict)
-
-def is_map_en_niet_leeg(obj):
-    return isinstance(obj, dict) and len(obj) > 0
-
 # inherit functions of math module
 ceil = math.ceil
 #comb = math.comb
