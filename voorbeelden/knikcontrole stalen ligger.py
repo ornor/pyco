@@ -11,7 +11,7 @@ class knikcontrole:
     Rekenwaarde optredende normaalkracht
     """
 
-    L = x(4).m >> """
+    L = x(4).m   >>"""
     Lengte element
     """
 
@@ -90,10 +90,13 @@ class knikcontrole:
     """
 
     knikdata = doc.data.KnikfactorStaal()
-    knikdata.plot()
-    chi = x(knikdata.interpoleer('lambda_rel', lambda_rel, kromme))   >>"""
+    chi = x(knikdata.interpoleer(
+        input_kolom='lambda_rel',
+        input_waarde=lambda_rel,
+        output_kolom=kromme))   >>"""
     Knikcoëfficiënt
     """
+    knikdata.plot(snijpunt=(lambda_rel, chi))
 
     N_Rd = x(chi * A * f_yk / gamma_m).kN._0   >>"""
     Opneembare normaalkracht: chi * A * F_yk / gamma_m
@@ -106,6 +109,13 @@ class knikcontrole:
 
 @doc
 class samenvatting:
+    ucs = []
+
     uc_knik = knikcontrole.uc
+    ucs.append(uc_knik())
+
+    conclusie = x('voldoet' if all([uc <= 1.0 for uc in ucs]) else 'voldoet niet')   >>"""
+    Alle unity checks moeten kleiner zijn dan 1.0
+    """
 
 doc.print_rapport()

@@ -39,7 +39,7 @@ print('sigma =', sigma)
 
 # waarde omzetten naar een getal (float); door ronde haken met eenheid tekst
 # met een getal kan je ook rekenen met niet standaard functies zoals math.sin()
-print('spanning heeft getal (kN/mm2):', sigma('kN/mm2'))
+print('spanning heeft waarde getal (kN/mm2):', sigma('kN/mm2'))
 
 # ps. waardes worden intern NOOIT afgerond; alleen bij omzetten naar tekst
 

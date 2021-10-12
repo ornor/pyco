@@ -94,6 +94,9 @@ class Figuur(pycom.BasisObject):
             naam = 'sinus parabool',
         )
 
+    OVERIG
+        f.volgende_kleur        # gebruik deze eigenschap om verschillende automatische kleuren te gebruiken
+
     """
 
     def __init__(self,
@@ -150,6 +153,8 @@ class Figuur(pycom.BasisObject):
         # if True:
         #     self.ax.spines['top'].set_visible(False)
 
+        self._kleuren = plt.rcParams["axes.prop_cycle"]()
+
     def _check_coordinaten(self, coordinaten:Union[list, tuple]):
         """Controleert coordinaten en bepaalt globaal minimum en maximum."""
         if not isinstance(coordinaten, list) and not isinstance(coordinaten, tuple):
@@ -176,6 +181,10 @@ class Figuur(pycom.BasisObject):
         self.max_y = max(y_waarden)
 
         return coordinaten
+
+    @property
+    def volgende_kleur(self):
+        return next(self._kleuren)["color"]
 
     def lijn(self,
              coordinaten:Union[list, tuple],

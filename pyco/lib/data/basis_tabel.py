@@ -65,5 +65,60 @@ class BasisTabel(object):
     def pd_dataframe(self):
         return pd.DataFrame(self.DATA, columns=self.KOLOMMEN)
 
-    def plot(self):
-        self.pd_dataframe.plot.line()
+    def plot(self, x_kolom:str=None, y_kolommen:Union[list, tuple]=None,
+             titel:str=None, x_titel:str=None, y_titel:str=None,
+             snijpunt:Union[list, tuple]=None, snijpunt_x_format:str='{:.2f}',
+             snijpunt_y_format:str='{:.2f}'):
+        x_kolom = self.KOLOMMEN[0] if x_kolom is None else x_kolom
+        y_kolommen = self.KOLOMMEN[1:] if y_kolommen is None else y_kolommen
+
+        fig = pycom.Figuur(
+            breedte=8,
+            hoogte=8,
+            raster=True,
+            legenda=True,
+            titel=titel,
+            x_as_titel=x_titel,
+            y_as_titel=y_titel,
+        )
+
+        self._check_data_KOLOMMEN()
+
+        pd_dataframe = self.pd_dataframe
+
+        if x_kolom not in self.KOLOMMEN:
+            raise KeyError('kolomnaam niet beschikbaar:', x_kolom)
+        x_kolom_data = pd_dataframe[x_kolom].to_list()
+
+        for y_kolom in y_kolommen:
+            if y_kolom not in self.KOLOMMEN:
+                raise KeyError('kolomnaam niet beschikbaar:', y_kolom)
+            y_kolom_data = pd_dataframe[y_kolom].to_list()
+            coordinaten = list(zip(x_kolom_data, y_kolom_data))
+            fig = fig.lijn(
+                coordinaten=coordinaten,
+                kleur=fig.volgende_kleur,
+                naam=y_kolom,
+            )
+
+        if snijpunt is not None:
+            if not len(snijpunt) == 2:
+                raise ValueError('snijpunt is geen lijst of tuple met twee elementen')
+            x_waarde = snijpunt[0]._export_waarde(None) if isinstance(snijpunt[0], pycom.Waarde) else snijpunt[0]
+            y_waarde = snijpunt[1]._export_waarde(None) if isinstance(snijpunt[1], pycom.Waarde) else snijpunt[1]
+            fig = fig.lijn(
+                coordinaten=((x_waarde, 0), (x_waarde, y_waarde), (0, y_waarde)),
+                kleur='darkgrey',
+            ).tekst(
+                coordinaten=((x_waarde, 0),),
+                teksten=(snijpunt_x_format.format(x_waarde),),
+                hor_uitlijnen='center',
+                vert_uitlijnen='top',
+            ).tekst(
+                coordinaten=((0, y_waarde),),
+                teksten=(snijpunt_y_format.format(y_waarde),),
+                hor_uitlijnen='right',
+                vert_uitlijnen='center',
+            )
+
+        fig()

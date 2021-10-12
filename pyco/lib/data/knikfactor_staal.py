@@ -1,5 +1,7 @@
 import pyco.data as pycod
 
+from typing import Union
+
 class KnikfactorStaal(pycod.BasisTabel):
 
     KOLOMMEN = ('lambda_rel', 'a0', 'a', 'b', 'c', 'd')
@@ -38,5 +40,14 @@ class KnikfactorStaal(pycod.BasisTabel):
     def __init__(self):
         super().__init__()
 
-    def plot(self):
-        self.pd_dataframe.drop(['lambda_rel'], axis=1).plot.line()
+    def plot(self, snijpunt:Union[list, tuple]=None):
+        super().plot(
+            x_kolom='lambda_rel',
+            y_kolommen=['a0', 'a', 'b', 'c', 'd'],
+            titel='Knikkromme',
+            x_titel='Relatieve slankheid: $\lambda_{rel}$',
+            y_titel='Knikcoëfficient: $\chi$',
+            snijpunt=snijpunt,
+            snijpunt_x_format='{:.2f}',
+            snijpunt_y_format='{:.2f}',
+        )
