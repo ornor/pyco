@@ -51,7 +51,7 @@ class Waarde(pycom.BasisObject):
         lengte                  am fm pm nm mum mm cm dm m dam hm km Mm Gm Tm
                                 Pm Em in ft yard zeemijl mijl
         tijd                    as(.attos) fs ps ns mus ms cs ds s das hs ks
-                                Ms Gs Ts Ps Es min(.minuut) h d
+                                Ms Gs Ts Ps Es min(.minuut) h d j
         temperatuur             C K F  (als temperatuur in teller, samen met
                                 andere eenheden, dan niet om te rekenen)
         hoek                    rad deg gon
@@ -192,7 +192,8 @@ class Waarde(pycom.BasisObject):
         'Es': ('exaseconde', TYPE['TIJD'], 1.0e18),
         'min': ('minuut (Waarde.minuut)', TYPE['TIJD'], 60), # eigenschap 'min' niet mogelijk -> 'minuut'
         'h': ('uur', TYPE['TIJD'], 3600),
-        'd': ('dag', TYPE['TIJD'], 86400),
+        'd': ('dag', TYPE['TIJD'], 24*3600),
+        'j': ('jaar', TYPE['TIJD'], 365*24*3600),
 
         # TEMPERATUUR
         'C': ('graden Celcius', TYPE['TEMPERATUUR'], 1),  # standaard
@@ -593,7 +594,8 @@ class Waarde(pycom.BasisObject):
         if not self.is_getal or not andere_waarde.is_getal:
             raise TypeError('beide waardes moeten getallen zijn')
         if self.eenheidbreuk != andere_waarde.eenheidbreuk:
-            raise TypeError('eenheden zijn niet zelfde type')
+            raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
+                self.eenheidnaam, andere_waarde.eenheidnaam))
         waarde = self.waarde + andere_waarde.waarde
         return Waarde(waarde, self.eenheidbreuk, config = self.config)
 
@@ -609,7 +611,8 @@ class Waarde(pycom.BasisObject):
         if not self.is_getal or not andere_waarde.is_getal:
             raise TypeError('beide waardes moeten getallen zijn')
         if self.eenheidbreuk != andere_waarde.eenheidbreuk:
-            raise TypeError('eenheden zijn niet zelfde type')
+            raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
+                self.eenheidnaam, andere_waarde.eenheidnaam))
         waarde = self.waarde - andere_waarde.waarde
         return Waarde(waarde, self.eenheidbreuk, config = self.config)
 

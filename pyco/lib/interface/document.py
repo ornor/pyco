@@ -37,6 +37,12 @@ class Document(pycom.BasisObject):
         self._klasses = []
 
     def _registreer(self, obj):
+        if isinstance(obj, str):
+            obj = pycom.Waarde(obj)
+        if isinstance(obj, pycom.Waarde):
+            class tmp:
+                tmp = obj
+            obj = tmp
         if inspect.isclass(obj):
             self._klasses.append((obj.__name__, obj))
         return obj
@@ -63,15 +69,25 @@ class Document(pycom.BasisObject):
         waarde_lijst = sorted(waarde_lijst)
         return waarde_lijst
 
+    def toevoegen(self, obj):
+        if isinstance(obj, str):
+            obj = pycom.Waarde(obj)
+        if isinstance(obj, pycom.Waarde):
+            class tmp:
+                tmp = obj
+
+            self._registreer(tmp)
+
+
     def print_rapport(self, len_omschrijving:int = 16, len_waarde:int = 12,
                       breedte_pagina:int = 80):
         lijn = breedte_pagina * '-'
         laatste_klasse_naam = None
         for _, klasse_naam, obj_naam, obj in self._waardes:
-            if laatste_klasse_naam != klasse_naam:
+            if laatste_klasse_naam != klasse_naam and klasse_naam != 'tmp':
                 print()
                 print(lijn)
-                print(klasse_naam)
+                print(klasse_naam.upper())
                 print(lijn)
                 laatste_klasse_naam = klasse_naam
             naam = obj_naam
@@ -79,10 +95,14 @@ class Document(pycom.BasisObject):
             if waarde[-2:] == ' -':
                 waarde = waarde[:-2]
             print()
-            # format_str = '{}\n{:' + str(len_omschrijving) + '.' \
-            #     + str(len_omschrijving) + 's} = {:' + str(len_waarde) + 's}'
-            if hasattr(obj, '_documentatie') and obj._documentatie:
-                print('{}\n{} = {}'.format(obj._documentatie, naam, waarde))
+            if naam != 'tmp':
+                if hasattr(obj, '_documentatie') and obj._documentatie:
+                    print('{}\n{} = {}'.format(obj._documentatie, naam, waarde))
+                else:
+                    print('{} = {}'.format(naam, waarde))
             else:
-                print('{} = {}'.format(naam, waarde))
+                if hasattr(obj, '_documentatie') and obj._documentatie:
+                    print('{}\n{}'.format(obj._documentatie, waarde))
+                else:
+                    print('{}'.format(waarde))
         print()
