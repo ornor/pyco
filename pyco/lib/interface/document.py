@@ -12,16 +12,17 @@ class Document(pycom.BasisObject):
     doc = pyco.interface.Document()
     x = doc.model.Waarde
 
+
+    doc('Dit is wat tekst voor op document')
+
     @doc
     class berekening:
 
-        a = x(120).cm  >>  \"\"\"
-        eerste parameter
-        \"\"\"
+        a = x(120).cm   >>\
+        "eerste parameter"
 
-        b = x(4).m  >>  \"\"\"
-        volgende parameter
-        \"\"\"
+        b = x(4).m   >>\
+        "volgende parameter"
 
     doc.print_rapport()
     """

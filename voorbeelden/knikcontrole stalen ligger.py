@@ -9,7 +9,7 @@ doc('Voorbeeld uit de cursus Constructie 2')
 @doc
 class knikcontrole:
 
-    N_Ed = x(120).kN   >>\
+    N_Ed = x(100).kN   >>\
     "Rekenwaarde optredende normaalkracht"
 
     L = x(4).m   >>\
@@ -48,14 +48,14 @@ class knikcontrole:
     gamma_m = x(1.0)   >>\
     "Materiaalfactor"
 
-    I_z = x(fn.sqrt(I_z('mm4') / A('mm2'))).mm   >>\
+    i_z = x(fn.sqrt(I_z('mm4') / A('mm2'))).mm   >>\
     "Traagheidsstraal: sqrt(I_z / A)"
 
     L_cr = L * L_cr_factor   >>\
     "Kniklengte: L * L_cr_factor"
 
-    lambda_abs = L_cr / I_z   >>\
-    "Absolute slankheid: L_cr / I_z"
+    lambda_abs = L_cr / i_z   >>\
+    "Absolute slankheid: L_cr / i_z"
 
     lambda_1 = x(fn.pi * fn.sqrt(E('MPa') / f_yk('MPa')))   >>\
     "Invloed staalsterkte: pi * sqrt(E / E_yk)"

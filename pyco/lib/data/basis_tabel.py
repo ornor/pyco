@@ -9,7 +9,8 @@ class BasisTabel(object):
     DATA = None     # should be a list
 
     def __init__(self):
-        pass
+        self._check_data_KOLOMMEN()
+        self.data = pd.DataFrame(self.DATA, columns=self.KOLOMMEN)
 
     def _check_data_KOLOMMEN(self):
         if not isinstance(self.KOLOMMEN, list) and not isinstance(self.KOLOMMEN, tuple):
@@ -31,7 +32,7 @@ class BasisTabel(object):
                     input_kolom: Union[str, pycom.Waarde],
                     input_waarde: Union[float, int, pycom.Waarde],
                     output_kolom: Union[str, pycom.Waarde]):
-        self._check_data_KOLOMMEN()
+
         if isinstance(input_kolom, pycom.Waarde):
             input_kolom = input_kolom._export_waarde(None)
         if isinstance(input_waarde, pycom.Waarde):
@@ -61,10 +62,6 @@ class BasisTabel(object):
 
         return vorige_output_waarde
 
-    @property
-    def pd_dataframe(self):
-        return pd.DataFrame(self.DATA, columns=self.KOLOMMEN)
-
     def plot(self, x_kolom:str=None, y_kolommen:Union[list, tuple]=None,
              titel:str=None, x_titel:str=None, y_titel:str=None,
              snijpunt:Union[list, tuple]=None, snijpunt_x_format:str='{:.2f}',
@@ -73,8 +70,8 @@ class BasisTabel(object):
         y_kolommen = self.KOLOMMEN[1:] if y_kolommen is None else y_kolommen
 
         fig = pycom.Figuur(
-            breedte=8,
-            hoogte=8,
+            breedte=12,
+            hoogte=12,
             raster=True,
             legenda=True,
             titel=titel,
@@ -82,18 +79,14 @@ class BasisTabel(object):
             y_as_titel=y_titel,
         )
 
-        self._check_data_KOLOMMEN()
-
-        pd_dataframe = self.pd_dataframe
-
         if x_kolom not in self.KOLOMMEN:
             raise KeyError('kolomnaam niet beschikbaar:', x_kolom)
-        x_kolom_data = pd_dataframe[x_kolom].to_list()
+        x_kolom_data = self.data[x_kolom].to_list()
 
         for y_kolom in y_kolommen:
             if y_kolom not in self.KOLOMMEN:
                 raise KeyError('kolomnaam niet beschikbaar:', y_kolom)
-            y_kolom_data = pd_dataframe[y_kolom].to_list()
+            y_kolom_data = self.data[y_kolom].to_list()
             coordinaten = list(zip(x_kolom_data, y_kolom_data))
             fig = fig.lijn(
                 coordinaten=coordinaten,
