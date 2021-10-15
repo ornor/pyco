@@ -6,6 +6,8 @@ import matplotlib.path as mpath
 import matplotlib.patches as mpatches
 
 from typing import Union
+import base64
+from io import BytesIO, StringIO
 
 import numpy as np
 
@@ -27,7 +29,7 @@ class Figuur(pycom.BasisComponent):
         ).fx(                   # onderdeel 2  etc.
             functie = lambda x: x**2,
             x = (-2, 3),
-        )()                     # afronden -> laat plot zien
+        ).plot_console()        # afronden -> laat plot zien
 
     CONFIGURATIE
         Figuur(
@@ -94,6 +96,10 @@ class Figuur(pycom.BasisComponent):
 
     OVERIG
         f.volgende_kleur        # gebruik deze eigenschap om verschillende automatische kleuren te gebruiken
+        f.png_html_code()       # laat HTML code zien van PNG afbeelding
+        f.svg_code()            # laat SVG code zien
+        f.bewaar_als_png()      # vraag bestandsnaam om op te slaan als PNG
+        f.bewaar_als_svg()      # vraag bestandsnaam om op te slaan als SVG
 
     """
 
@@ -154,6 +160,8 @@ class Figuur(pycom.BasisComponent):
 
         self._kleuren = plt.rcParams["axes.prop_cycle"]()
 
+        self.alleen_lezen = False
+
     def _check_coordinaten(self, coordinaten:Union[list, tuple]):
         """Controleert coordinaten en bepaalt globaal minimum en maximum."""
         if not isinstance(coordinaten, list) and not isinstance(coordinaten, tuple):
@@ -181,6 +189,10 @@ class Figuur(pycom.BasisComponent):
 
         return coordinaten
 
+    def _check_alleen_lezen(self):
+        if self.alleen_lezen:
+            raise Exception('figuur is al afgerond en is daardoor alleen-lezen')
+
     @property
     def volgende_kleur(self):
         return next(self._kleuren)["color"]
@@ -193,6 +205,8 @@ class Figuur(pycom.BasisComponent):
              arcering='',
              naam:str=None):
         """Trekt een lijn door middel van coordinaten."""
+
+        self._check_alleen_lezen()
 
         coordinaten = self._check_coordinaten(coordinaten)
         codes = [mpath.Path.MOVETO, *[mpath.Path.LINETO for _ in range(len(coordinaten)-1)]]
@@ -213,6 +227,8 @@ class Figuur(pycom.BasisComponent):
              stijl='o',
              naam:str=None):
         """Plot punten door middel van coordinaten."""
+
+        self._check_alleen_lezen()
 
         coordinaten = self._check_coordinaten(coordinaten)
         X = [x for x, _ in coordinaten]
@@ -236,6 +252,8 @@ class Figuur(pycom.BasisComponent):
              vert_uitlijnen:str='center', # {'center', 'top', 'bottom', 'baseline', 'center_baseline'}
              roteren:Union[float, int, str]=0): # float in degrees
         """Laat teksten zien op posities gegeven door coordinaten."""
+
+        self._check_alleen_lezen()
 
         coordinaten = self._check_coordinaten(coordinaten)
         X = [x for x, _ in coordinaten]
@@ -264,6 +282,8 @@ class Figuur(pycom.BasisComponent):
              naam:str=None):
         """Plot verticale kolommen door middel van coordinaten (positie, hoogte)."""
 
+        self._check_alleen_lezen()
+
         waardes = self._check_coordinaten(coordinaten)
         X = [x for x, _ in waardes]
         hoogtes = [h for _, h in waardes]
@@ -285,6 +305,8 @@ class Figuur(pycom.BasisComponent):
            aantal_punten=100):
         """Plot een wiskundige functie bij bepaald domein."""
 
+        self._check_alleen_lezen()
+
         if len(x) != 2:
             raise ValueError('x waarde moet een lijst of tupel zijn met 2 getallen')
 
@@ -302,49 +324,84 @@ class Figuur(pycom.BasisComponent):
 
     def _afronden_figuur(self):
         """Rond figuur af."""
-        min_x = self.min_x if self.min_x is not None else 0
-        max_x = self.max_x if self.max_x is not None else 1
-        min_y = self.min_y if self.min_y is not None else 0
-        max_y = self.max_y if self.max_y is not None else 1
+        if not self.alleen_lezen:
+            min_x = self.min_x if self.min_x is not None else 0
+            max_x = self.max_x if self.max_x is not None else 1
+            min_y = self.min_y if self.min_y is not None else 0
+            max_y = self.max_y if self.max_y is not None else 1
 
-        marge_x = (max_x - min_x) * self.marge_x
-        marge_y = (max_y - min_y) * self.marge_y
+            marge_x = (max_x - min_x) * self.marge_x
+            marge_y = (max_y - min_y) * self.marge_y
 
-        self.ax.axis([min_x - marge_x, max_x + marge_x, min_y - marge_y, max_y + marge_y])
+            self.ax.axis([min_x - marge_x, max_x + marge_x, min_y - marge_y, max_y + marge_y])
 
-        if self.maak_raster:
-           self.ax.grid(color='grey', linestyle='-', linewidth=0.2)
+            if self.maak_raster:
+               self.ax.grid(color='grey', linestyle='-', linewidth=0.2)
 
-        if self.maak_legenda:
-            self.ax.legend()
+            if self.maak_legenda:
+                self.ax.legend()
+
+        self.alleen_lezen = True
 
     def plot_console(self):
         """Rond figuur af en laat deze inline zien."""
         self._afronden_figuur()
         self.fig.show()
+        return self
 
     def plot_venster(self):
         """Rond figuur af en laat deze in venster zien."""
         self._afronden_figuur()
-        pycoi.Venster(
-                breedte=800,
-                hoogte=600,
-                titel='figuur' if self.titel == '' else self.titel,
-            ).figuur(self)
 
-    def png_html(self):
-        import base64
-        from io import BytesIO
+        pycoi.FiguurVenster(
+            figuur=self,
+            breedte=800,
+            hoogte=600,
+            titel='figuur' if self.titel == '' else self.titel,
+        )
 
+        plt.close(fig=self.fig)
+        return self
+
+    def png_html_code(self):
         buf = BytesIO()
         self.fig.savefig(buf, format='png')
         data = base64.b64encode(buf.getbuffer()).decode('ascii')
         html = (f"<img src='data:image/png;base64,{data}'/>")
 
-        pycoi.Venster(
-                breedte=800,
-                hoogte=600,
-                titel='PNG figuur',
-            ).tekst(
-                tekst=html
-            )
+        pycoi.TekstVenster(
+            tekst=html,
+            breedte=800,
+            hoogte=600,
+            titel='PNG figuur',
+        )
+
+    def bewaar_als_png(self):
+        bestandsnaam = pycoi.BewaarAlsVenster(
+            extensie='png',
+            titel='Bewaren als PNG',
+        ).bestandsnaam
+
+        if bestandsnaam is not None:
+            self.fig.savefig(bestandsnaam, format='png')
+
+    def svg_code(self):
+        buf = StringIO()
+        self.fig.savefig(buf, format='svg')
+        data = buf.getvalue()
+
+        pycoi.TekstVenster(
+            tekst=data,
+            breedte=800,
+            hoogte=600,
+            titel='SVG figuur',
+        )
+
+    def bewaar_als_svg(self):
+        bestandsnaam = pycoi.BestandsnaamVenster(
+            extensie='svg',
+            titel='Bewaren als SVG',
+        ).bestandsnaam
+
+        if bestandsnaam is not None:
+            self.fig.savefig(bestandsnaam, format='svg')

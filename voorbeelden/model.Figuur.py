@@ -8,7 +8,7 @@ twee_punten = {
     'punt 2: $\\omega_3$': (-1, 6.5),
 }
 
-doc.model.Figuur(
+fig1 = doc.model.Figuur(
         breedte=7,
         hoogte=7,
         raster=True,
@@ -62,20 +62,26 @@ doc.model.Figuur(
         breedte = 2,
         kleur = 'green',
         naam = 'sinus parabool',
-    ).plot_console()
+    ).plot_venster()
 
 
-fig = doc.model.Figuur(
+fig2 = doc.model.Figuur(
         raster=True,
     ).fx(
         functie = lambda x: 0.1*x**2 + 5*fn.sin(x) + 2,
         x = (-4, 10),
-    ).plot_venster()
-
-#fig.png_html()
+    ).plot_console()
 
 
+fig1.bewaar_als_svg()
 
+if False:
+    # hieronder staan een aantal opties
+    fig1.plot_console()
+    fig1.plot_venster()
+    fig1.png_html_code()
+    fig1.svg_code()
+    fig1.bewaar_als_png()
+    fig1.bewaar_als_svg()
 
-# haal hekje weg aan begin van volgende regel om help tekst te zien
-#doc.model.Figuur.print_help()
+    doc.model.Figuur.print_help()

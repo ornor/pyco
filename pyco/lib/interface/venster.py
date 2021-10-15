@@ -1,6 +1,7 @@
 import pyco.model as pycom
 
 import tkinter as tk
+from tkinter import filedialog as fd
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -22,7 +23,15 @@ class Venster(pycom.BasisObject):
         self.root.title(titel)
         self.root.geometry('{}x{}'.format(self.breedte, self.hoogte))
 
-    def tekst(self, tekst:str):
+
+class TekstVenster(Venster):
+    """
+    Popup venster met tekstvak en scrollbalk.
+    """
+
+    def __init__(self, tekst:str, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         s = tk.Scrollbar(self.root, width=20)
         s.pack(side=tk.RIGHT, fill=tk.Y)
 
@@ -34,9 +43,57 @@ class Venster(pycom.BasisObject):
 
         self.root.mainloop()
 
-    def figuur(self, figuur:pycom.Figuur):
+
+class FiguurVenster(Venster):
+    """
+    Popup venster met pyco.model.Figuur object.
+    """
+
+    def __init__(self, figuur:pycom.Figuur, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
         canvas = FigureCanvasTkAgg(figuur.fig, master=self.root)
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1.0)
         canvas.draw()
 
         self.root.mainloop()
+
+class BestandsnaamVenster(Venster):
+    """
+    Popup venster om bestandsnaam te vragen.
+
+    venster = BestandsnaamVenster(extensie='jpg')
+    bestandsnaam = venster.bestandsnaam
+
+    if bestandsnaam is None:
+        'geannuleerd'
+    else:
+        tekst = 'dit is wat tekst'
+        with open(bestandsnaam, 'w') as f:
+            f.write(tekst)
+    """
+
+    def __init__(self, extensie:str, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.root.geometry('10x10')
+        self.bestandsnaam = None
+
+        def popup():
+            bestand = fd.asksaveasfilename(
+                title='Bewaar als',
+                filetypes=['{}-bestand {}'.format(extensie.upper(), extensie)],
+                defaultextension=extensie)
+
+            self.bestandsnaam = bestand if len(bestand) > 0 and isinstance(bestand, str) else None
+
+            try:
+                self.root.destroy()
+            except:
+                pass
+
+        # btn = tk.Button(self.root, text='Bewaar als', command=lambda:klik())
+        # btn.pack(side = tk.TOP, pady = 20)
+        popup()
+
+        # self.root.mainloop()
