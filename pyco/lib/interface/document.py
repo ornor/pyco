@@ -44,6 +44,10 @@ class Document(pycom.BasisObject):
             class tmp:
                 tmp = obj
             obj = tmp
+        elif isinstance(obj, pycom.Figuur):
+            class tmp:
+                tmp = obj
+            obj = tmp
         if inspect.isclass(obj):
             self._klasses.append((obj.__name__, obj))
         return obj
@@ -62,13 +66,13 @@ class Document(pycom.BasisObject):
                     yield klasse_naam, obj_naam, obj
 
     @property
-    def _waardes(self):
-        waarde_lijst = []
-        for klasse_naam, obj_naam, obj in self._iter_klasse_objecten(pycom.Waarde):
+    def _componenten(self):
+        comp_lijst = []
+        for klasse_naam, obj_naam, obj in self._iter_klasse_objecten(pycom.BasisComponent):
             obj_nr = obj._object_nummer if hasattr(obj, '_object_nummer') else 0
-            waarde_lijst.append((obj_nr, klasse_naam, obj_naam, obj))
-        waarde_lijst = sorted(waarde_lijst)
-        return waarde_lijst
+            comp_lijst.append((obj_nr, klasse_naam, obj_naam, obj))
+        comp_lijst = sorted(comp_lijst)
+        return comp_lijst
 
     def toevoegen(self, obj):
         if isinstance(obj, str):
@@ -80,11 +84,11 @@ class Document(pycom.BasisObject):
             self._registreer(tmp)
 
 
-    def print_rapport(self, len_omschrijving:int = 16, len_waarde:int = 12,
+    def print_console(self, len_omschrijving:int = 16, len_waarde:int = 12,
                       breedte_pagina:int = 80):
         lijn = breedte_pagina * '-'
         laatste_klasse_naam = None
-        for _, klasse_naam, obj_naam, obj in self._waardes:
+        for _, klasse_naam, obj_naam, obj in self._componenten:
             if laatste_klasse_naam != klasse_naam and klasse_naam != 'tmp':
                 print()
                 print(lijn)
@@ -92,18 +96,24 @@ class Document(pycom.BasisObject):
                 print(lijn)
                 laatste_klasse_naam = klasse_naam
             naam = obj_naam
-            waarde = str(obj)
-            if waarde[-2:] == ' -':
-                waarde = waarde[:-2]
-            print()
-            if naam != 'tmp':
-                if hasattr(obj, '_documentatie') and obj._documentatie:
-                    print('{}\n{} = {}'.format(obj._documentatie, naam, waarde))
+            str_obj = str(obj)
+
+            if isinstance(obj, pycom.Waarde):
+                print()
+
+                if str_obj[-2:] == ' -':
+                    str_obj = str_obj[:-2]
+
+                if naam != 'tmp':
+                    if hasattr(obj, '_documentatie') and obj._documentatie:
+                        print('{}\n{} = {}'.format(obj._documentatie, naam, str_obj))
+                    else:
+                        print('{} = {}'.format(naam, str_obj))
                 else:
-                    print('{} = {}'.format(naam, waarde))
-            else:
-                if hasattr(obj, '_documentatie') and obj._documentatie:
-                    print('{}\n{}'.format(obj._documentatie, waarde))
-                else:
-                    print('{}'.format(waarde))
+                    if hasattr(obj, '_documentatie') and obj._documentatie:
+                        print('{}\n{}'.format(obj._documentatie, str_obj))
+                    else:
+                        print('{}'.format(str_obj))
+            elif isinstance(obj, pycom.Figuur):
+                obj.plot_console()
         print()

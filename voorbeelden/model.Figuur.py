@@ -62,13 +62,20 @@ doc.model.Figuur(
         breedte = 2,
         kleur = 'green',
         naam = 'sinus parabool',
-    )()
+    ).plot_console()
 
-doc.model.Figuur(
+
+fig = doc.model.Figuur(
         raster=True,
     ).fx(
         functie = lambda x: 0.1*x**2 + 5*fn.sin(x) + 2,
         x = (-4, 10),
-    )()
+    ).plot_venster()
 
-doc.model.Figuur.print_help()
+#fig.png_html()
+
+
+
+
+# haal hekje weg aan begin van volgende regel om help tekst te zien
+#doc.model.Figuur.print_help()

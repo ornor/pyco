@@ -62,10 +62,10 @@ class BasisTabel(object):
 
         return vorige_output_waarde
 
-    def plot(self, x_kolom:str=None, y_kolommen:Union[list, tuple]=None,
+    def figuur(self, x_kolom:str=None, y_kolommen:Union[list, tuple]=None,
              titel:str=None, x_titel:str=None, y_titel:str=None,
              snijpunt:Union[list, tuple]=None, snijpunt_x_format:str='{:.2f}',
-             snijpunt_y_format:str='{:.2f}'):
+             snijpunt_y_format:str='{:.2f}', venster:bool=False):
         x_kolom = self.KOLOMMEN[0] if x_kolom is None else x_kolom
         y_kolommen = self.KOLOMMEN[1:] if y_kolommen is None else y_kolommen
 
@@ -114,4 +114,4 @@ class BasisTabel(object):
                 vert_uitlijnen='center',
             )
 
-        fig()
+        return fig

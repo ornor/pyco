@@ -43,4 +43,6 @@ print('spanning heeft waarde getal (kN/mm2):', sigma('kN/mm2'))
 
 # ps. waardes worden intern NOOIT afgerond; alleen bij omzetten naar tekst
 
-x.print_help()
+
+# haal hekje weg aan begin van volgende regel om help tekst te zien
+#x.print_help()

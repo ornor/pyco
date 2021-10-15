@@ -58,4 +58,4 @@ class uitwerking:
     " P + R_i + O_i + G_i - R_u - G_u - O_u - Sigma_Delta_V"
 
 
-doc.print_rapport()
+doc.print_console()

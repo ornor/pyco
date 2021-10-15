@@ -82,14 +82,13 @@ class knikcontrole:
         input_waarde=lambda_rel,
         output_kolom=kromme))   >>\
     "Knikcoëfficiënt"
-    knikdata.plot(snijpunt=(lambda_rel, chi))
+    chi_fig = knikdata.figuur(snijpunt=(lambda_rel, chi))
 
     N_Rd = x(chi * A * f_yk / gamma_m).kN._0   >>\
     "Opneembare normaalkracht: chi * A * F_yk / gamma_m"
 
     uc = N_Ed / N_Rd   >>\
     "Unity check knikcontrole: N_Ed / N_Rd"
-
 
 @doc
 class samenvatting:
@@ -101,4 +100,4 @@ class samenvatting:
     conclusie = x('voldoet' if all([uc <= 1.0 for uc in ucs]) else 'voldoet niet')   >>\
     "Alle unity checks moeten kleiner zijn dan 1.0"
 
-doc.print_rapport()
+doc.print_console()

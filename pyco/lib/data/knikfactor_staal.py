@@ -40,8 +40,8 @@ class KnikfactorStaal(pycod.BasisTabel):
     def __init__(self):
         super().__init__()
 
-    def plot(self, snijpunt:Union[list, tuple]=None):
-        super().plot(
+    def figuur(self, snijpunt:Union[list, tuple]=None):
+        return super().figuur(
             x_kolom='lambda_rel',
             y_kolommen=['a0', 'a', 'b', 'c', 'd'],
             titel='Knikkromme',

@@ -1,4 +1,5 @@
 import pyco.model as pycom
+import pyco.interface as pycoi
 
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
@@ -13,7 +14,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-class Figuur(pycom.BasisObject):
+class Figuur(pycom.BasisComponent):
     """
     Tekent een figuur met behulp van matplotlib bibliotheek.
 
@@ -128,8 +129,9 @@ class Figuur(pycom.BasisObject):
            self.ax.axhline(y=0, color='darkgrey', linewidth=1.2)
            self.ax.axvline(x=0, color='darkgrey', linewidth=1.2)
 
-        if titel != '':
-            self.ax.set_title(titel)
+        self.titel = titel
+        if self.titel != '':
+            self.ax.set_title(self.titel)
         if x_as_titel != '':
             self.ax.set_xlabel(x_as_titel)
         if y_as_titel != '':
@@ -298,8 +300,8 @@ class Figuur(pycom.BasisObject):
         self.ax.plot(X, Y, label=naam, color=kleur, linewidth=breedte)
         return self
 
-    def __call__(self):
-        """Rond figuur af en laat deze zien."""
+    def _afronden_figuur(self):
+        """Rond figuur af."""
         min_x = self.min_x if self.min_x is not None else 0
         max_x = self.max_x if self.max_x is not None else 1
         min_y = self.min_y if self.min_y is not None else 0
@@ -316,40 +318,33 @@ class Figuur(pycom.BasisObject):
         if self.maak_legenda:
             self.ax.legend()
 
+    def plot_console(self):
+        """Rond figuur af en laat deze inline zien."""
+        self._afronden_figuur()
         self.fig.show()
 
-        return self
+    def plot_venster(self):
+        """Rond figuur af en laat deze in venster zien."""
+        self._afronden_figuur()
+        pycoi.Venster(
+                breedte=800,
+                hoogte=600,
+                titel='figuur' if self.titel == '' else self.titel,
+            ).figuur(self)
 
-# -----------------------------------------------------------------------------
+    def png_html(self):
+        import base64
+        from io import BytesIO
 
-# import os
-# import shutil
-# import tkinter as tk
-# from tkinter.filedialog import asksaveasfile
+        buf = BytesIO()
+        self.fig.savefig(buf, format='png')
+        data = base64.b64encode(buf.getbuffer()).decode('ascii')
+        html = (f"<img src='data:image/png;base64,{data}'/>")
 
-    # def bewaar_als_svg(self):
-    #     """Laat een popup venster zien om figuur op te slaan als SVG bestand."""
-    #     FILENAME = 'tmp.svg'
-    #     plt.savefig(FILENAME)
-
-    #     class TkFileDialog(tk.Frame):
-    #         def __init__(self, root):
-    #             tk.Frame.__init__(self, root)
-    #             button_opt = {'fill': tk.BOTH, 'padx': 5, 'pady': 5}
-    #             tk.Button(self, text='bewaar figuur als SVG bestand', command=self.asksaveasfilename).pack(**button_opt)
-    #             self.file_opt = options = {}
-    #             options['filetypes'] = [('all files', '.*'), ('SVG bestand', '.svg')]
-    #             options['initialfile'] = 'figuur.svg'
-    #             options['parent'] = root
-
-    #         def asksaveasfilename(self):
-    #             new_filename = asksaveasfile(**self.file_opt)
-
-    #             if new_filename:
-    #                 shutil.copyfile(FILENAME, new_filename)
-
-    #     root = tk.Tk()
-    #     TkFileDialog(root).pack()
-    #     root.mainloop()
-
-    #     os.remove(FILENAME)
+        pycoi.Venster(
+                breedte=800,
+                hoogte=600,
+                titel='PNG figuur',
+            ).tekst(
+                tekst=html
+            )

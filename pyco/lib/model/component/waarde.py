@@ -5,7 +5,7 @@ from typing import Union
 
 import pyco.model as pycom
 
-class Waarde(pycom.BasisObject):
+class Waarde(pycom.BasisComponent):
     """
     Bevat een getal en bijhorende eenheid.
 
