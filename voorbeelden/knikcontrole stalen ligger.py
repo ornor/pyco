@@ -101,3 +101,4 @@ class samenvatting:
     "Alle unity checks moeten kleiner zijn dan 1.0"
 
 doc.print_console()
+doc.print_html()

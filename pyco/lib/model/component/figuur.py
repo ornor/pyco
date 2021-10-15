@@ -96,8 +96,8 @@ class Figuur(pycom.BasisComponent):
 
     OVERIG
         f.volgende_kleur        # gebruik deze eigenschap om verschillende automatische kleuren te gebruiken
-        f.png_html_code()       # laat HTML code zien van PNG afbeelding
-        f.svg_code()            # laat SVG code zien
+        f.png_html_code()       # HTML IMG code van PNG afbeelding
+        f.svg_code()            # SVG code
         f.bewaar_als_png()      # vraag bestandsnaam om op te slaan als PNG
         f.bewaar_als_svg()      # vraag bestandsnaam om op te slaan als SVG
 
@@ -369,12 +369,14 @@ class Figuur(pycom.BasisComponent):
         data = base64.b64encode(buf.getbuffer()).decode('ascii')
         html = (f"<img src='data:image/png;base64,{data}'/>")
 
-        pycoi.TekstVenster(
-            tekst=html,
-            breedte=800,
-            hoogte=600,
-            titel='PNG figuur',
-        )
+        # pycoi.TekstVenster(
+        #     tekst=html,
+        #     breedte=800,
+        #     hoogte=600,
+        #     titel='PNG figuur',
+        # )
+
+        return html
 
     def bewaar_als_png(self):
         bestandsnaam = pycoi.BewaarAlsVenster(
@@ -390,12 +392,14 @@ class Figuur(pycom.BasisComponent):
         self.fig.savefig(buf, format='svg')
         data = buf.getvalue()
 
-        pycoi.TekstVenster(
-            tekst=data,
-            breedte=800,
-            hoogte=600,
-            titel='SVG figuur',
-        )
+        # pycoi.TekstVenster(
+        #     tekst=data,
+        #     breedte=800,
+        #     hoogte=600,
+        #     titel='SVG figuur',
+        # )
+
+        return data
 
     def bewaar_als_svg(self):
         bestandsnaam = pycoi.BestandsnaamVenster(

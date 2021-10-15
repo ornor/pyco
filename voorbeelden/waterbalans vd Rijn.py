@@ -57,5 +57,5 @@ class uitwerking:
     E = (P + R_i + O_i + G_i - R_u - G_u - O_u - Sigma_Delta_V)['mm/j']._0   >>\
     " P + R_i + O_i + G_i - R_u - G_u - O_u - Sigma_Delta_V"
 
-
 doc.print_console()
+doc.print_html()
