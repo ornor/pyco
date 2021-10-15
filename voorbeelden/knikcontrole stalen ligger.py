@@ -4,7 +4,10 @@ doc = Document()
 fn = doc.functies
 x = doc.model.Waarde
 
+doc.titel = 'Knikcontrole stalen ligger'
+
 doc('Voorbeeld uit de cursus Constructie 2')
+
 
 @doc
 class knikcontrole:
@@ -90,6 +93,7 @@ class knikcontrole:
     uc = N_Ed / N_Rd   >>\
     "Unity check knikcontrole: N_Ed / N_Rd"
 
+
 @doc
 class samenvatting:
     ucs = []
@@ -99,6 +103,7 @@ class samenvatting:
 
     conclusie = x('voldoet' if all([uc <= 1.0 for uc in ucs]) else 'voldoet niet')   >>\
     "Alle unity checks moeten kleiner zijn dan 1.0"
+
 
 doc.print_console()
 doc.print_html()

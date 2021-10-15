@@ -12,11 +12,11 @@ class Html(pycom.BasisObject):
     def __init__(self):
         super().__init__()
 
-        self.title = 'PYCO'
+        self.titel = 'PYCO'
 
         self._doctype= '<!DOCTYPE html>\n'
-        self._html_open = '<html>\n'
-        self._head_open = '<head>\n'
+        self._html_open = '<html lang="nl-NL">\n'
+        self._head_open = '<head>\n<meta charset="UTF-8">\n'
         self._title_open = '<title>'
         self._title_close = '</title>\n'
         self._head = ''
@@ -26,20 +26,21 @@ class Html(pycom.BasisObject):
         self._body_close = '</body>\n'
         self._html_close = '</html>\n'
 
-        self._head += '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">\n'
-
         self._head += """
 <style>
-    body {font-family:sans-serif;}
-    pre {}
-    p {}
+    body {font-family:sans-serif; padding:0px;}
+    h1 {margin:10px 0px 20px 0px; padding:0px;}
+    h2 {margin:5px 0px 10px 0px; padding:0px;}
+    pre {margin:5px 0px 20px 0px; padding:0px;}
+    p {margin:5px 0px 20px 0px; padding:0px;}
+    div {margin:0px; padding:0px;}
 </style>
-""".strip() + '\n'
+        """.strip() + '\n'
 
     @property
     def html(self):
         return self._doctype + self._html_open + self._head_open \
-            + self._title_open + self.title + self._title_close \
+            + self._title_open + self.titel + self._title_close \
             + self._head + self._head_close + self._body_open \
             + self._body + self._body_close + self._html_close
 

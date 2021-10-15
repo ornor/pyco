@@ -3,7 +3,10 @@ from pyco.interface import Document
 doc = Document()
 x = doc.model.Waarde
 
+doc.titel = 'Waterbalans vd Rijn'
+
 doc('Voorbeeld uit de cursus Water 1')
+
 
 @doc
 class opgave:
@@ -32,7 +35,9 @@ class opgave:
     G_u = x(0, 'm3/s')   >>\
     "Ondergrondse uitstroom"
 
+
 doc('Stel de waterbalans voor de Rijn op en bereken de ontbrekende term, uitgedruk in mm/j.')
+
 
 @doc
 class uitwerking:
@@ -56,6 +61,7 @@ class uitwerking:
 
     E = (P + R_i + O_i + G_i - R_u - G_u - O_u - Sigma_Delta_V)['mm/j']._0   >>\
     " P + R_i + O_i + G_i - R_u - G_u - O_u - Sigma_Delta_V"
+
 
 doc.print_console()
 doc.print_html()

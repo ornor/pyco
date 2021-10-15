@@ -36,6 +36,8 @@ class Document(pycom.BasisObject):
     def __init__(self):
         super().__init__()
 
+        self.titel = 'PYCO document'
+
         self._klasses = []
 
     def _registreer(self, obj):
@@ -86,6 +88,11 @@ class Document(pycom.BasisObject):
 
 
     def print_console(self, breedte_pagina:int = 80):
+        print(breedte_pagina * '=')
+        print(self.titel.upper())
+        print(breedte_pagina * '=')
+        print()
+
         lijn = breedte_pagina * '-'
         laatste_klasse_naam = None
         for _, klasse_naam, obj_naam, obj in self._componenten:
@@ -122,8 +129,8 @@ class Document(pycom.BasisObject):
 
         html = pycoi.Html()
 
-        html.title = 'PYCO document'
-        html.body('<h1>' + html.title + '</h1>')
+        html.titel = self.titel
+        html.body('<h1>' + self.titel + '</h1>')
 
         laatste_klasse_naam = None
         for _, klasse_naam, obj_naam, obj in self._componenten:
