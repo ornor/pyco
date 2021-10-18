@@ -69,7 +69,25 @@ class Waarde(pycom.BasisComponent):
         oppervlakte             ca a ha  (of lengte^2)
         inhoud                  ml cl dl l dal hl kl gallon pint floz tbs tsp
                                 bbl cup  (of lengte^3)
+
+    BESCHIKBARE EIGENSCHAPPEN   voor snel toekennen van eenheid aan waarde
+        a ag am attos bbl C ca cg cl cl_d cl_h cl_j cl_min cl_s cm cm2 cm3
+        cm3_d cm3_h cm3_j cm3_min cm3_s cm4 cm_d cm_h cm_j cm_min cm_s cs cup
+        d dal dam das deg dg dl dl_d dl_h dl_j dl_min dl_s dm dm2 dm3 dm3_d
+        dm3_h dm3_j dm3_min dm3_s dm4 dm_d dm_h dm_j dm_min dm_s ds Eg Em Es
+        F fg floz fm fs ft g gallon Gg Gm GN gon GPa grain Gs h ha hg hl hm
+        hm2 hm3 hs inch K kg kip kl km km2 km3 km3_d km3_h km3_j km3_min km3_s
+        km4 km_d km_h km_j km_min km_s kN kNm kNmm kN_m2 kN_mm2 kPa ks kton l
+        l_d l_h l_j l_min l_s m m2 m3 m3_d m3_h m3_j m3_min m3_s m4 Mg mg mijl
+        minuut ml ml_d ml_h ml_j ml_min ml_s Mm mm mm2 mm3 mm3_d mm3_h mm3_j
+        mm3_min mm3_s mm4 mm_d mm_h mm_j mm_min mm_s MN MNm MNmm MN_m2 MN_mm2
+        MPa Ms ms Mton mug mum mus m_d m_h m_j m_min m_s N ng Nm nm Nmm ns
+        N_m2 N_mm2 ounce Pa Pg pg pint Pm pm pound print_help Ps ps rad s
+        stone tbs Tg Tm TN ton TPa Ts tsp yard zeemijl
     """
+
+    # hulp functie om lijst hierboven te gegeneren; hierna nog bepaalde eigenschappen/methodes verwijderen
+    # ' '.join(sorted([a for a in dir(Waarde) if a[0] != '_'], key=lambda x:x.upper()))
 
     # factoren horende bij basiseenheden, om eenheidsbreuk samen te stellen
     # verschillende priemgetallen, zodat product een uniek resultaat geeft
@@ -1400,6 +1418,10 @@ class Waarde(pycom.BasisComponent):
     # SNELHEID
 
     @property
+    def km_j(self):
+        return self._verander_eenheid('km/j')
+
+    @property
     def km_d(self):
         return self._verander_eenheid('km/d')
 
@@ -1414,6 +1436,10 @@ class Waarde(pycom.BasisComponent):
     @property
     def km_s(self):
         return self._verander_eenheid('km/s')
+
+    @property
+    def m_j(self):
+        return self._verander_eenheid('m/j')
 
     @property
     def m_d(self):
@@ -1431,16 +1457,73 @@ class Waarde(pycom.BasisComponent):
     def m_s(self):
         return self._verander_eenheid('m/s')
 
+    @property
+    def dm_j(self):
+        return self._verander_eenheid('dm/j')
+
+    @property
+    def dm_d(self):
+        return self._verander_eenheid('dm/d')
+
+    @property
+    def dm_h(self):
+        return self._verander_eenheid('dm/h')
+
+    @property
+    def dm_min(self):
+        return self._verander_eenheid('dm/min')
+
+    @property
+    def dm_s(self):
+        return self._verander_eenheid('dm/s')
+
+    @property
+    def cm_j(self):
+        return self._verander_eenheid('cm/j')
+
+    @property
+    def cm_d(self):
+        return self._verander_eenheid('cm/d')
+
+    @property
+    def cm_h(self):
+        return self._verander_eenheid('cm/h')
+
+    @property
+    def cm_min(self):
+        return self._verander_eenheid('cm/min')
+
+    @property
+    def cm_s(self):
+        return self._verander_eenheid('cm/s')
+
+    @property
+    def mm_j(self):
+        return self._verander_eenheid('mm/j')
+
+    @property
+    def mm_d(self):
+        return self._verander_eenheid('mm/d')
+
+    @property
+    def mm_h(self):
+        return self._verander_eenheid('mm/h')
+
+    @property
+    def mm_min(self):
+        return self._verander_eenheid('mm/min')
+
+    @property
+    def mm_s(self):
+        return self._verander_eenheid('mm/s')
+
+
 
     # TRAAGHEIDSMOMENT
 
     @property
     def km4(self):
         return self._verander_eenheid('km4')
-
-    @property
-    def hm4(self):
-        return self._verander_eenheid('hm4')
 
     @property
     def m4(self):
@@ -1457,3 +1540,185 @@ class Waarde(pycom.BasisComponent):
     @property
     def mm4(self):
         return self._verander_eenheid('mm4')
+
+    # DEBIET
+
+    @property
+    def km3_j(self):
+        return self._verander_eenheid('km3/j')
+
+    @property
+    def km3_d(self):
+        return self._verander_eenheid('km3/d')
+
+    @property
+    def km3_h(self):
+        return self._verander_eenheid('km3/h')
+
+    @property
+    def km3_min(self):
+        return self._verander_eenheid('km3/min')
+
+    @property
+    def km3_s(self):
+        return self._verander_eenheid('km3/s')
+
+    @property
+    def m3_j(self):
+        return self._verander_eenheid('m3/j')
+
+    @property
+    def m3_d(self):
+        return self._verander_eenheid('m3/d')
+
+    @property
+    def m3_h(self):
+        return self._verander_eenheid('m3/h')
+
+    @property
+    def m3_min(self):
+        return self._verander_eenheid('m3/min')
+
+    @property
+    def m3_s(self):
+        return self._verander_eenheid('m3/s')
+
+    @property
+    def dm3_j(self):
+        return self._verander_eenheid('dm3/j')
+
+    @property
+    def dm3_d(self):
+        return self._verander_eenheid('dm3/d')
+
+    @property
+    def dm3_h(self):
+        return self._verander_eenheid('dm3/h')
+
+    @property
+    def dm3_min(self):
+        return self._verander_eenheid('dm3/min')
+
+    @property
+    def dm3_s(self):
+        return self._verander_eenheid('dm3/s')
+
+    @property
+    def cm3_j(self):
+        return self._verander_eenheid('cm3/j')
+
+    @property
+    def cm3_d(self):
+        return self._verander_eenheid('cm3/d')
+
+    @property
+    def cm3_h(self):
+        return self._verander_eenheid('cm3/h')
+
+    @property
+    def cm3_min(self):
+        return self._verander_eenheid('cm3/min')
+
+    @property
+    def cm3_s(self):
+        return self._verander_eenheid('cm3/s')
+
+    @property
+    def mm3_j(self):
+        return self._verander_eenheid('mm3/j')
+
+    @property
+    def mm3_d(self):
+        return self._verander_eenheid('mm3/d')
+
+    @property
+    def mm3_h(self):
+        return self._verander_eenheid('mm3/h')
+
+    @property
+    def mm3_min(self):
+        return self._verander_eenheid('mm3/min')
+
+    @property
+    def mm3_s(self):
+        return self._verander_eenheid('mm3/s')
+
+    @property
+    def l_j(self):
+        return self._verander_eenheid('l/j')
+
+    @property
+    def l_d(self):
+        return self._verander_eenheid('l/d')
+
+    @property
+    def l_h(self):
+        return self._verander_eenheid('l/h')
+
+    @property
+    def l_min(self):
+        return self._verander_eenheid('l/min')
+
+    @property
+    def l_s(self):
+        return self._verander_eenheid('l/s')
+
+    @property
+    def dl_j(self):
+        return self._verander_eenheid('dl/j')
+
+    @property
+    def dl_d(self):
+        return self._verander_eenheid('dl/d')
+
+    @property
+    def dl_h(self):
+        return self._verander_eenheid('dl/h')
+
+    @property
+    def dl_min(self):
+        return self._verander_eenheid('dl/min')
+
+    @property
+    def dl_s(self):
+        return self._verander_eenheid('dl/s')
+
+    @property
+    def cl_j(self):
+        return self._verander_eenheid('cl/j')
+
+    @property
+    def cl_d(self):
+        return self._verander_eenheid('cl/d')
+
+    @property
+    def cl_h(self):
+        return self._verander_eenheid('cl/h')
+
+    @property
+    def cl_min(self):
+        return self._verander_eenheid('cl/min')
+
+    @property
+    def cl_s(self):
+        return self._verander_eenheid('cl/s')
+
+    @property
+    def ml_j(self):
+        return self._verander_eenheid('ml/j')
+
+    @property
+    def ml_d(self):
+        return self._verander_eenheid('ml/d')
+
+    @property
+    def ml_h(self):
+        return self._verander_eenheid('ml/h')
+
+    @property
+    def ml_min(self):
+        return self._verander_eenheid('ml/min')
+
+    @property
+    def ml_s(self):
+        return self._verander_eenheid('ml/s')

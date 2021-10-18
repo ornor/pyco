@@ -14,25 +14,25 @@ class opgave:
     A = x(16e4).km2   >>\
     "Oppervlakte stroomgebied"
 
-    P = x(910, 'mm/j')   >>\
+    P = x(910).mm_j   >>\
     "Gemiddelde jaarneerslag"
 
-    R_u = x(2200, 'm3/s')   >>\
+    R_u = x(2200).m3_s   >>\
     "Gemiddelde oppervlakteafvoer"
 
-    O = x(16.8e9, 'm3/j')   >>\
+    O = x(16.8e9).m3_j   >>\
     "Gemiddelde waterontrekking industrie, drinkwater e.d."
 
-    O_i = x(16.0e9, 'm3/j')   >>\
+    O_i = x(16.0e9).m3_j   >>\
     "Gemiddelde waterlozing industrie, afvalwater e.d."
 
-    Sigma_Delta_V = x(0, 'm3/s')   >>\
+    Sigma_Delta_V = x(0).m3_s   >>\
     "Berginsverandering"
 
-    G_i = x(0, 'm3/s')   >>\
+    G_i = x(0).m3_s   >>\
     "Ondergrondse instroom"
 
-    G_u = x(0, 'm3/s')   >>\
+    G_u = x(0).m3_s   >>\
     "Ondergrondse uitstroom"
 
 
@@ -44,7 +44,7 @@ class uitwerking:
 
     P = x(opgave.P)
 
-    R_i = x(0, 'mm/j')   >>\
+    R_i = x(0).mm_j   >>\
     "We bekijken immers het hele stroomgebied"
 
     G_i = opgave.G_i / opgave.A
@@ -59,7 +59,7 @@ class uitwerking:
 
     Sigma_Delta_V = opgave.Sigma_Delta_V / opgave.A
 
-    E = (P + R_i + O_i + G_i - R_u - G_u - O_u - Sigma_Delta_V)['mm/j']._0   >>\
+    E = (P + R_i + O_i + G_i - R_u - G_u - O_u - Sigma_Delta_V).mm_j._0   >>\
     " P + R_i + O_i + G_i - R_u - G_u - O_u - Sigma_Delta_V"
 
 
