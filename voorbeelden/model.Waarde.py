@@ -43,6 +43,17 @@ print('spanning heeft waarde getal (kN/mm2):', sigma('kN/mm2'))
 
 # ps. waardes worden intern NOOIT afgerond; alleen bij omzetten naar tekst
 
+print()
+# waardes vergelijken
+r = x(23).mm
+s = x(2.3).cm
+t = x(5).m
+
+print('r == s   -->   {} == {}   -->  '.format(r, s), r == s)
+print('r != t   -->   {} != {}    -->  '.format(r, t), r != t)
+print('s > t    -->    {} >  {}    -->  '.format(s, t), s > t)
+print('s <= t   -->    {} <= {}    -->  '.format(s, t), s <= t)
+
 
 if False:
     # hieronder staan nog extra opties

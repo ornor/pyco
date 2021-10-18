@@ -64,4 +64,5 @@ class uitwerking:
 
 
 doc.print_console()
-doc.print_html()
+
+#doc.print_html()

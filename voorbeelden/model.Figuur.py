@@ -1,4 +1,4 @@
-from pyco.interface import Document
+from pyco.interface import Document, TekstVenster
 
 doc = Document()
 fn = doc.functies
@@ -73,14 +73,20 @@ fig2 = doc.model.Figuur(
     ).plot_console()
 
 
-fig1.bewaar_als_svg()
+TekstVenster(
+    tekst=fig1.svg_html_code(),
+    breedte=800,
+    hoogte=600,
+    titel='SVG figuur',
+)
+
 
 if False:
     # hieronder staan een aantal opties
     fig1.plot_console()
     fig1.plot_venster()
     fig1.png_html_code()
-    fig1.svg_code()
+    fig1.svg_html_code()
     fig1.bewaar_als_png()
     fig1.bewaar_als_svg()
 

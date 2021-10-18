@@ -96,8 +96,8 @@ class Figuur(pycom.BasisComponent):
 
     OVERIG
         f.volgende_kleur        # gebruik deze eigenschap om verschillende automatische kleuren te gebruiken
-        f.png_html_code()       # HTML IMG code van PNG afbeelding
-        f.svg_code()            # SVG code
+        f.png_html_code()       # HTML IMG code van PNG afbeelding (data url encoded)
+        f.svg_html_code()       # SVG code voor inline HTML gebruik
         f.bewaar_als_png()      # vraag bestandsnaam om op te slaan als PNG
         f.bewaar_als_svg()      # vraag bestandsnaam om op te slaan als SVG
 
@@ -364,21 +364,15 @@ class Figuur(pycom.BasisComponent):
         return self
 
     def png_html_code(self):
+        """Genereer PNG code voor inline gebruik IMG HTML."""
         buf = BytesIO()
         self.fig.savefig(buf, format='png')
         data = base64.b64encode(buf.getbuffer()).decode('ascii')
         html = (f"<img src='data:image/png;base64,{data}'/>")
-
-        # pycoi.TekstVenster(
-        #     tekst=html,
-        #     breedte=800,
-        #     hoogte=600,
-        #     titel='PNG figuur',
-        # )
-
         return html
 
     def bewaar_als_png(self):
+        """Vraag om bestandsnaam en bewaar afbeelding als PNG bestand."""
         bestandsnaam = pycoi.BewaarAlsVenster(
             extensie='png',
             titel='Bewaren als PNG',
@@ -387,21 +381,17 @@ class Figuur(pycom.BasisComponent):
         if bestandsnaam is not None:
             self.fig.savefig(bestandsnaam, format='png')
 
-    def svg_code(self):
+    def svg_html_code(self):
+        """Genereer SVG code voor inline gebruik HTML."""
         buf = StringIO()
         self.fig.savefig(buf, format='svg')
         data = buf.getvalue()
-
-        # pycoi.TekstVenster(
-        #     tekst=data,
-        #     breedte=800,
-        #     hoogte=600,
-        #     titel='SVG figuur',
-        # )
-
+        # data heeft XML en DOCTYPE header; deze er afhalen (alleen SVG tags)
+        data = '<svg ' + data.split('<svg ', 1)[1]
         return data
 
     def bewaar_als_svg(self):
+        """Vraag om bestandsnaam en bewaar afbeelding als SVG bestand."""
         bestandsnaam = pycoi.BestandsnaamVenster(
             extensie='svg',
             titel='Bewaren als SVG',

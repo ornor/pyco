@@ -38,6 +38,14 @@ class Waarde(pycom.BasisComponent):
         w2 = w1 / n             waarde delen door getal
         w2 = w1 ** n            waarde tot de macht een getal
 
+    WAARDEN VERGELIJKEN         resulteert in een boolean (True/False)
+        w1 == w2                is gelijk aan
+        w1 != w2                is niet gelijk aan
+        w1 >  w2                is groter dan
+        w1 <  w2                is kleiner dan
+        w1 >= w2                is groter dan of gelijk aan
+        w1 <= w2                is kleiner dan of gelijk aan
+
     TEKST EENHEID
         gebruik een getal achter naam eenheid voor 'tot de macht'
         gebruik / (maximaal één keer) om teller en noemer te introduceren
@@ -617,7 +625,7 @@ class Waarde(pycom.BasisComponent):
         return Waarde(waarde, self.eenheidbreuk, config = self.config)
 
     def __mul__(self, andere_waarde):
-        """Vermenigvuldigd waarde met andere waarde of getal.
+        """Vermenigvuldigt waarde met andere waarde of getal.
 
         >> Waarde(3, 'm') * Waarde(4, 's')
         Waarde(12.0, 'm*s')
@@ -675,7 +683,7 @@ class Waarde(pycom.BasisComponent):
         return Waarde(waarde, eenheidbreuk, config = None)
 
     def __rmul__(self, scalar):
-        """Vermenigvuldigd getal met waarde.
+        """Vermenigvuldigt getal met waarde.
 
         >> 2 * Waarde(4, 's')
         Waarde(8.0, 's')
@@ -701,6 +709,60 @@ class Waarde(pycom.BasisComponent):
         waarde = scalar / self.waarde
         eenheidbreuk = 1 / self.eenheidbreuk
         return Waarde(waarde, eenheidbreuk, config = self.config)
+
+    def __eq__(self, andere_waarde):
+        """Vergelijkt waarde met andere waarde: =="""
+        if not isinstance(andere_waarde, Waarde):
+            raise TypeError('term is niet van type Waarde')
+        if self.eenheidbreuk != andere_waarde.eenheidbreuk:
+            raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
+                self.eenheidnaam, andere_waarde.eenheidnaam))
+        return self.waarde == andere_waarde.waarde
+
+    def __ne__(self, andere_waarde):
+        """Vergelijkt waarde met andere waarde: !="""
+        if not isinstance(andere_waarde, Waarde):
+            raise TypeError('term is niet van type Waarde')
+        if self.eenheidbreuk != andere_waarde.eenheidbreuk:
+            raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
+                self.eenheidnaam, andere_waarde.eenheidnaam))
+        return self.waarde != andere_waarde.waarde
+
+    def __lt__(self, andere_waarde):
+        """Vergelijkt waarde met andere waarde: <"""
+        if not isinstance(andere_waarde, Waarde):
+            raise TypeError('term is niet van type Waarde')
+        if self.eenheidbreuk != andere_waarde.eenheidbreuk:
+            raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
+                self.eenheidnaam, andere_waarde.eenheidnaam))
+        return self.waarde < andere_waarde.waarde
+
+    def __gt__(self, andere_waarde):
+        """Vergelijkt waarde met andere waarde: >"""
+        if not isinstance(andere_waarde, Waarde):
+            raise TypeError('term is niet van type Waarde')
+        if self.eenheidbreuk != andere_waarde.eenheidbreuk:
+            raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
+                self.eenheidnaam, andere_waarde.eenheidnaam))
+        return self.waarde > andere_waarde.waarde
+
+    def __le__(self, andere_waarde):
+        """Vergelijkt waarde met andere waarde: <="""
+        if not isinstance(andere_waarde, Waarde):
+            raise TypeError('term is niet van type Waarde')
+        if self.eenheidbreuk != andere_waarde.eenheidbreuk:
+            raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
+                self.eenheidnaam, andere_waarde.eenheidnaam))
+        return self.waarde <= andere_waarde.waarde
+
+    def __ge__(self, andere_waarde):
+        """Vergelijkt waarde met andere waarde: >="""
+        if not isinstance(andere_waarde, Waarde):
+            raise TypeError('term is niet van type Waarde')
+        if self.eenheidbreuk != andere_waarde.eenheidbreuk:
+            raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
+                self.eenheidnaam, andere_waarde.eenheidnaam))
+        return self.waarde >= andere_waarde.waarde
 
     def __repr__(self):
         if self.is_getal:
