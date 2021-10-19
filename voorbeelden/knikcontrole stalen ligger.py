@@ -51,7 +51,7 @@ class knikcontrole:
     gamma_m = x(1.0)   >>\
     "Materiaalfactor"
 
-    i_z = x(fn.sqrt(I_z('mm4') / A('mm2'))).mm   >>\
+    i_z = x(fn.wortel(I_z('mm4') / A('mm2'))).mm   >>\
     "Traagheidsstraal: sqrt(I_z / A)"
 
     L_cr = L * L_cr_factor   >>\
@@ -60,7 +60,7 @@ class knikcontrole:
     lambda_abs = L_cr / i_z   >>\
     "Absolute slankheid: L_cr / i_z"
 
-    lambda_1 = x(fn.pi * fn.sqrt(E('MPa') / f_yk('MPa')))   >>\
+    lambda_1 = x(fn.pi * fn.wortel(E('MPa') / f_yk('MPa')))   >>\
     "Invloed staalsterkte: pi * sqrt(E / E_yk)"
 
     lambda_rel = lambda_abs / lambda_1   >>\

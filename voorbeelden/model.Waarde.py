@@ -1,4 +1,5 @@
 from pyco.interface import Document
+import pyco.functies as fn
 
 doc = Document()
 x = doc.model.Waarde
@@ -43,6 +44,7 @@ print('spanning heeft waarde getal (kN/mm2):', sigma('kN/mm2'))
 
 # ps. waardes worden intern NOOIT afgerond; alleen bij omzetten naar tekst
 
+
 print()
 # waardes vergelijken
 r = x(23).mm
@@ -53,6 +55,19 @@ print('r == s   -->   {} == {}   -->  '.format(r, s), r == s)
 print('r != t   -->   {} != {}    -->  '.format(r, t), r != t)
 print('s > t    -->    {} >  {}    -->  '.format(s, t), s > t)
 print('s <= t   -->    {} <= {}    -->  '.format(s, t), s <= t)
+
+
+print()
+# pyco functies zijn geschikt voor Waarde objecten
+r = x(20).mm
+h = x(10).cm
+
+print('V bol:', fn.V_bol(r, h).cm3)
+print('V kegel:', fn.V_kegel(r, h).cm3)
+
+print('A hele cirkel:', fn.A_cirkel(r).cm2)
+alpha = x(45).deg
+print('A cirkelsegment:', fn.A_cirkelsegment(alpha, r).cm2)
 
 
 if False:

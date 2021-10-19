@@ -25,7 +25,8 @@ class Waarde(pycom.BasisComponent):
         tekst = str(w)          of automatisch met print(w)
 
     OMZETTEN WAARDE NAAR GETAL  resulteert in nieuw float object
-        getal = w('cm')
+        getal = w('cm')         omzetten met gegeven eenheid
+        getal = abs(w)          omzetten met standaard eenheid
 
     MOGELIJKE BEWERKINGEN       resulteert in nieuw Waarde object
         w3 = w1 + w2            waarde optellen bij waarde
@@ -781,6 +782,24 @@ class Waarde(pycom.BasisComponent):
             raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
                 self.eenheidnaam, andere_waarde.eenheidnaam))
         return self.waarde >= andere_waarde.waarde
+
+    def __abs__(self):
+        """Zet waarde om een float object gebruik makend van standaard eenheid."""
+        if 'standaard_eenheid' in self.config \
+                and self.config['standaard_eenheid'] is not None \
+                and self.config['standaard_eenheid'] != '' \
+                and self.config['standaard_eenheid'] != '-':
+            # wel een standaard eenheid
+            return float(self._export_waarde(self.config['standaard_eenheid']))
+        elif self.is_getal and self.eenheidbreuk != Fraction(1):
+            # geen standaard eenheid maar wel een dimensie
+            return float(self._export_waarde(self.eenheidnaam))
+        else:
+            # geen eenheid
+            if self.is_getal:
+                return float(self.waarde)
+            else:
+                raise ValueError('waarde is geen getal: {}'.format(self.waarde))
 
     def __repr__(self):
         if self.is_getal:
