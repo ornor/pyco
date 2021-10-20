@@ -34,13 +34,14 @@ print('A =', A, '(v3)')
 F = x(803)['kN'][0]
 print('F =', F)
 
+
 # aanmaken waarde
 sigma = (F / A).N_mm2._1
 print('sigma =', sigma)
 
 # waarde omzetten naar een getal (float); door ronde haken met eenheid tekst
 # met een getal kan je ook rekenen met niet standaard functies zoals math.sin()
-print('spanning heeft waarde getal (kN/mm2):', sigma('kN/mm2'))
+print('spanning heeft waarde getal (kN/mm2):', float(sigma['kN/mm2']))
 
 # ps. waardes worden intern NOOIT afgerond; alleen bij omzetten naar tekst
 
@@ -62,7 +63,7 @@ print()
 r = x(20).mm
 h = x(10).cm
 
-print('V bol:', fn.V_bol(r, h).cm3)
+print('V bol:', fn.V_bol(r).cm3)
 print('V kegel:', fn.V_kegel(r, h).cm3)
 
 print('A hele cirkel:', fn.A_cirkel(r).cm2)

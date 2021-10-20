@@ -51,7 +51,7 @@ class knikcontrole:
     gamma_m = x(1.0)   >>\
     "Materiaalfactor"
 
-    i_z = x(fn.wortel(I_z('mm4') / A('mm2'))).mm   >>\
+    i_z = x(fn.wortel(float(I_z.mm4) / float(A.mm2))).mm   >>\
     "Traagheidsstraal: sqrt(I_z / A)"
 
     L_cr = L * L_cr_factor   >>\
@@ -60,22 +60,22 @@ class knikcontrole:
     lambda_abs = L_cr / i_z   >>\
     "Absolute slankheid: L_cr / i_z"
 
-    lambda_1 = x(fn.pi * fn.wortel(E('MPa') / f_yk('MPa')))   >>\
+    lambda_1 = x(fn.pi * fn.wortel(float(E.MPa) / float(f_yk.MPa)))   >>\
     "Invloed staalsterkte: pi * sqrt(E / E_yk)"
 
     lambda_rel = lambda_abs / lambda_1   >>\
     "Relatieve slankheid: lambda_abs / lambda_1"
 
-    if h('mm')/b('mm') > 1.2:
-        if t_f('mm') <= 40:
-            kr = 'b' if f_yk('MPa') < 420 else 'a0'
+    if float(h.mm)/float(b.mm) > 1.2:
+        if float(t_f.mm) <= 40:
+            kr = 'b' if float(f_yk.MPa) < 420 else 'a0'
         else:
-            kr = 'c' if f_yk('MPa') < 420 else 'a'
+            kr = 'c' if float(f_yk.MPa) < 420 else 'a'
     else:
-        if t_f('mm') <= 100:
-            kr = 'c' if f_yk('MPa') < 420 else 'a'
+        if float(t_f.mm) <= 100:
+            kr = 'c' if float(f_yk.MPa) < 420 else 'a'
         else:
-            kr = 'd' if f_yk('MPa') < 420 else 'c'
+            kr = 'd' if float(f_yk.MPa) < 420 else 'c'
     kromme = x(kr)    >>\
     "Type knikkromme"
 
@@ -99,7 +99,7 @@ class samenvatting:
     ucs = []
 
     uc_knik = knikcontrole.uc
-    ucs.append(uc_knik())
+    ucs.append(float(uc_knik))
 
     conclusie = x('voldoet' if all([uc <= 1.0 for uc in ucs]) else 'voldoet niet')   >>\
     "Alle unity checks moeten kleiner zijn dan 1.0"

@@ -21,8 +21,6 @@ is_oneindig = math.isinf
 is_nan = math.isnan
 ldexp = math.ldexp
 modf = math.modf
-#perm = math.perm
-#prod = math.prod
 rest = math.remainder
 trunc = math.trunc
 exp = math.exp
@@ -45,7 +43,6 @@ atanh = math.atanh
 cosh = math.acosh
 sinh = math.sinh
 tanh = math.tanh
-#dist = math.dist
 hypot = math.hypot
 graden = math.degrees
 radialen = math.radians
@@ -59,21 +56,28 @@ tau = math.tau
 inf = math.inf
 nan = math.nan
 
+
 def A_vierkant(b:Union[Waarde, int, float]) -> float:
     """Berekent oppervlakte van vierkant."""
     if all(isinstance(obj, Waarde) for obj in [b]):
         return b**2
     else:
-        b = float(b)
-        return b**2
+        return float(b)**2
+
+assert A_vierkant(b=2) == 4.0
+assert A_vierkant(b=Waarde(2).cm) == Waarde(400).mm2
+
 
 def O_vierkant(b:Union[Waarde, int, float]) -> float:
     """Berekent omtrek van vierkant."""
     if all(isinstance(obj, Waarde) for obj in [b]):
         return 4*b
     else:
-        b = float(b)
-        return 4*b
+        return 4*float(b)
+
+assert O_vierkant(b=2) == 8.0
+assert O_vierkant(b=Waarde(2).cm) == Waarde(80).mm
+
 
 def A_rechthoek(b:Union[Waarde, int, float],
                 h:Union[Waarde, int, float]) -> float:
@@ -81,9 +85,12 @@ def A_rechthoek(b:Union[Waarde, int, float],
     if all(isinstance(obj, Waarde) for obj in [b, h]):
         return b*h
     else:
-        b = abs(b) if isinstance(b, Waarde) else float(b)
-        h = abs(h) if isinstance(h, Waarde) else float(h)
-        return b*h
+        return float(b)*float(h)
+
+assert A_rechthoek(b=2, h=3) == 6.0
+assert A_rechthoek(b=Waarde(2).cm, h=3) == 6.0
+assert A_rechthoek(b=Waarde(2).cm, h=Waarde(30).mm) == Waarde(600).mm2
+
 
 def O_rechthoek(b:Union[Waarde, int, float],
                 h:Union[Waarde, int, float]) -> float:
@@ -91,45 +98,47 @@ def O_rechthoek(b:Union[Waarde, int, float],
     if all(isinstance(obj, Waarde) for obj in [b, h]):
         return 2*b + 2*h
     else:
-        b = abs(b) if isinstance(b, Waarde) else float(b)
-        h = abs(h) if isinstance(h, Waarde) else float(h)
-        return 2*b + 2*h
+        return 2*float(b) + 2*float(h)
+
+assert O_rechthoek(b=2, h=3) == 10.0
+assert O_rechthoek(b=Waarde(2).cm, h=3) == 10.0
+assert O_rechthoek(b=Waarde(2).cm, h=Waarde(30).mm) == Waarde(100).mm
+
 
 def A_driehoek(b:Union[Waarde, int, float],
                h:Union[Waarde, int, float]) -> float:
     """Berekent oppervlakte van driehoek."""
     if all(isinstance(obj, Waarde) for obj in [b, h]):
-        return b*h/2
+        return 1/2*b*h
     else:
-        b = abs(b) if isinstance(b, Waarde) else float(b)
-        h = abs(h) if isinstance(h, Waarde) else float(h)
-        return b*h/2
+        return 1/2*float(b)*float(h)
+
+assert A_driehoek(b=2, h=3) == 3.0
+assert A_driehoek(b=Waarde(2).cm, h=3) == 3.0
+assert A_driehoek(b=Waarde(2).cm, h=Waarde(30).mm) == Waarde(300).mm2
+
 
 def A_cirkel(r:Union[Waarde, int, float]) -> float:
     """Berekent oppervlakte van cirkel."""
     if all(isinstance(obj, Waarde) for obj in [r]):
         return pi*r**2
     else:
-        r = float(r)
-        return pi*r**2
+        return pi*float(r)**2
 
 def A_cirkelsegment(alpha:Union[Waarde, int, float],
                     r:Union[Waarde, int, float]) -> float:
-    """Berekent oppervlakte van cirkel segment."""
+    """Berekent oppervlakte van cirkelsegment."""
     if all(isinstance(obj, Waarde) for obj in [alpha, r]):
-        return alpha.rad / Waarde(2*pi).rad *pi*r**2
+        return alpha / Waarde(2*pi).rad *pi*r**2
     else:
-        alpha = abs(alpha) if isinstance(alpha, Waarde) else float(alpha)
-        r = abs(r) if isinstance(r, Waarde) else float(r)
-        return 1/2*alpha*r**2
+        return 1/2*float(alpha)*float(r)**2
 
 def O_cirkel(r:Union[Waarde, int, float]) -> float:
     """Berekent omtrek van cirkel."""
     if all(isinstance(obj, Waarde) for obj in [r]):
         return 2*pi*r
     else:
-        r = float(r)
-        return 2*pi*r
+        return 2*pi*float(r)
 
 def V_prisma(A_grond:Union[Waarde, int, float],
              h:Union[Waarde, int, float]) -> float:
@@ -137,19 +146,15 @@ def V_prisma(A_grond:Union[Waarde, int, float],
     if all(isinstance(obj, Waarde) for obj in [A_grond, h]):
         return A_grond*h
     else:
-        A_grond = abs(A_grond) if isinstance(A_grond, Waarde) else float(A_grond)
-        h = abs(h) if isinstance(h, Waarde) else float(h)
-        return A_grond*h
+        return float(A_grond)*float(h)
 
 def V_piramide(A_grond:Union[Waarde, int, float],
                h:Union[Waarde, int, float]) -> float:
     """Berekent inhoud van een piramide."""
     if all(isinstance(obj, Waarde) for obj in [A_grond, h]):
-        return A_grond*h/3
+        return 1/3*A_grond*h
     else:
-        A_grond = abs(A_grond) if isinstance(A_grond, Waarde) else float(A_grond)
-        h = abs(h) if isinstance(h, Waarde) else float(h)
-        return A_grond*h/3
+        return 1/3*float(A_grond)*float(h)
 
 def A_cilinder(r:Union[Waarde, int, float],
                h:Union[Waarde, int, float]) -> float:
@@ -157,9 +162,7 @@ def A_cilinder(r:Union[Waarde, int, float],
     if all(isinstance(obj, Waarde) for obj in [r, h]):
         return 2*pi*r**2 + 2*pi*r*h
     else:
-        r = abs(r) if isinstance(r, Waarde) else float(r)
-        h = abs(h) if isinstance(h, Waarde) else float(h)
-        return 2*pi*r**2 + 2*pi*r*h
+        return 2*pi*float(r)**2 + 2*pi*float(r)*float(h)
 
 def V_cilinder(r:Union[Waarde, int, float],
                h:Union[Waarde, int, float]) -> float:
@@ -167,55 +170,43 @@ def V_cilinder(r:Union[Waarde, int, float],
     if all(isinstance(obj, Waarde) for obj in [r, h]):
         return pi*r**2*h
     else:
-        r = abs(r) if isinstance(r, Waarde) else float(r)
-        h = abs(h) if isinstance(h, Waarde) else float(h)
-        return pi*r**2*h
+        return pi*float(r)**2*float(h)
 
 def V_kegel(r:Union[Waarde, int, float],
             h:Union[Waarde, int, float]) -> float:
     """Berekent inhoud van een kegel."""
     if all(isinstance(obj, Waarde) for obj in [r, h]):
-        return pi*r**2*h/3
+        return 1/3*pi*r**2*h
     else:
-        r = abs(r) if isinstance(r, Waarde) else float(r)
-        h = abs(h) if isinstance(h, Waarde) else float(h)
-        return pi*r**2*h/3
+        return 1/3*pi*float(r)**2*float(h)
 
-def A_bol(r:Union[Waarde, int, float],
-          h:Union[Waarde, int, float]) -> float:
+def A_bol(r:Union[Waarde, int, float]) -> float:
     """Berekent oppervlakte van een bol."""
-    if all(isinstance(obj, Waarde) for obj in [r, h]):
+    if all(isinstance(obj, Waarde) for obj in [r]):
         return 4*pi*r**2
     else:
-        r = abs(r) if isinstance(r, Waarde) else float(r)
-        h = abs(h) if isinstance(h, Waarde) else float(h)
-        return 4*pi*r**2
+        return 4*pi*float(r)**2
 
-def V_bol(r:Union[Waarde, int, float],
-          h:Union[Waarde, int, float]) -> float:
+def V_bol(r:Union[Waarde, int, float]) -> float:
     """Berekent inhoud van een bol."""
-    if all(isinstance(obj, Waarde) for obj in [r, h]):
-        return pi*r**2*h*4/3
+    if all(isinstance(obj, Waarde) for obj in [r]):
+        return 4/3*pi*r**3
     else:
-        r = abs(r) if isinstance(r, Waarde) else float(r)
-        h = abs(h) if isinstance(h, Waarde) else float(h)
-        return pi*r**2*h*4/3
+        return 4/3*pi*float(r)**3
 
 def A_kubus(b:Union[Waarde, int, float]) -> float:
     """Berekent oppervlakte van een kubus."""
     if all(isinstance(obj, Waarde) for obj in [b]):
         return 6*b**2
     else:
-        b = float(b)
-        return 6*b**2
+        return 6*float(b)**2
 
 def V_kubus(b:Union[Waarde, int, float]) -> float:
     """Berekent inhoud van een kubus."""
     if all(isinstance(obj, Waarde) for obj in [b]):
         return b**3
     else:
-        b = float(b)
-        return b**3
+        return float(b)**3
 
 def A_balk(b:Union[Waarde, int, float],
            h:Union[Waarde, int, float],
@@ -224,10 +215,13 @@ def A_balk(b:Union[Waarde, int, float],
     if all(isinstance(obj, Waarde) for obj in [b, h, l]):
         return 2*b*h + 2*b*l + 2*h*l
     else:
-        b = abs(b) if isinstance(b, Waarde) else float(b)
-        h = abs(h) if isinstance(h, Waarde) else float(h)
-        l = abs(l) if isinstance(l, Waarde) else float(l)
-        return 2*b*h + 2*b*l + 2*h*l
+        return (2*float(b)*float(h) + 2*float(b)*float(l) +
+                2*float(h)*float(l))
+
+assert A_balk(b=2, h=3, l=4) == 52.0
+assert A_balk(b=Waarde(2).cm, h=3, l=4) == 52.0
+assert A_balk(b=Waarde(2).cm, h=Waarde(30).mm, l=Waarde(0.04).m) == Waarde(5200).mm2
+
 
 def V_balk(b:Union[Waarde, int, float],
            h:Union[Waarde, int, float],
@@ -236,7 +230,8 @@ def V_balk(b:Union[Waarde, int, float],
     if all(isinstance(obj, Waarde) for obj in [b, h, l]):
         return b*h*l
     else:
-        b = abs(b) if isinstance(b, Waarde) else float(b)
-        h = abs(h) if isinstance(h, Waarde) else float(h)
-        l = abs(l) if isinstance(l, Waarde) else float(l)
-        return b*h*l
+        return float(b)*float(h)*float(l)
+
+assert V_balk(b=2, h=3, l=4) == 24.0
+assert V_balk(b=Waarde(2).cm, h=3, l=4) == 24.0
+assert V_balk(b=Waarde(2).cm, h=Waarde(30).mm, l=Waarde(0.04).m) == Waarde(24).cm3
