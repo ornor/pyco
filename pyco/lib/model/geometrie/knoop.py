@@ -8,10 +8,6 @@ class Knoop(pycom.BasisObject):
         self._y = None
         self._z = None
 
-        self.x = x
-        self.y = y
-        self.z = z
-
     def _controleer_waarde(self, naam, waarde):
         if not isinstance(waarde, pycom.Waarde):
             raise ValueError('waarde \'{}\' is geen geldige Waarde'.format(naam))
