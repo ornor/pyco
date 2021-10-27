@@ -13,15 +13,17 @@ class Waarde(pycom.BasisComponent):
         w = Waarde(getal)
         w = Waarde(getal, eenheid_tekst)
 
-    AANPASSEN _EENHEID          omzetten van eenheid naar andere eenheid
+    AANPASSEN EENHEID           omzetten van eenheid naar andere eenheid
         w = w['N/mm2']          kan voor alle eenheden
         w = w.N_mm2             kan voor een aantal standaard gevallen (zie lijst onderaan)
+        w.eenheid               eenheid opvragen
+        w.eenheid = 'N/mm2'     alternatief om eenheid om te zetten
 
     AANPASSEN AFRONDING         pas afgerond wanneer waarde wordt getoond als tekst
         w = w[0]                kan voor alle gehele getallen
         w = w._0                kan voor 0 t/m 9 (cijfers achter de komma)
 
-    OMZETTEN WAARDE NAAR TEKST  resulteert in nieuw string object
+    OMZETTEN WAARDE NAAR TEKST  resulteert in nieuw string object -> gebruikt afronding
         tekst = str(w)          of automatisch met bijvoorbeeld print(w)
 
     OMZETTEN WAARDE NAAR GETAL  resulteert in nieuw float object
@@ -37,15 +39,20 @@ class Waarde(pycom.BasisComponent):
         w2 = w1 * n             waarde vermenigvuldigen met getal
         w2 = n / w1             getal delen door waarde
         w2 = w1 / n             waarde delen door getal
-        w2 = w1 ** n            waarde tot de macht een getal
+        w2 = w1 ** n            waarde tot de macht een geheel getal
+        w2 = abs(w1)            maakt waarde altijd positief
+        w2 = +w1                behoud teken
+        w2 = -w1                verander teken (positief vs. negatief)
 
     WAARDEN VERGELIJKEN         resulteert in een boolean (True/False)
         w1 == w2                is gelijk aan
+        w1 == getal             de float() van waarde is gelijk aan getal
         w1 != w2                is niet gelijk aan
         w1 >  w2                is groter dan
         w1 <  w2                is kleiner dan
         w1 >= w2                is groter dan of gelijk aan
         w1 <= w2                is kleiner dan of gelijk aan
+        w1 &  w2                eenheden zijn zelfde type
 
     EENHEID TEKST
         gebruik een getal achter standaard eenheid voor 'tot de macht' (bijv. mm3)
@@ -72,7 +79,7 @@ class Waarde(pycom.BasisComponent):
                                 bbl cup  (of lengte^3)
 
     BESCHIKBARE EIGENSCHAPPEN   voor snel toekennen van eenheid aan waarde
-    <object>.eenheid            bijvoorbeeld toekennen inhoud: w.dm3
+    <object>.<eigenschap>       bijvoorbeeld toekennen inhoud: w.dm3
     a ag am attos bbl C ca cg cl cl_d cl_h cl_j cl_min cl_s cm cm2 cm3 cm3_d
     cm3_h cm3_j cm3_min cm3_s cm4 cm_d cm_h cm_j cm_min cm_s cs cup d dal dam
     das deg dg dl dl_d dl_h dl_j dl_min dl_s dm dm2 dm3 dm3_d dm3_h dm3_j
@@ -227,16 +234,16 @@ class Waarde(pycom.BasisComponent):
         # TEMPERATUUR
         'C': ('graden Celcius', _TYPE['TEMPERATUUR'], 1),  # standaard
         'K': ('graden Kelvin', _TYPE['TEMPERATUUR'],
-              (lambda K: K - 273,
-               lambda C: C + 273,
+              (lambda K: K - 273.15,
+               lambda C: C + 273.15,
                1.0)),
         # 1 graad C warmer is 1 graad K warmer
         #   -> als temperatuur in noemer van eenheid
         # als temperatuur in teller (samen met andere eenheden),
         #   dan niet om te rekenen
         'F': ('graden Fahrenheit', _TYPE['TEMPERATUUR'],
-              (lambda F: 1.8 * F + 32,
-               lambda C: (C - 32) / 1.8,
+              (lambda F: (F - 32) / 1.8,
+               lambda C: 1.8 * C + 32,
                (1 / 1.8))),
         # 1 graad C warmer is 1.8 graden F warmer
         #   -> als temperatuur in noemer van eenheid
@@ -314,7 +321,7 @@ class Waarde(pycom.BasisComponent):
                             eenheid = '-'
                         self._init_waarde_object_eenheidtekst(waarde, eenheid)
             else:
-                self._init_waarde_tekst(waarde)
+                self._init_waarde_tekst(str(waarde))
         elif isinstance(eenheid, Fraction):
             self._init_waarde_eenheidbreuk(waarde, eenheid)
         elif isinstance(eenheid, str):
@@ -325,34 +332,34 @@ class Waarde(pycom.BasisComponent):
             self._init_waarde_getal(waarde)
 
         if config is not None and isinstance(config, dict):
-            self.config = config
+            self._config = config
 
     def _init_waarde_getal(self, waarde: Union[int, float]):
         """Initieert alleen een getal."""
-        self.is_getal = True
-        self.waarde = float(waarde)
-        self.eenheidbreuk = Fraction(1)
-        self.config = {
+        self._is_getal = True
+        self._getal = float(waarde)
+        self._eenheidbreuk = Fraction(1)
+        self._config = {
             'standaard_eenheid': None,
             'aantal_decimalen': self._STANDAARD_AANTAL_DECIMALEN,
         }
 
     def _init_waarde_eenheidtekst(self, waarde: Union[int, float], eenheid: str):
         """Initieert een eenheid met tekst."""
-        self.is_getal = True
+        self._is_getal = True
         self.decimalen = self._STANDAARD_AANTAL_DECIMALEN
-        self.waarde, self.eenheidbreuk = self._bereken_nieuwe_waarde(eenheid, float(waarde))
-        self.config = {
+        self._getal, self._eenheidbreuk = self._bereken_nieuwe_waarde(eenheid, float(waarde))
+        self._config = {
             'standaard_eenheid': eenheid if isinstance(eenheid, str) else '-',
             'aantal_decimalen': self._STANDAARD_AANTAL_DECIMALEN,
         }
 
     def _init_waarde_eenheidbreuk(self, waarde: Union[int, float], eenheid: Fraction):
         """Initieert een eenheid met Fraction breuk object."""
-        self.is_getal = True
-        self.waarde = waarde
-        self.eenheidbreuk = eenheid
-        self.config = {
+        self._is_getal = True
+        self._getal = waarde
+        self._eenheidbreuk = eenheid
+        self._config = {
             'standaard_eenheid': None,
             'aantal_decimalen': self._STANDAARD_AANTAL_DECIMALEN,
         }
@@ -361,9 +368,9 @@ class Waarde(pycom.BasisComponent):
         """Initieert getal met Waarde object en eenheid met tekst."""
         if not isinstance(waarde, Waarde):
             raise TypeError('waarde is niet van type Waarde')
-        self.is_getal = True
-        self.waarde, self.eenheidbreuk = self._bereken_nieuwe_waarde(eenheid, waarde.waarde)
-        self.config = {
+        self._is_getal = True
+        self._getal, self._eenheidbreuk = self._bereken_nieuwe_waarde(eenheid, waarde._getal)
+        self._config = {
             'standaard_eenheid': None,
             'aantal_decimalen': self._STANDAARD_AANTAL_DECIMALEN,
         }
@@ -372,10 +379,10 @@ class Waarde(pycom.BasisComponent):
         """Initieert getal met Waarde object en eenheid met Fraction breuk object."""
         if not isinstance(waarde, Waarde):
             raise TypeError('waarde is niet van type Waarde')
-        self.is_getal = True
-        self.eenheidbreuk = eenheid
-        self.waarde = waarde._export_waarde(self._eenheidnaam)
-        self.config = {
+        self._is_getal = True
+        self._eenheidbreuk = eenheid
+        self._getal = waarde._export_waarde(self._eenheidnaam)
+        self._config = {
             'standaard_eenheid': None,
             'aantal_decimalen': self._STANDAARD_AANTAL_DECIMALEN,
         }
@@ -384,16 +391,16 @@ class Waarde(pycom.BasisComponent):
         """Initieert getal met Waarde object zonder eenheid."""
         if not isinstance(waarde, Waarde):
             raise TypeError('waarde is niet van type Waarde')
-        self.is_getal = waarde.is_getal
-        self.eenheidbreuk = waarde.eenheidbreuk
-        self.waarde = waarde.waarde
-        self.config = waarde.config
+        self._is_getal = waarde._is_getal
+        self._eenheidbreuk = waarde._eenheidbreuk
+        self._getal = waarde._getal
+        self._config = waarde.config
 
     def _init_waarde_tekst(self, waarde:str):
-        self.is_getal = False
-        self.waarde = waarde
-        self.eenheidbreuk = None
-        self.config = {
+        self._is_getal = False
+        self._getal = waarde
+        self._eenheidbreuk = None
+        self._config = {
             'standaard_eenheid': None,
             'aantal_decimalen': None,
         }
@@ -440,11 +447,11 @@ class Waarde(pycom.BasisComponent):
                     nieuwe_namen.append(vorige_naam)
             return '*'.join(nieuwe_namen)
 
-        if not hasattr(self, 'eenheidbreuk'):
-            self.eenheidbreuk = Fraction(1)
+        if not hasattr(self, '_eenheidbreuk'):
+            self._eenheidbreuk = Fraction(1)
 
-        evenredig__BASIS = priem_BASIS(self.eenheidbreuk.numerator)  # teller
-        omgekeerd_evenredig__BASIS = priem_BASIS(self.eenheidbreuk.denominator)  # noemer
+        evenredig__BASIS = priem_BASIS(self._eenheidbreuk.numerator)  # teller
+        omgekeerd_evenredig__BASIS = priem_BASIS(self._eenheidbreuk.denominator)  # noemer
         evenredig_namen = []
         omgekeerd_evenredig_namen = []
 
@@ -476,9 +483,9 @@ class Waarde(pycom.BasisComponent):
                 if Fraction(self._BASIS['DIMENSIELOOS']) == eh_dict[1] and eh_dict[2] == 1:
                     return eh_afk
 
-    def _bereken_nieuwe_waarde(self, eenheid, invoer_waarde):
-        """Genereert een interne waarde (getal) op basis van eenheid en invoerwaarde."""
-        waarde = invoer_waarde
+    def _bereken_nieuwe_waarde(self, eenheid, invoer_getal):
+        """Genereert een interne waarde (getal) op basis van eenheid en invoergetal."""
+        getal = invoer_getal
         if not isinstance(eenheid, str) or not eenheid:
             raise ValueError('eenheid moet een (niet leeg) stuk tekst zijn')
         eenheidbreuk = Fraction(1)
@@ -503,13 +510,13 @@ class Waarde(pycom.BasisComponent):
                 for _ in range(eenheid_aantal):
                     weging = self._EENHEID[eenheid_naam][2]
                     if isinstance(weging, float) or isinstance(weging, int):
-                        waarde = waarde * weging
+                        getal = getal * weging
                     elif isinstance(weging, tuple) and len(weging) == 3 \
                             and callable(weging[0]) and callable(weging[1]) \
                             and (isinstance(weging[2], float) or isinstance(weging[2], int)):
                         if len(telleronderdelen) > 1 or len(noemeronderdelen) > 0:
                             raise ValueError('de niet standaard schaalbare sub-eenheid \'{}\' kan enkel worden omgerekend in teller als het als enige onderdeel voorkomt in hele eenheid; in de noemer kan deze eenheid wel worden gecombineerd'.format(eenheid_naam))
-                        waarde = weging[0](waarde)
+                        getal = weging[0](getal)
                     else:
                         raise ValueError('weging basiseenheid heeft verkeerde syntax')
                     subeenheidfactor = self._EENHEID[eenheid_naam][1]
@@ -526,17 +533,17 @@ class Waarde(pycom.BasisComponent):
                 for _ in range(eenheid_aantal):
                     weging = self._EENHEID[eenheid_naam][2]
                     if isinstance(weging, float) or isinstance(weging, int):
-                        waarde = waarde / weging
+                        getal = getal / weging
                     elif isinstance(weging, tuple) and len(weging) == 3 \
                             and callable(weging[0]) and callable(weging[1]) \
                             and (isinstance(weging[2], float) or isinstance(weging[2], int)):
                         weging_noemerfactor = weging[2]
-                        waarde = waarde / weging_noemerfactor
+                        getal = getal / weging_noemerfactor
                     else:
                         raise ValueError('weging basiseenheid heeft verkeerde syntax')
                     subeenheidfactor = self._EENHEID[eenheid_naam][1]
                     eenheidbreuk = eenheidbreuk / subeenheidfactor
-        return waarde, eenheidbreuk
+        return getal, eenheidbreuk
 
     def _bereken_inverse_waarde(self, eenheid, oude_waarde, oude_eenheidbreuk):
         """Genereert een waarde (getal) op basis van een eenheid."""
@@ -604,164 +611,181 @@ class Waarde(pycom.BasisComponent):
     def _export_waarde(self, eenheid=None):
         """Exporteert interne waarde (getal) gegeven een eenheid."""
         if eenheid is None or eenheid == '' or eenheid == '-':
-            return self.waarde
+            return self._getal
         else:
-            return self._bereken_inverse_waarde(eenheid, self.waarde, self.eenheidbreuk)
+            return self._bereken_inverse_waarde(eenheid, self._getal, self._eenheidbreuk)
+
+    def _verander_aantal_decimalen(self, decimalen:int):
+        """Helper functie voor eigenschappen qua standaard eenheid."""
+        if not isinstance(decimalen, int):
+            raise ValueError('aantal decimalen is geen geheel getal')
+        self._config['aantal_decimalen'] = decimalen
+        return self
+
+    def _verander_eenheid(self, eenheid:str):
+        """Helper functie voor eigenschappen qua afronding."""
+        if not self._is_getal:
+            raise ValueError('huide waarde is geen getal: {}'.format(self._getal))
+        if self._eenheidbreuk == Fraction(1):
+            # waarde was dimensieloos; dan mogelijk om eenheid te veranderen
+            self.__init__(self._getal, eenheid)
+        else:
+            # waarde had een bepaalde eenheid; moet zelfde soort blijven
+            tmp = Waarde(1.0, eenheid)
+            if tmp._eenheidbreuk != self._eenheidbreuk:
+                raise ValueError('huidig type eenheid ({}) komt niet overeen met nieuwe eenheid ({})'.format(self._eenheidbreuk, tmp._eenheidbreuk))
+            self.__init__(self._export_waarde(eenheid), eenheid)
+        return self
+
+    @property
+    def eenheid(self):
+        """Geeft eenheid van Waarde. 'None' als geen eenheid."""
+        if 'standaard_eenheid' in self._config \
+                and self._config['standaard_eenheid'] is not None \
+                and self._config['standaard_eenheid'] != '' \
+                and self._config['standaard_eenheid'] != '-':
+            waarde_eenheid = self._config['standaard_eenheid']
+        elif self._is_getal and self._eenheidbreuk != Fraction(1):
+            waarde_eenheid = self._eenheidnaam
+        else:
+            waarde_eenheid = ''
+        waarde_eenheid = None if waarde_eenheid == '' else waarde_eenheid
+        return waarde_eenheid
+
+    @eenheid.setter
+    def eenheid(self, nieuwe_eenheid:str):
+        """Zet Waarde om naar nieuwe eenheid."""
+        self._verander_eenheid(nieuwe_eenheid)
 
     def __add__(self, andere_waarde):
-        """Telt twee waarden bij elkaar op.
-
-        >> Waarde(120, 'mm') + Waarde(30, 'cm')
-        Waarde(0.42, 'm')
-        """
+        """Telt twee waarden bij elkaar op."""
         if not isinstance(andere_waarde, Waarde):
             raise TypeError('term is niet van type Waarde')
-        if not self.is_getal or not andere_waarde.is_getal:
+        if not self._is_getal or not andere_waarde._is_getal:
             raise TypeError('beide waardes moeten getallen zijn')
-        if self.eenheidbreuk != andere_waarde.eenheidbreuk:
+        if self._eenheidbreuk != andere_waarde._eenheidbreuk:
             raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
                 self._eenheidnaam, andere_waarde._eenheidnaam))
-        waarde = self.waarde + andere_waarde.waarde
-        return Waarde(waarde, self.eenheidbreuk, config = self.config)
+        getal = self._getal + andere_waarde._getal
+        return Waarde(getal, self._eenheidbreuk, config = self._config)
 
 
     def __sub__(self, andere_waarde):
-        """Trekt waarde van andere waarde af.
-
-        >> Waarde(520, 'mm') - Waarde(30, 'cm')
-        Waarde(0.22, 'm')
-        """
+        """Trekt waarde van andere waarde af."""
         if not isinstance(andere_waarde, Waarde):
             raise TypeError('term is niet van type Waarde')
-        if not self.is_getal or not andere_waarde.is_getal:
+        if not self._is_getal or not andere_waarde._is_getal:
             raise TypeError('beide waardes moeten getallen zijn')
-        if self.eenheidbreuk != andere_waarde.eenheidbreuk:
+        if self._eenheidbreuk != andere_waarde._eenheidbreuk:
             raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
                 self._eenheidnaam, andere_waarde._eenheidnaam))
-        waarde = self.waarde - andere_waarde.waarde
-        return Waarde(waarde, self.eenheidbreuk, config = self.config)
+        getal = self._getal - andere_waarde._getal
+        return Waarde(getal, self._eenheidbreuk, config = self._config)
 
     def __mul__(self, andere_waarde):
-        """Vermenigvuldigt waarde met andere waarde of getal.
-
-        >> Waarde(3, 'm') * Waarde(4, 's')
-        Waarde(12.0, 'm*s')
-
-        >> Waarde(3, 'm') * 6
-        Waarde(18.0, 'm')
-        """
+        """Vermenigvuldigt waarde met andere waarde of getal."""
         if (isinstance(andere_waarde, int) or isinstance(andere_waarde, float)):
-            waarde = self.waarde * andere_waarde
-            eenheidbreuk = self.eenheidbreuk
-            return Waarde(waarde, eenheidbreuk, config = None)
+            getal = self._getal * andere_waarde
+            eenheidbreuk = self._eenheidbreuk
+            return Waarde(getal, eenheidbreuk, config=None)
         elif not isinstance(andere_waarde, Waarde):
             raise TypeError('term is niet van type Waarde')
-        if not self.is_getal or not andere_waarde.is_getal:
+        if not self._is_getal or not andere_waarde._is_getal:
             raise TypeError('beide waardes moeten getallen zijn')
-        waarde = self.waarde * andere_waarde.waarde
-        eenheidbreuk = self.eenheidbreuk * andere_waarde.eenheidbreuk
-        return Waarde(waarde, eenheidbreuk, config = None)
+        getal = self._getal * andere_waarde._getal
+        eenheidbreuk = self._eenheidbreuk * andere_waarde._eenheidbreuk
+        return Waarde(getal, eenheidbreuk, config=None)
 
     def __truediv__(self, andere_waarde):
-        """Deelt waarde door andere waarde of getal.
-
-        >> Waarde(20, 'ha') / Waarde(5, 'km')
-        Waarde(40.0, 'm')
-
-        >> Waarde(3, 'm') / 4
-        Waarde(0.75, 'm')
-        """
+        """Deelt waarde door andere waarde of getal."""
         if (isinstance(andere_waarde, int) or isinstance(andere_waarde, float)):
-            waarde = self.waarde / andere_waarde
-            eenheidbreuk = self.eenheidbreuk
-            return Waarde(waarde, eenheidbreuk, config = None)
+            getal = self._getal / andere_waarde
+            eenheidbreuk = self._eenheidbreuk
+            return Waarde(getal, eenheidbreuk, config=None)
         elif not isinstance(andere_waarde, Waarde):
             raise TypeError('term is niet van type Waarde')
-        if not self.is_getal or not andere_waarde.is_getal:
+        if not self._is_getal or not andere_waarde._is_getal:
             raise TypeError('beide waardes moeten getallen zijn')
-        if andere_waarde.waarde == 0:
+        if andere_waarde._getal == 0:
             raise ZeroDivisionError('delen door 0 is niet mogelijk')
-        waarde = self.waarde / andere_waarde.waarde
-        eenheidbreuk = self.eenheidbreuk / andere_waarde.eenheidbreuk
-        return Waarde(waarde, eenheidbreuk, config = None)
+        getal = self._getal / andere_waarde._getal
+        eenheidbreuk = self._eenheidbreuk / andere_waarde._eenheidbreuk
+        return Waarde(getal, eenheidbreuk, config=None)
 
     def __pow__(self, macht):
-        """Doet waarde tot de macht een andere waarde.
-
-        >> Waarde(2, 'm') ** 3
-        Waarde(8.0, 'm3')
-        """
+        """Doet waarde tot de macht een andere waarde (geheel getal)."""
         if not isinstance(macht, int):
             raise TypeError('term is geen geheel getal')
-        if not self.is_getal:
+        if not self._is_getal:
             raise TypeError('waarde moeten getal zijn')
-        waarde = self.waarde ** macht
-        eenheidbreuk = self.eenheidbreuk ** macht
-        return Waarde(waarde, eenheidbreuk, config = None)
+        getal = self._getal ** macht
+        eenheidbreuk = self._eenheidbreuk ** macht
+        return Waarde(getal, eenheidbreuk, config=None)
 
     def __rmul__(self, scalar):
-        """Vermenigvuldigt getal met waarde.
-
-        >> 2 * Waarde(4, 's')
-        Waarde(8.0, 's')
-        """
+        """Vermenigvuldigt getal met waarde."""
         if not (isinstance(scalar, int) or isinstance(scalar, float)):
             raise TypeError('term is geen getal')
-        if not self.is_getal:
+        if not self._is_getal:
             raise TypeError('waarde moeten getal zijn')
-        waarde = scalar * self.waarde
-        eenheidbreuk = self.eenheidbreuk
-        return Waarde(waarde, eenheidbreuk, config = self.config)
+        getal= scalar * self._getal
+        eenheidbreuk = self._eenheidbreuk
+        return Waarde(getal, eenheidbreuk, config = self._config)
 
     def __rtruediv__(self, scalar):
-        """Deelt getal met waarde.
-
-        >> 2 / Waarde(4, 's')
-        Waarde(0.5, '1/s')
-        """
+        """Deelt getal met waarde."""
         if not (isinstance(scalar, int) or isinstance(scalar, float)):
             raise TypeError('term is geen getal')
-        if not self.is_getal:
+        if not self._is_getal:
             raise TypeError('waarde moeten getal zijn')
-        waarde = scalar / self.waarde
-        eenheidbreuk = 1 / self.eenheidbreuk
-        return Waarde(waarde, eenheidbreuk, config = self.config)
+        getal = scalar / self._getal
+        eenheidbreuk = 1 / self._eenheidbreuk
+        return Waarde(getal, eenheidbreuk, config = self._config)
 
     def __eq__(self, andere_waarde):
         """Vergelijkt waarde met andere waarde: =="""
         if not isinstance(andere_waarde, Waarde):
-            raise TypeError('term is niet van type Waarde')
-        if self.eenheidbreuk != andere_waarde.eenheidbreuk:
-            raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
-                self._eenheidnaam, andere_waarde._eenheidnaam))
-        return round(self.waarde*1e6) == round(andere_waarde.waarde*1e6)
+            if (isinstance(andere_waarde, int)
+                     or isinstance(andere_waarde, float)):
+                return round(float(self)*1e12) == round(float(andere_waarde)*1e12)
+            else:
+                raise TypeError('term is niet van type Waarde, int of float')
+        if self._eenheidbreuk != andere_waarde._eenheidbreuk:
+            return False
+        if self._is_getal:
+            return round(self._getal*1e12) == round(andere_waarde._getal*1e12)
+        else:
+            return self._getal == andere_waarde._getal
 
     def __ne__(self, andere_waarde):
         """Vergelijkt waarde met andere waarde: !="""
-        if not isinstance(andere_waarde, Waarde):
-            raise TypeError('term is niet van type Waarde')
-        if self.eenheidbreuk != andere_waarde.eenheidbreuk:
-            raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
-                self._eenheidnaam, andere_waarde._eenheidnaam))
-        return round(self.waarde*1e6) != round(andere_waarde.waarde*1e6)
+        return not self.__eq__(andere_waarde)
 
     def __lt__(self, andere_waarde):
         """Vergelijkt waarde met andere waarde: <"""
         if not isinstance(andere_waarde, Waarde):
-            raise TypeError('term is niet van type Waarde')
-        if self.eenheidbreuk != andere_waarde.eenheidbreuk:
+            if (isinstance(andere_waarde, int)
+                     or isinstance(andere_waarde, float)):
+                return float(self) < andere_waarde
+            else:
+                raise TypeError('term is niet van type Waarde')
+        if self._eenheidbreuk != andere_waarde._eenheidbreuk:
             raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
                 self._eenheidnaam, andere_waarde._eenheidnaam))
-        return self.waarde < andere_waarde.waarde
+        return self._getal < andere_waarde._getal
 
     def __gt__(self, andere_waarde):
         """Vergelijkt waarde met andere waarde: >"""
         if not isinstance(andere_waarde, Waarde):
-            raise TypeError('term is niet van type Waarde')
-        if self.eenheidbreuk != andere_waarde.eenheidbreuk:
+            if (isinstance(andere_waarde, int)
+                     or isinstance(andere_waarde, float)):
+                return float(self) > andere_waarde
+            else:
+                raise TypeError('term is niet van type Waarde')
+        if self._eenheidbreuk != andere_waarde._eenheidbreuk:
             raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
                 self._eenheidnaam, andere_waarde._eenheidnaam))
-        return self.waarde > andere_waarde.waarde
+        return self._getal > andere_waarde._getal
 
     def __le__(self, andere_waarde):
         """Vergelijkt waarde met andere waarde: <="""
@@ -769,113 +793,60 @@ class Waarde(pycom.BasisComponent):
 
     def __ge__(self, andere_waarde):
         """Vergelijkt waarde met andere waarde: >="""
-        if not isinstance(andere_waarde, Waarde):
-            raise TypeError('term is niet van type Waarde')
-        if self.eenheidbreuk != andere_waarde.eenheidbreuk:
-            raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
-                self._eenheidnaam, andere_waarde._eenheidnaam))
         return self.__gt__(andere_waarde) or self.__eq__(andere_waarde)
+
+    def __and__(self, andere_waarde):
+        """Vergelijkt eenheden of deze zelfde type zijn."""
+        return self._eenheidbreuk == andere_waarde._eenheidbreuk
 
     def __float__(self):
         """Zet waarde om een float object gebruik makend van standaard eenheid."""
-        if 'standaard_eenheid' in self.config \
-                and self.config['standaard_eenheid'] is not None \
-                and self.config['standaard_eenheid'] != '' \
-                and self.config['standaard_eenheid'] != '-':
+        if 'standaard_eenheid' in self._config \
+                and self._config['standaard_eenheid'] is not None \
+                and self._config['standaard_eenheid'] != '' \
+                and self._config['standaard_eenheid'] != '-':
             # wel een standaard eenheid
-            return float(self._export_waarde(self.config['standaard_eenheid']))
-        elif self.is_getal and self.eenheidbreuk != Fraction(1):
+            return float(self._export_waarde(self._config['standaard_eenheid']))
+        elif self._is_getal and self._eenheidbreuk != Fraction(1):
             # geen standaard eenheid maar wel een dimensie
             return float(self._export_waarde(self._eenheidnaam))
         else:
             # geen eenheid
-            if self.is_getal:
-                return float(self.waarde)
+            if self._is_getal:
+                return float(self._getal)
             else:
-                raise ValueError('waarde is geen getal: {}'.format(self.waarde))
+                raise ValueError('waarde is geen getal: {}'.format(self._getal))
 
-    #def __abs__(self):
-
-    #def __bool__(self):
-
-    #def __iter__(self):
-
-    #def __format__(self):
-
-    #def __round__(self):
-
-    #def __call__(self):
-
-
-    def __repr__(self):
-        if self.is_getal:
-            return 'Waarde({}, \'{}\')'.format(self.waarde, self._eenheidnaam)
-        else:
-            return 'Waarde(\'{}\')'.format(self.waarde)
-
-    def __str__(self):
-        if 'standaard_eenheid' in self.config \
-                and self.config['standaard_eenheid'] is not None \
-                and self.config['standaard_eenheid'] != '' \
-                and self.config['standaard_eenheid'] != '-':
-            # wel een standaard eenheid
-            if 'aantal_decimalen' in self.config \
-                    and self.config['aantal_decimalen'] is not None:
-                format_str = '{:.' + str(self.config['aantal_decimalen']) + 'f} {}'
-                return format_str.format(
-                    self._export_waarde(self.config['standaard_eenheid']),
-                    self.config['standaard_eenheid'])
-            else:
-                format_str = '{:.' + str(self._STANDAARD_AANTAL_DECIMALEN) + 'f} {}'
-                return format_str.format(
-                    self._export_waarde(self.config['standaard_eenheid']),
-                    self.config['standaard_eenheid'])
-        elif self.is_getal and self.eenheidbreuk != Fraction(1):
-            # geen standaard eenheid maar wel een dimensie
-            if 'aantal_decimalen' in self.config \
-                    and self.config['aantal_decimalen'] is not None:
-                format_str = '{:.' + str(self.config['aantal_decimalen']) + 'f} {}'
-                ehnaam = self._eenheidnaam
-                return format_str.format(self._export_waarde(ehnaam), ehnaam)
-            else:
-                ehnaam = self._eenheidnaam
-                return '{} {}'.format(self._export_waarde(ehnaam), ehnaam)
-        else:
-            # geen eenheid
-            if self.is_getal:
-                if 'aantal_decimalen' in self.config \
-                        and self.config['aantal_decimalen'] is not None:
-                    format_str = '{:.' + str(self.config['aantal_decimalen']) + 'f}'
-                    return format_str.format(self.waarde)
-                else:
-                    return '{}'.format(self.waarde)
-            else:
-                return '{}'.format(self.waarde)
-
-    #==========================================================================
-
-    def _verander_aantal_decimalen(self, decimalen:int):
-        """Helper functie voor eigenschappen qua standaard eenheid."""
-        if not isinstance(decimalen, int):
-            raise ValueError('aantal decimalen is geen geheel getal')
-        self.config['aantal_decimalen'] = decimalen
+    def __abs__(self):
+        """Absolute waarde: zet negatieve waarden om naar positief."""
+        if self._is_getal:
+            self._getal = abs(self._getal)
         return self
 
-
-    def _verander_eenheid(self, eenheid:str):
-        """Helper functie voor eigenschappen qua afronding."""
-        if not self.is_getal:
-            raise ValueError('huide waarde is geen getal: {}'.format(self.waarde))
-        if self.eenheidbreuk == Fraction(1):
-            # waarde was dimensieloos; dan mogelijk om eenheid te veranderen
-            self.__init__(self.waarde, eenheid)
-        else:
-            # waarde had een bepaalde eenheid; moet zelfde soort blijven
-            tmp = Waarde(1.0, eenheid)
-            if tmp.eenheidbreuk != self.eenheidbreuk:
-                raise ValueError('huidig type eenheid ({}) komt niet overeen met nieuwe eenheid ({})'.format(self.eenheidbreuk, tmp.eenheidbreuk))
-            self.__init__(self._export_waarde(eenheid), eenheid)
+    def __pos__(self):
+        """Behoud teken (positief = positief, negatief = negatief)."""
         return self
+
+    def __neg__(self):
+        """Verander teken (positief = negatief, negatief = postief)."""
+        if self._is_getal:
+            self._getal = -1*self._getal
+        return self
+
+    def __bool__(self):
+        """Genereert een boolean. False wanneer getal 0 of lege tekst."""
+        return bool(self._getal)
+
+    def __iter__(self):
+        """Itereert over het getal/tekst en de eenheidtekst."""
+        waarde_getal = float(self) if self._is_getal else self._getal
+        waarde_eenheid = self.eenheid
+
+        return (x for x in (waarde_getal, waarde_eenheid))
+
+    def __len__(self):
+        """Lengte is altijd 2. Twee iter elementen: het getal/tekst en de eenheidtekst."""
+        return 2
 
     def __getitem__(self, param:Union[int, str]):
         """Aanpassen van standaard eenheid of afronding."""
@@ -885,6 +856,45 @@ class Waarde(pycom.BasisComponent):
             return self._verander_eenheid(param)
         else:
             return self
+
+    def __format__(self, config:str=None):
+       """Geeft tekst met geformatteerd getal en eenheid."""
+       if config is None:
+           return str(self)
+       if self._is_getal:
+           waarde_getal, waarde_eenheid = tuple(self)
+           format_str = '{:' + config + '} {}'
+           return format_str.format(waarde_getal, waarde_eenheid).strip()
+       else:
+           waarde_getal, _ = tuple(self)
+           format_str = '{:' + config + '}'
+           return format_str.format(waarde_getal)
+
+    def __repr__(self):
+        """Geeft representatie object."""
+        if self._is_getal:
+            getal, eenheid = tuple(self)
+            eenheid = '' if eenheid is None else eenheid
+            if eenheid:
+                return 'Waarde({}, \'{}\')'.format(getal, eenheid)
+            else:
+                return 'Waarde({})'.format(getal)
+        else:
+            return 'Waarde(\'{}\')'.format(self._getal)
+
+    def __str__(self):
+        """Geeft tekst met getal en eenheid."""
+        if self._is_getal:
+            waarde_getal, waarde_eenheid = tuple(self)
+            waarde_eenheid = '' if waarde_eenheid is None else waarde_eenheid
+            if 'aantal_decimalen' in self._config \
+                    and self._config['aantal_decimalen'] is not None:
+                format_str = '{:.' + str(self._config['aantal_decimalen']) + 'f} {}'
+            else:
+                format_str = '{:.' + str(self._STANDAARD_AANTAL_DECIMALEN) + 'f} {}'
+            return format_str.format(waarde_getal, waarde_eenheid).strip()
+        else:
+            return self._getal
 
     # AANTAL DECIMALEN
 
@@ -1747,17 +1757,3 @@ class Waarde(pycom.BasisComponent):
     @property
     def ml_s(self):
         return self._verander_eenheid('ml/s')
-
-
-assert float(Waarde(30, 'mm').cm) == 3.0
-assert float(Waarde(30).mm.cm) == float(Waarde(3))
-assert str(Waarde('Foo')) == 'Foo'
-
-assert Waarde(3).cm == Waarde(30).mm
-assert Waarde(3.0000000000001).cm == Waarde(30).mm
-assert Waarde(2).cm < Waarde(30).mm
-assert Waarde(4).cm > Waarde(30).mm
-assert Waarde(2).cm <= Waarde(30).mm
-assert Waarde(3.0000000000001).cm <= Waarde(30).mm
-assert Waarde(3.0000000000001).cm >= Waarde(30).mm
-assert Waarde(4).cm >= Waarde(30).mm

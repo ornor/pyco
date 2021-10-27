@@ -1,0 +1,253 @@
+from typing import Union
+import math
+
+import pyco.model as pycom
+
+
+class Vector(pycom.BasisComponent):
+    """
+    Bevat een lijst van getallen (Waarde objecten) met allen dezelfde eenheid.
+
+    AANMAKEN VECTOR             eenheid van 1e component, geldt voor geheel
+        v = Vector([waarde1, waarde2, waarde3])
+
+
+    """
+
+    def __init__(self, *waardes:Union[pycom.Waarde, int, float]):
+        super().__init__()
+
+        self._waardes = []
+        self._eenheid = None
+
+        if len(waardes) < 1:
+            raise ValueError('Er moet minimaal één waarde worden opgegeven.')
+
+        if len(waardes) == 1 and \
+                (isinstance(waardes[0], list) or isinstance(waardes[0], tuple)):
+            waardes = waardes[0]
+
+        for i, waarde in enumerate(waardes):
+            if i == 0:
+                # eerste waarde
+                if isinstance(waarde, pycom.Waarde):
+                    _, eenheid = tuple(waarde)
+                    if eenheid != '':
+                        self._eenheid = eenheid
+            else:
+                # volgende waardes
+                if isinstance(waarde, pycom.Waarde):
+                    # check of type eenheid zelfde is
+                    if not waarde & pycom.Waarde(1, self._eenheid):
+                        raise TypeError('type eenheid komt niet overeen met 1e waarde: {}'.format(waarde))
+                    # eenheden omzetten naar eerste eenheid
+                    waarde = waarde[self._eenheid]
+                elif isinstance(waarde, float) or isinstance(waarde, int):
+                    if self._eenheid is not None:
+                        raise TypeError('type eenheid komt niet overeen met 1e waarde: {}'.format(waarde))
+            # waardes toevoegen aan self._waardes
+            if isinstance(waarde, pycom.Waarde):
+                getal, _ = tuple(waarde)
+                if isinstance(getal, float) or isinstance(getal, int):
+                    self._waardes.append(getal)
+                else:
+                    raise TypeError('waarde in Waarde object is geen getal')
+            elif isinstance(waarde, float) or isinstance(waarde, int):
+                self._waardes.append(float(waarde))
+            else:
+                raise TypeError('waarde is geen Waarde/float/int: {}'.format(waarde))
+
+    @property
+    def eenheid(self):
+        """Geeft eenheid van Waarde. 'None' als geen eenheid."""
+        return self._eenheid
+
+    @eenheid.setter
+    def eenheid(self, eenheid:str):
+        """Zet Vector om naar nieuwe eenheid."""
+        if self._eenheid is None:
+            self._eenheid = eenheid
+        else:
+            waardes = []
+            oude_eenheid = self._eenheid
+            for w in self:
+                w = float(pycom.Waarde(float(w), oude_eenheid)[eenheid])
+                waardes.append(w)
+            self._waardes = waardes
+            self._eenheid = eenheid
+
+    def __add__(self, andere):
+        """."""
+        pass
+
+    def __sub__(self, andere):
+        """."""
+        pass
+
+    def __mul__(self, andere):
+        """."""
+        pass
+
+    def __truediv__(self, andere):
+        """."""
+        pass
+
+    def __pow__(self, andere):
+        """."""
+        pass
+
+    def __rmul__(self, andere):
+        """."""
+        pass
+
+    def __rtruediv__(self, andere):
+        """."""
+        pass
+
+    def __eq__(self, andere):
+        """Vergelijkt Vector met andere Vector."""
+        if not isinstance(andere, Vector):
+            raise TypeError('tweede waarde is geen Vector object')
+        if len(self) != len(andere):
+            return False
+        if self.eenheid is None and andere.eenheid is not None:
+            return False
+        if self.eenheid is not None and andere.eenheid is None:
+            return False
+        Waarde = pycom.Waarde
+        if not Waarde(1, self.eenheid) & Waarde(1, andere.eenheid):
+            # ander type eenheid
+            return False
+        for w1, w2 in zip(self, andere):
+            if self.eenheid is None:
+                # w is float object
+                if round(w1*1e12) != round(w2*1e12):
+                    return False
+            else:
+                # w is Waarde object
+                if w1 != w2:
+                    return False
+        return True
+
+    def __neq__(self, andere):
+        """Vergelijkt Vector negatief met andere Vector"""
+        return not self.__eq__(andere)
+
+    def __lt__(self, andere):
+        """Kijkt of absolute waarde (lengte vector) kleiner is dan andere Vector."""
+        if not isinstance(andere, Vector):
+            raise TypeError('tweede waarde is geen Vector object')
+        if len(self) != len(andere):
+            raise TypeError('tweede vector heeft niet zelfde dimensie')
+        if self.eenheid is None and andere.eenheid is not None:
+            raise TypeError('tweede vector heeft niet zelfde eenheid')
+        if self.eenheid is not None and andere.eenheid is None:
+            raise TypeError('tweede vector heeft niet zelfde eenheid')
+        Waarde = pycom.Waarde
+        if not Waarde(1, self.eenheid) & Waarde(1, andere.eenheid):
+            raise TypeError('tweede vector heeft niet zelfde type eenheid')
+        return abs(self) < abs(andere)
+
+    def __gt__(self, andere):
+        """Kijkt of absolute waarde (lengte vector) groter is dan andere Vector."""
+        if not isinstance(andere, Vector):
+            raise TypeError('tweede waarde is geen Vector object')
+        if len(self) != len(andere):
+            raise TypeError('tweede vector heeft niet zelfde dimensie')
+        if self.eenheid is None and andere.eenheid is not None:
+            raise TypeError('tweede vector heeft niet zelfde eenheid')
+        if self.eenheid is not None and andere.eenheid is None:
+            raise TypeError('tweede vector heeft niet zelfde eenheid')
+        Waarde = pycom.Waarde
+        if not Waarde(1, self.eenheid) & Waarde(1, andere.eenheid):
+            raise TypeError('tweede vector heeft niet zelfde type eenheid')
+        return abs(self) > abs(andere)
+
+    def __le__(self, andere):
+        """Kijkt of absolute waarde (lengte vector) kleiner dan of gelijk is aan andere Vector."""
+        if self.__lt__(andere):
+            return True
+        else:
+            return abs(self) == abs(andere)
+
+    def __ge__(self, andere):
+        """Kijkt of absolute waarde (lengte vector) groter dan of gelijk is aan andere Vector."""
+        if self.__gt__(andere):
+            return True
+        else:
+            return abs(self) == abs(andere)
+
+    def __and__(self, andere):
+        """Controleert of Vector zelfde type eenheid heeft als andere."""
+        if not isinstance(andere, Vector):
+            raise TypeError('tweede waarde is geen Vector object')
+        Waarde = pycom.Waarde
+        return Waarde(1, self.eenheid) & Waarde(1, andere.eenheid)
+
+    def __float__(self):
+        """Berekent de lengte van de vector als float object."""
+        return math.sqrt(sum(float(w)**2 for w in self))
+
+    def __abs__(self):
+        """Berekent de lengte van de vector als Waarde object."""
+        return pycom.Waarde(math.sqrt(sum(float(w)**2 for w in self)), self.eenheid)
+
+    def __pos__(self):
+        """Behoud teken (positief = positief, negatief = negatief)."""
+        return self
+
+    def __neg__(self):
+        """Verander teken (positief = negatief, negatief = postief)."""
+        self._waardes = [-w for w in self._waardes]
+        return self
+
+    def __bool__(self):
+        """Geeft False als lengte Vector == 0. Anders True."""
+        length = float(self)
+        return not (length < 1e-12 and length > -1e-12)
+
+    def __iter__(self):
+        """Itereert over waardes. Als geen eenheid: floats. Als wel eenheid dan Waarde objecten."""
+        eenheid = self.eenheid
+        for w in self._waardes:
+            if eenheid is None:
+                yield w
+            else:
+                yield pycom.Waarde(w, eenheid)
+
+    def __len__(self):
+        """Geeft aantal dimensies (waarden) van vector."""
+        return len(self._waardes)
+
+    def __format__(self, config:str=None):
+        """Geeft tekst met geformatteerd getal en eenheid."""
+        if config is None:
+            return str(self)
+        format_str = '{:' + config + '}'
+        waardes = ', '.join(format_str.format(float(w)) for w in self)
+        eenheid = self.eenheid if self.eenheid is not None else ''
+        return '[{}] {}'.format(waardes, eenheid).strip()
+
+    def __repr__(self):
+        """Geeft representatie object."""
+        if self.eenheid is None:
+            waardes = ', '.join(str(float(w)) for w in self)
+        else:
+            waardes = ', '.join(repr(pycom.Waarde(float(w), self.eenheid)) for w in self)
+        return 'Vector({})'.format(waardes)
+
+    def __str__(self):
+        """Geeft tekst met vecotr en eenheid"""
+        waardes = ', '.join(str(float(w)) for w in self)
+        eenheid = self.eenheid if self.eenheid is not None else ''
+        return '[{}] {}'.format(waardes, eenheid).strip()
+
+    def __getitem__(self, subset):
+        """Retourneer subset van waardes (floats of Waarde objecten).
+        Als slice dan wordt er nieuw Vector object gegenereert"""
+        waardes = [w for w in self]
+        if isinstance(subset, int):
+            return waardes[subset]
+        else:
+            cls = type(self)
+            return cls(waardes[subset])
