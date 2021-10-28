@@ -36,25 +36,54 @@ class TestVector(unittest.TestCase):
         assert str(v) == '[0.5, 60.0] dm'
 
     def test___add__(self):
-        pass
+        self.assertRaises(TypeError, lambda: Vector(5, 6) + 4)
+        assert Vector(3, 4) + Vector(5, 6) == Vector(8, 10)
+        assert Vector(Waarde(3, 'm')) + Vector(Waarde(5, 'cm')) == Vector(Waarde(30.5, 'dm'))
+        self.assertRaises(TypeError, lambda: Vector(Waarde(3, 'm')) + Vector(Waarde(5, 's')))
+        assert Vector(3, 4) + Vector(5, 6, 1) == Vector(8, 10, 1)
 
     def test___sub__(self):
-        pass
+        self.assertRaises(TypeError, lambda: Vector(5, 6) - 4)
+        assert Vector(3, 4) - Vector(5, 6) == Vector(-2, -2)
+        assert Vector(Waarde(3, 'm')) - Vector(Waarde(5, 'cm')) == Vector(Waarde(29.5, 'dm'))
+        self.assertRaises(TypeError, lambda: Vector(Waarde(3, 'm')) - Vector(Waarde(5, 's')))
+        assert Vector(3, 4) - Vector(5, 6, 1) == Vector(-2, -2, -1)
 
     def test___mul__(self):
-        pass
+        self.assertRaises(TypeError, lambda: Vector(5, 6) * 'str')
+        assert Vector(3, 4) * Vector(5, 6) == 39.0
+        assert Vector(Waarde(30, 'mm')) * Vector(Waarde(5, 'cm')) == Waarde(15, 'cm2')
+        assert Vector(Waarde(30, 'mm'), Waarde(30, 'mm')) * Vector(Waarde(5, 'cm'), Waarde(5, 'cm')) == Waarde(30, 'cm2')
+        assert Vector(3, 4) * Vector(5, 6, 10) == 39.0
+        assert Vector(3, 4) * 6 == Vector(18, 24)
+        assert Vector(Waarde(3, 'cm'), Waarde(40, 'mm')) * -0.5 == Vector(Waarde(-1.5, 'cm'), Waarde(-2, 'cm'))
 
     def test___truediv__(self):
-        pass
+        self.assertRaises(TypeError, lambda: Vector(5, 6) / 'str')
+        assert Vector(3, 6) / Vector(6, 6) == 1.5
+        assert Vector(Waarde(30, 'mm')) / Vector(Waarde(6, 'cm')) == Waarde(0.5)
+        assert Vector(Waarde(30, 'mm'), Waarde(30, 'mm')) / Vector(Waarde(5, 'cm'), Waarde(5, 'cm')) == Waarde(1.2)
+        assert Vector(3, 4) / Vector(5, 6, 10) == 3.8/3
+        assert Vector(3, 4) / 6 == Vector(0.5, 2/3)
+        assert Vector(Waarde(3, 'cm'), Waarde(40, 'mm')) / -0.5 == Vector(Waarde(-6, 'cm'), Waarde(-8, 'cm'))
 
     def test___pow__(self):
-        pass
+        self.assertRaises(ValueError, lambda: Vector(5, 6) ** -1)
+        self.assertRaises(ValueError, lambda: Vector(5, 6) ** 1)
+        self.assertRaises(ValueError, lambda: Vector(5, 6) ** 'str')
+        assert Vector(5, 6) ** 2 == 61.0
+        assert Vector(5, 6) ** 3 == 3721.0
+        assert Vector(Waarde(30, 'mm'), Waarde(5, 'cm')) ** 2 == Waarde(0.0034, 'm2')
+        assert Vector(Waarde(30, 'mm'), Waarde(5, 'cm')) ** 3 == Waarde(0.00001156, 'm4')
 
     def test___rmul__(self):
-        pass
+        self.assertRaises(TypeError, lambda: 'str' * Vector(5, 6))
+        assert 6 * Vector(3, 4) == Vector(18, 24)
+        assert -0.5 * Vector(Waarde(3, 'cm'), Waarde(40, 'mm')) == Vector(Waarde(-1.5, 'cm'), Waarde(-2, 'cm'))
 
     def test___rtruediv__(self):
-        pass
+        self.assertRaises(TypeError, lambda: 'str' / Vector(5, 6))
+        assert 6 / Vector(3, 4) == Vector(2.0, 1.5)
 
     def test___eq__(self):
         self.assertRaises(TypeError, lambda: Vector(5, 6) == 4)

@@ -1,5 +1,6 @@
 from typing import Union
 import math
+import itertools
 
 import pyco.model as pycom
 
@@ -77,32 +78,73 @@ class Vector(pycom.BasisComponent):
             self._eenheid = eenheid
 
     def __add__(self, andere):
-        """."""
-        pass
+        """Telt waarden bij elkaar op."""
+        if not isinstance(andere, Vector):
+            raise TypeError('tweede waarde is geen Vector object')
+        pairs = itertools.zip_longest(self, andere, fillvalue=0.0)
+        return Vector([a + b for a, b in pairs])
 
     def __sub__(self, andere):
-        """."""
-        pass
+        """Trekt waarde van elkaar af"""
+        if not isinstance(andere, Vector):
+            raise TypeError('tweede waarde is geen Vector object')
+        pairs = itertools.zip_longest(self, andere, fillvalue=0.0)
+        return Vector([a - b for a, b in pairs])
 
     def __mul__(self, andere):
-        """."""
-        pass
+        """Vermenigvuldigd Vector met andere Vector (inproduct) of scalar getal."""
+        if isinstance(andere, Vector):
+            pairs = itertools.zip_longest(self, andere, fillvalue=0.0)
+            for i, (a, b) in enumerate(pairs):
+                if i == 0:
+                    product = a * b
+                else:
+                    product += a * b
+            return product
+        elif isinstance(andere, int) or isinstance(andere, float):
+            return Vector([w * andere for w in self])
+        else:
+            raise TypeError('tweede waarde is geen Vector object of getal')
+
+    #def __matmul__(self, andere):
+    #    @ operator -> gebruiken voor kruisproduct? (en niet inproduct); vanaf python 3.5
 
     def __truediv__(self, andere):
-        """."""
-        pass
+        """Deelt Vector met andere Vector (inproduct) of scalar getal."""
+        if isinstance(andere, Vector):
+            pairs = itertools.zip_longest(self, andere, fillvalue=0.0)
+            for i, (a, b) in enumerate(pairs):
+                if i == 0:
+                    product = (a / b)
+                else:
+                    product += (a / b)
+            return product
+        elif isinstance(andere, int) or isinstance(andere, float):
+            return Vector([w / andere for w in self])
+        else:
+            raise TypeError('tweede waarde is geen Vector object of getal')
 
-    def __pow__(self, andere):
-        """."""
-        pass
+    def __pow__(self, macht):
+        """Doet Vector tot de macht een geheel getal > 1."""
+        if isinstance(macht, int) and macht > 1:
+            resultaat = self
+            for i in range(2, macht+1):
+                resultaat = resultaat * resultaat
+            return resultaat
+        else:
+            raise ValueError('macht moet geheel getal zijn groter dan 1')
 
     def __rmul__(self, andere):
-        """."""
-        pass
+        """Vermenigvuldigd scalar getal met Vector."""
+        return self * andere
 
     def __rtruediv__(self, andere):
-        """."""
-        pass
+        """Deelt scalar met eenheidsloze Vector."""
+        if (isinstance(andere, int) or isinstance(andere, float)) and \
+                self.eenheid is None:
+            return Vector([andere / w for w in self])
+        else:
+            raise TypeError('kan alleen getal delen door eenheidsloze Vector')
 
     def __eq__(self, andere):
         """Vergelijkt Vector met andere Vector."""
@@ -248,6 +290,8 @@ class Vector(pycom.BasisComponent):
         waardes = [w for w in self]
         if isinstance(subset, int):
             return waardes[subset]
-        else:
+        elif isinstance(subset, slice):
             cls = type(self)
             return cls(waardes[subset])
+        else:
+            raise TypeError('index moet geheel getal of slice zijn')
