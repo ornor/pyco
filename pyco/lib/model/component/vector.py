@@ -7,12 +7,45 @@ import pyco.model as pycom
 
 class Vector(pycom.BasisComponent):
     """
-    Bevat een lijst van getallen (Waarde objecten) met allen dezelfde eenheid.
+    Bevat een lijst van getallen of Waarde objecten met allen dezelfde eenheid.
 
     AANMAKEN VECTOR             eenheid van 1e component, geldt voor geheel
         v = Vector([waarde1, waarde2, waarde3])
 
+    AANPASSEN EENHEID           omzetten van eenheid naar andere eenheid
+        v.eenheid               huidige eenheid opvragen (tekst of None)
+        v.eenheid = 'N/mm2'     eenheid aanpassen
 
+    OMZETTEN VECTOR NAAR TEKST  resulteert in nieuw string object
+        tekst = str(v)          of automatisch met bijvoorbeeld print(w)
+        tekst = format(v,'.2f') format configuratie meegeven voor getal
+
+    MOGELIJKE BEWERKINGEN       resulteert in nieuw Vector object
+        v3 = v1 + v2            vector optellen bij vector
+        v3 = v1 - v2            vector aftrekken van vector
+        getal = v1 * v2         vector vermenigvuldigen met vector (inproduct)
+        getal = v1 / v2         vector delen door vector (inverse inproduct)
+        v2 = n * v1             getal vermenigvuldigen met vector
+        v2 = v1 * n             vector vermenigvuldigen met getal
+        v2 = n / v1             getal delen door vector
+        v2 = v1 / n             vector delen door getal
+        waarde = v1 ** n        vector tot de macht een geheel getal
+        waarde = abs(v1)        berekent lengte van vector -> Waarde object
+        getal = float(v1)       berekent lengte van vector -> float object
+        v2 = +v1                behoud teken
+        v2 = -v1                verander teken (positief vs. negatief)
+        waarde/getal = v1[3]    retourneer float/Waarde object op index
+        v2 = v1[1:3]            retourneer Vector object gegeven slice subset
+        getal = len(v1)         geeft aantal elementen (dimensies) van vector
+
+    WAARDEN VERGELIJKEN         resulteert in een boolean (True/False)
+        v1 == v2                is gelijk aan
+        v1 != v2                is niet gelijk aan
+        v1 >  v2                de lengte van vector is groter dan
+        v1 <  v2                de lengte van vector is kleiner dan
+        v1 >= v2                de lengte van vector is groter dan of gelijk aan
+        v1 <= v2                de lengte van vector is kleiner dan of gelijk aan
+        v1 &  v2                eenheden zijn zelfde type
     """
 
     def __init__(self, *waardes:Union[pycom.Waarde, int, float]):
@@ -82,14 +115,16 @@ class Vector(pycom.BasisComponent):
         if not isinstance(andere, Vector):
             raise TypeError('tweede waarde is geen Vector object')
         pairs = itertools.zip_longest(self, andere, fillvalue=0.0)
-        return Vector([a + b for a, b in pairs])
+        cls = type(self)
+        return cls([a + b for a, b in pairs])
 
     def __sub__(self, andere):
         """Trekt waarde van elkaar af"""
         if not isinstance(andere, Vector):
             raise TypeError('tweede waarde is geen Vector object')
         pairs = itertools.zip_longest(self, andere, fillvalue=0.0)
-        return Vector([a - b for a, b in pairs])
+        cls = type(self)
+        return cls([a - b for a, b in pairs])
 
     def __mul__(self, andere):
         """Vermenigvuldigd Vector met andere Vector (inproduct) of scalar getal."""
@@ -102,7 +137,8 @@ class Vector(pycom.BasisComponent):
                     product += a * b
             return product
         elif isinstance(andere, int) or isinstance(andere, float):
-            return Vector([w * andere for w in self])
+            cls = type(self)
+            return cls([w * andere for w in self])
         else:
             raise TypeError('tweede waarde is geen Vector object of getal')
 
@@ -120,7 +156,8 @@ class Vector(pycom.BasisComponent):
                     product += (a / b)
             return product
         elif isinstance(andere, int) or isinstance(andere, float):
-            return Vector([w / andere for w in self])
+            cls = type(self)
+            return cls([w / andere for w in self])
         else:
             raise TypeError('tweede waarde is geen Vector object of getal')
 
@@ -142,7 +179,8 @@ class Vector(pycom.BasisComponent):
         """Deelt scalar met eenheidsloze Vector."""
         if (isinstance(andere, int) or isinstance(andere, float)) and \
                 self.eenheid is None:
-            return Vector([andere / w for w in self])
+            cls = type(self)
+            return cls([andere / w for w in self])
         else:
             raise TypeError('kan alleen getal delen door eenheidsloze Vector')
 
@@ -163,7 +201,7 @@ class Vector(pycom.BasisComponent):
         for w1, w2 in zip(self, andere):
             if self.eenheid is None:
                 # w is float object
-                if round(w1*1e12) != round(w2*1e12):
+                if round(w1*Waarde._AFRONDEN_BIJ_VERGELIJKEN) != round(w2*Waarde._AFRONDEN_BIJ_VERGELIJKEN):
                     return False
             else:
                 # w is Waarde object
@@ -246,7 +284,8 @@ class Vector(pycom.BasisComponent):
     def __bool__(self):
         """Geeft False als lengte Vector == 0. Anders True."""
         length = float(self)
-        return not (length < 1e-12 and length > -1e-12)
+        Waarde = pycom.Waarde
+        return not (length < 1/Waarde._AFRONDEN_BIJ_VERGELIJKEN and length > -1/Waarde._AFRONDEN_BIJ_VERGELIJKEN)
 
     def __iter__(self):
         """Itereert over waardes. Als geen eenheid: floats. Als wel eenheid dan Waarde objecten."""
@@ -268,21 +307,22 @@ class Vector(pycom.BasisComponent):
         format_str = '{:' + config + '}'
         waardes = ', '.join(format_str.format(float(w)) for w in self)
         eenheid = self.eenheid if self.eenheid is not None else ''
-        return '[{}] {}'.format(waardes, eenheid).strip()
+        return '({}) {}'.format(waardes, eenheid).strip()
 
     def __repr__(self):
         """Geeft representatie object."""
+        cls_naam = type(self).__name__
         if self.eenheid is None:
             waardes = ', '.join(str(float(w)) for w in self)
         else:
             waardes = ', '.join(repr(pycom.Waarde(float(w), self.eenheid)) for w in self)
-        return 'Vector({})'.format(waardes)
+        return '{}({})'.format(cls_naam, waardes)
 
     def __str__(self):
-        """Geeft tekst met vecotr en eenheid"""
+        """Geeft tekst met vector en eenheid"""
         waardes = ', '.join(str(float(w)) for w in self)
         eenheid = self.eenheid if self.eenheid is not None else ''
-        return '[{}] {}'.format(waardes, eenheid).strip()
+        return '({}) {}'.format(waardes, eenheid).strip()
 
     def __getitem__(self, subset):
         """Retourneer subset van waardes (floats of Waarde objecten).

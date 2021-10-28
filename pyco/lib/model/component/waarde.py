@@ -23,8 +23,10 @@ class Waarde(pycom.BasisComponent):
         w = w[0]                kan voor alle gehele getallen
         w = w._0                kan voor 0 t/m 9 (cijfers achter de komma)
 
-    OMZETTEN WAARDE NAAR TEKST  resulteert in nieuw string object -> gebruikt afronding
+    OMZETTEN WAARDE NAAR TEKST  resulteert in nieuw string object
+                                    -> gebruikt afronding indien opgegeven
         tekst = str(w)          of automatisch met bijvoorbeeld print(w)
+        tekst = format(w,'.2f') format configuratie meegeven voor getal
 
     OMZETTEN WAARDE NAAR GETAL  resulteert in nieuw float object
         getal = float(w)        omzetten met standaard eenheid
@@ -303,6 +305,7 @@ class Waarde(pycom.BasisComponent):
     }
 
     _STANDAARD_AANTAL_DECIMALEN = 2
+    _AFRONDEN_BIJ_VERGELIJKEN = 1e12
 
     def __init__(self, waarde: Union[int, float, str] = 0,
                  eenheid: Union[str, Fraction] = None, config:dict = None):
@@ -667,7 +670,8 @@ class Waarde(pycom.BasisComponent):
             raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
                 self._eenheidnaam, andere_waarde._eenheidnaam))
         getal = self._getal + andere_waarde._getal
-        return Waarde(getal, self._eenheidbreuk, config = self._config)
+        cls = type(self)
+        return cls(getal, self._eenheidbreuk, config = self._config)
 
 
     def __sub__(self, andere_waarde):
@@ -680,7 +684,8 @@ class Waarde(pycom.BasisComponent):
             raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
                 self._eenheidnaam, andere_waarde._eenheidnaam))
         getal = self._getal - andere_waarde._getal
-        return Waarde(getal, self._eenheidbreuk, config = self._config)
+        cls = type(self)
+        return cls(getal, self._eenheidbreuk, config = self._config)
 
     def __mul__(self, andere_waarde):
         """Vermenigvuldigt waarde met andere waarde of getal."""
@@ -694,7 +699,8 @@ class Waarde(pycom.BasisComponent):
             raise TypeError('beide waardes moeten getallen zijn')
         getal = self._getal * andere_waarde._getal
         eenheidbreuk = self._eenheidbreuk * andere_waarde._eenheidbreuk
-        return Waarde(getal, eenheidbreuk, config=None)
+        cls = type(self)
+        return cls(getal, eenheidbreuk, config=None)
 
     def __truediv__(self, andere_waarde):
         """Deelt waarde door andere waarde of getal."""
@@ -710,7 +716,8 @@ class Waarde(pycom.BasisComponent):
             raise ZeroDivisionError('delen door 0 is niet mogelijk')
         getal = self._getal / andere_waarde._getal
         eenheidbreuk = self._eenheidbreuk / andere_waarde._eenheidbreuk
-        return Waarde(getal, eenheidbreuk, config=None)
+        cls = type(self)
+        return cls(getal, eenheidbreuk, config=None)
 
     def __pow__(self, macht):
         """Doet waarde tot de macht een andere waarde (geheel getal)."""
@@ -720,7 +727,8 @@ class Waarde(pycom.BasisComponent):
             raise TypeError('waarde moeten getal zijn')
         getal = self._getal ** macht
         eenheidbreuk = self._eenheidbreuk ** macht
-        return Waarde(getal, eenheidbreuk, config=None)
+        cls = type(self)
+        return cls(getal, eenheidbreuk, config=None)
 
     def __rmul__(self, scalar):
         """Vermenigvuldigt getal met waarde."""
@@ -730,7 +738,8 @@ class Waarde(pycom.BasisComponent):
             raise TypeError('waarde moeten getal zijn')
         getal= scalar * self._getal
         eenheidbreuk = self._eenheidbreuk
-        return Waarde(getal, eenheidbreuk, config = self._config)
+        cls = type(self)
+        return cls(getal, eenheidbreuk, config = self._config)
 
     def __rtruediv__(self, scalar):
         """Deelt getal met waarde."""
@@ -740,20 +749,21 @@ class Waarde(pycom.BasisComponent):
             raise TypeError('waarde moeten getal zijn')
         getal = scalar / self._getal
         eenheidbreuk = 1 / self._eenheidbreuk
-        return Waarde(getal, eenheidbreuk, config = self._config)
+        cls = type(self)
+        return cls(getal, eenheidbreuk, config = self._config)
 
     def __eq__(self, andere_waarde):
         """Vergelijkt waarde met andere waarde: =="""
         if not isinstance(andere_waarde, Waarde):
             if (isinstance(andere_waarde, int)
                      or isinstance(andere_waarde, float)):
-                return round(float(self)*1e12) == round(float(andere_waarde)*1e12)
+                return round(float(self)*self._AFRONDEN_BIJ_VERGELIJKEN) == round(float(andere_waarde)*self._AFRONDEN_BIJ_VERGELIJKEN)
             else:
                 raise TypeError('term is niet van type Waarde, int of float')
         if self._eenheidbreuk != andere_waarde._eenheidbreuk:
             return False
         if self._is_getal:
-            return round(self._getal*1e12) == round(andere_waarde._getal*1e12)
+            return round(self._getal*self._AFRONDEN_BIJ_VERGELIJKEN) == round(andere_waarde._getal*self._AFRONDEN_BIJ_VERGELIJKEN)
         else:
             return self._getal == andere_waarde._getal
 
@@ -835,7 +845,11 @@ class Waarde(pycom.BasisComponent):
 
     def __bool__(self):
         """Genereert een boolean. False wanneer getal 0 of lege tekst."""
-        return bool(self._getal)
+        if self._getal == '':
+            return False
+        elif isinstance(self._getal, str):
+            return True
+        return not (self._getal < 1/self._AFRONDEN_BIJ_VERGELIJKEN and self._getal > -1/self._AFRONDEN_BIJ_VERGELIJKEN)
 
     def __iter__(self):
         """Itereert over het getal/tekst en de eenheidtekst."""
@@ -872,15 +886,16 @@ class Waarde(pycom.BasisComponent):
 
     def __repr__(self):
         """Geeft representatie object."""
+        cls_naam = type(self).__name__
         if self._is_getal:
             getal, eenheid = tuple(self)
             eenheid = '' if eenheid is None else eenheid
             if eenheid:
-                return 'Waarde({}, \'{}\')'.format(getal, eenheid)
+                return '{}({}, \'{}\')'.format(cls_naam, getal, eenheid)
             else:
-                return 'Waarde({})'.format(getal)
+                return '{}({})'.format(cls_naam, getal)
         else:
-            return 'Waarde(\'{}\')'.format(self._getal)
+            return '{}(\'{}\')'.format(cls_naam, self._getal)
 
     def __str__(self):
         """Geeft tekst met getal en eenheid."""

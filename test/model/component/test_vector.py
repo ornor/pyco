@@ -30,10 +30,10 @@ class TestVector(unittest.TestCase):
         assert Vector(Waarde(4).cm, Waarde(4, 'mm')).eenheid == 'cm'
         v = Vector(3, 4, 5)
         v.eenheid = 'm'
-        assert str(v) == '[3.0, 4.0, 5.0] m'
+        assert str(v) == '(3.0, 4.0, 5.0) m'
         v = Vector(Waarde(5, 'cm'), Waarde(6, 'm'))
         v.eenheid = 'dm'
-        assert str(v) == '[0.5, 60.0] dm'
+        assert str(v) == '(0.5, 60.0) dm'
 
     def test___add__(self):
         self.assertRaises(TypeError, lambda: Vector(5, 6) + 4)
@@ -171,12 +171,12 @@ class TestVector(unittest.TestCase):
         assert len(Vector(3, 4)) == 2
 
     def test___format__(self):
-        assert format(Vector(3, 4, 5)) == '[3.0, 4.0, 5.0]'
-        assert format(Vector(3, 4, 5), '.0f') == '[3, 4, 5]'
-        assert format(Vector(Waarde(34, 'cm')), '.3f') == '[34.000] cm'
-        assert format(Vector(Waarde(340, 'cm').m), '.3f') == '[3.400] m'
-        assert format(Vector(Waarde(34000, 'cm').m), '.1e') == '[3.4e+02] m'
-        assert format(Vector(Waarde(12, 'cm'), Waarde(34, 'mm')), '.3f') == '[12.000, 3.400] cm'
+        assert format(Vector(3, 4, 5)) == '(3.0, 4.0, 5.0)'
+        assert format(Vector(3, 4, 5), '.0f') == '(3, 4, 5)'
+        assert format(Vector(Waarde(34, 'cm')), '.3f') == '(34.000) cm'
+        assert format(Vector(Waarde(340, 'cm').m), '.3f') == '(3.400) m'
+        assert format(Vector(Waarde(34000, 'cm').m), '.1e') == '(3.4e+02) m'
+        assert format(Vector(Waarde(12, 'cm'), Waarde(34, 'mm')), '.3f') == '(12.000, 3.400) cm'
 
     def test___repr__(self):
         assert repr(Vector(3, 4, 5)) == 'Vector(3.0, 4.0, 5.0)'
@@ -184,8 +184,8 @@ class TestVector(unittest.TestCase):
         assert repr(Vector(Waarde(3, 'm'), Waarde(5, 'cm'))) == "Vector(Waarde(3.0, 'm'), Waarde(0.05, 'm'))"
 
     def test___str__(self):
-        assert str(Vector(3, 4)) == '[3.0, 4.0]'
-        assert str(Vector(Waarde(3, 'm'), Waarde(5, 'cm'))) == '[3.0, 0.05] m'
+        assert str(Vector(3, 4)) == '(3.0, 4.0)'
+        assert str(Vector(Waarde(3, 'm'), Waarde(5, 'cm'))) == '(3.0, 0.05) m'
 
     def test___getitem__(self):
         assert Vector(3)[0] == 3.0
@@ -196,6 +196,7 @@ class TestVector(unittest.TestCase):
         v = Vector(3, 4, 5, 6)
         v.eenheid = 'm'
         assert v[2:] == Vector(Waarde(5).m, Waarde(6).m)
+
 
 if __name__ == '__main__':
     unittest.main()
