@@ -1,5 +1,7 @@
 import unittest
 
+import numpy as np
+
 from pyco.interface import Document
 
 doc = Document()
@@ -34,6 +36,9 @@ class TestVector(unittest.TestCase):
         v = Vector(Waarde(5, 'cm'), Waarde(6, 'm'))
         v.eenheid = 'dm'
         assert str(v) == '(0.5, 60.0) dm'
+
+    def test_array(self):
+        assert np.array([3, 4, 5]).tolist() == Vector(3, 4, 5).array.tolist()
 
     def test___add__(self):
         self.assertRaises(TypeError, lambda: Vector(5, 6) + 4)
@@ -190,13 +195,9 @@ class TestVector(unittest.TestCase):
     def test___getitem__(self):
         assert Vector(3)[0] == 3.0
         assert Vector(3, 4)[1] == 4.0
-        assert Vector(Waarde(3, 'm'), Waarde(5, 'cm'))[1] == Waarde(0.05, 'm')
-        assert Vector(3, 4, 5, 6)[2:] == Vector(5, 6)
-        assert Vector(3, 4, 5)[:] == Vector(3, 4, 5)
-        v = Vector(3, 4, 5, 6)
-        v.eenheid = 'm'
-        assert v[2:] == Vector(Waarde(5).m, Waarde(6).m)
-
+        assert Vector(Waarde(3, 'm'), Waarde(5, 'cm'))[1] == 0.05
+        assert Vector(3, 4, 5, 6)[2:].tolist() == np.array([5, 6]).tolist()
+        assert Vector(3, 4, 5)[:].tolist() == np.array([3, 4, 5]).tolist()
 
 if __name__ == '__main__':
     unittest.main()

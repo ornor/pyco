@@ -1,6 +1,7 @@
 from typing import Union
-import math
 import itertools
+
+import numpy as np
 
 import pyco.model as pycom
 
@@ -34,9 +35,14 @@ class Vector(pycom.BasisComponent):
         getal = float(v1)       berekent lengte van vector -> float object
         v2 = +v1                behoud teken
         v2 = -v1                verander teken (positief vs. negatief)
-        waarde/getal = v1[3]    retourneer float/Waarde object op index
-        v2 = v1[1:3]            retourneer Vector object gegeven slice subset
+        for w in v1:            itereert en geeft float/Waarde object terug
         getal = len(v1)         geeft aantal elementen (dimensies) van vector
+
+    NUMPY BEWERKINGEN           gebruikt array object
+        numpy_array = v1.array  retourneert Numpy array object
+                                    (bevat allen getallen, zonder eenheid)
+        getal = v1[2]           retourneert getal (zonder eenheid) op index
+        numpy_array = v1[1:3]   retourneert Numpy array object vanuit slice
 
     WAARDEN VERGELIJKEN         resulteert in een boolean (True/False)
         v1 == v2                is gelijk aan
@@ -51,8 +57,8 @@ class Vector(pycom.BasisComponent):
     def __init__(self, *waardes:Union[pycom.Waarde, int, float]):
         super().__init__()
 
-        self._waardes = []
         self._eenheid = None
+        tmp_waardes = []
 
         if len(waardes) < 1:
             raise ValueError('Er moet minimaal één waarde worden opgegeven.')
@@ -79,17 +85,19 @@ class Vector(pycom.BasisComponent):
                 elif isinstance(waarde, float) or isinstance(waarde, int):
                     if self._eenheid is not None:
                         raise TypeError('type eenheid komt niet overeen met 1e waarde: {}'.format(waarde))
-            # waardes toevoegen aan self._waardes
+            # waardes toevoegen aan self._array
             if isinstance(waarde, pycom.Waarde):
                 getal, _ = tuple(waarde)
                 if isinstance(getal, float) or isinstance(getal, int):
-                    self._waardes.append(getal)
+                    tmp_waardes.append(getal)
                 else:
                     raise TypeError('waarde in Waarde object is geen getal')
             elif isinstance(waarde, float) or isinstance(waarde, int):
-                self._waardes.append(float(waarde))
+                tmp_waardes.append(float(waarde))
             else:
                 raise TypeError('waarde is geen Waarde/float/int: {}'.format(waarde))
+
+        self._array = np.array(tmp_waardes, dtype='float64')
 
     @property
     def eenheid(self):
@@ -102,13 +110,18 @@ class Vector(pycom.BasisComponent):
         if self._eenheid is None:
             self._eenheid = eenheid
         else:
-            waardes = []
+            tmp_waardes = []
             oude_eenheid = self._eenheid
             for w in self:
                 w = float(pycom.Waarde(float(w), oude_eenheid)[eenheid])
-                waardes.append(w)
-            self._waardes = waardes
+                tmp_waardes.append(w)
+            self._array = np.array(tmp_waardes, dtype='float64')
             self._eenheid = eenheid
+
+    @property
+    def array(self):
+        """Retourneert Numpy array object met alle getallen (zonder eenheid)."""
+        return self._array
 
     def __add__(self, andere):
         """Telt waarden bij elkaar op."""
@@ -266,19 +279,20 @@ class Vector(pycom.BasisComponent):
 
     def __float__(self):
         """Berekent de lengte van de vector als float object."""
-        return math.sqrt(sum(float(w)**2 for w in self))
+        return np.linalg.norm(self.array)
 
     def __abs__(self):
         """Berekent de lengte van de vector als Waarde object."""
-        return pycom.Waarde(math.sqrt(sum(float(w)**2 for w in self)), self.eenheid)
+        return pycom.Waarde(float(self), self.eenheid)
 
     def __pos__(self):
         """Behoud teken (positief = positief, negatief = negatief)."""
+        self._array *= 1  # moet met underscore
         return self
 
     def __neg__(self):
         """Verander teken (positief = negatief, negatief = postief)."""
-        self._waardes = [-w for w in self._waardes]
+        self._array *= -1  # moet met underscore
         return self
 
     def __bool__(self):
@@ -290,7 +304,7 @@ class Vector(pycom.BasisComponent):
     def __iter__(self):
         """Itereert over waardes. Als geen eenheid: floats. Als wel eenheid dan Waarde objecten."""
         eenheid = self.eenheid
-        for w in self._waardes:
+        for w in self.array:
             if eenheid is None:
                 yield w
             else:
@@ -298,7 +312,7 @@ class Vector(pycom.BasisComponent):
 
     def __len__(self):
         """Geeft aantal dimensies (waarden) van vector."""
-        return len(self._waardes)
+        return len(self.array)
 
     def __format__(self, config:str=None):
         """Geeft tekst met geformatteerd getal en eenheid."""
@@ -325,13 +339,16 @@ class Vector(pycom.BasisComponent):
         return '({}) {}'.format(waardes, eenheid).strip()
 
     def __getitem__(self, subset):
-        """Retourneer subset van waardes (floats of Waarde objecten).
-        Als slice dan wordt er nieuw Vector object gegenereert"""
-        waardes = [w for w in self]
-        if isinstance(subset, int):
-            return waardes[subset]
-        elif isinstance(subset, slice):
-            cls = type(self)
-            return cls(waardes[subset])
-        else:
-            raise TypeError('index moet geheel getal of slice zijn')
+        """Geeft subset van numpy array met waarden."""
+        return self.array[subset]
+
+        # """Retourneer subset van waardes (floats of Waarde objecten).
+        # Als slice dan wordt er nieuw Vector object gegenereert"""
+        # waardes = [w for w in self]
+        # if isinstance(subset, int):
+        #     return waardes[subset]
+        # elif isinstance(subset, slice):
+        #     cls = type(self)
+        #     return cls(waardes[subset])
+        # else:
+        #     raise TypeError('index moet geheel getal of slice zijn')

@@ -1,5 +1,7 @@
 import unittest
 
+#import numpy as np
+
 from pyco.interface import Document
 
 doc = Document()
@@ -12,7 +14,7 @@ class TestLijn(unittest.TestCase):
 
     def test_Lijn(self):
         self.assertRaises(TypeError, lambda: Lijn('str', 'str'))
-        self.assertRaises(ValueError, lambda: Lijn(Knoop(1, 2)))
+        self.assertRaises(ValueError, lambda: Lijn())
         self.assertRaises(ValueError, lambda: Lijn(Knoop(1, 2), Knoop(Waarde(1).cm, Waarde(2).cm)))
         assert Lijn(Knoop(1, 2), Knoop(3, 4)) == Lijn([Knoop(1, 2), Knoop(3, 4)])
         assert Lijn((1, 2), (1, 2), (3, 4), (3, 4), (3, 4)) == Lijn(Knoop(1, 2), Knoop(3, 4))
@@ -24,6 +26,21 @@ class TestLijn(unittest.TestCase):
         l2 = Lijn(Knoop(Waarde(1).cm, Waarde(2).cm), Knoop(Waarde(3).cm, Waarde(4).cm))
         l2.eenheid = 'mm'
         assert str(l2) == '((10.0, 20.0), (30.0, 40.0)) mm'
+
+    def test_array(self):
+        assert Lijn((1, 2), (3, 4)).array.tolist() == [[1.0, 2.0], [3.0, 4.0]]
+
+    def test_lijn_recht(self):
+        self.assertRaises(ValueError, lambda: Lijn((1, 2), (3, 4)).lijn_recht(naar=Knoop(Waarde(3, 'mm'), Waarde(4, 'mm'))))
+        assert Lijn((1, 2), (3, 4)).lijn_recht(naar=(3, 4)).lijn_recht(naar=(5, 6)) == Lijn((1, 2), (3, 4), (5, 6))
+        assert repr(Lijn((3,4)).lijn_recht(naar=(5,6))) == 'Lijn(Knoop(3.0, 4.0), Knoop(5.0, 6.0))'
+        assert Lijn((1, 2), (3, 4)).lijn_recht(naar=Knoop(5, 6)) == Lijn((1, 2), (3, 4), (5, 6))
+
+    def test_lijn_bezier(self):
+        assert format(Lijn((1, 1)).lijn_bezier(richting=(10,0), naar=(10,10), stappen=3), '.2f') == '((1.00, 1.00), (6.44, 2.00), (9.44, 5.00), (10.00, 10.00))'
+
+    def test_lijn_cirkel(self):
+        assert format(Lijn((1, 1)).lijn_cirkelboog(middelpunt=(0,0), gradenhoek=360, stappen=10), '.2f') == '((1.00, 1.00), (0.22, 1.40), (-0.64, 1.26), (-1.26, 0.64), (-1.40, -0.22), (-1.00, -1.00), (-0.22, -1.40), (0.64, -1.26), (1.26, -0.64), (1.40, 0.22), (1.00, 1.00))'
 
     def test___eq__(self):
         l1 = Lijn(Knoop(Waarde(1).cm, Waarde(2).cm), Knoop(Waarde(3).cm, Waarde(4).cm))
@@ -39,7 +56,7 @@ class TestLijn(unittest.TestCase):
         assert tuple(Lijn(Knoop(1,2), Knoop(3,4))) == (Knoop(1,2), Knoop(3,4))
 
     def test___getitem__(self):
-        assert Lijn(Knoop(1,2), Knoop(3,4))[1] == Knoop(3,4)
+        assert Lijn(Knoop(1,2), Knoop(3,4))[1].tolist() == [3,4]
 
     def test___len__(self):
         assert len(Lijn(Knoop(1,2), Knoop(3,4))) == 2
