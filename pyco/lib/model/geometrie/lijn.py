@@ -1,10 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-import pyco.model as pycom
+from pyco.model import BasisObject, Waarde, Knoop
 
 
-class Lijn(pycom.BasisObject):
+class Lijn(BasisObject):
     """Bevat een collectie met knopen, waartussen zich rechte lijnen bevinden.
 
     AANMAKEN LIJN               invoeren van één of meedere Knoop objecten
@@ -54,11 +54,11 @@ class Lijn(pycom.BasisObject):
         l1 &  l2                eenheden zijn zelfde type
 
     EXTRA OPTIES
-        l.plot2d()              plot simpele weergave van lijn
+        l.plot()                plot simpele weergave van lijn
 
         Lijn((4, -5), (-10, 10)).lijn_cirkelboog(middelpunt=(0,0),
             gradenhoek=+220, stappen=50).lijn_recht(naar=(4, 10)).lijn_bezier(
-            richting=(-10,-4), naar=(4, -5)).plot2d()
+            richting=(-10,-4), naar=(4, -5)).plot()
     """
 
     def __init__(self, *knopen):
@@ -73,7 +73,7 @@ class Lijn(pycom.BasisObject):
                     isinstance(knopen[0], tuple))
                 and len(knopen[0]) > 0
                 and (
-                    isinstance(knopen[0][0], pycom.Knoop) or
+                    isinstance(knopen[0][0], Knoop) or
                     isinstance(knopen[0][0], list) or
                     isinstance(knopen[0][0], tuple))):
             knopen = knopen[0]
@@ -82,11 +82,11 @@ class Lijn(pycom.BasisObject):
             raise ValueError('voer minimaal één knoop in')
 
         for i, knoop in enumerate(knopen):
-            if not (isinstance(knoop, pycom.Knoop)
+            if not (isinstance(knoop, Knoop)
                     or isinstance(knoop, list) or isinstance(knoop, tuple)):
                 raise TypeError('opgegeven argument is geen Knoop object of lijst met getallen/Waardes')
-            if not isinstance(knoop, pycom.Knoop):
-                knoop = pycom.Knoop(knoop)
+            if not isinstance(knoop, Knoop):
+                knoop = Knoop(knoop)
             if i > 0:
                 if ((self._eenheid is None and knoop.eenheid is not None)
                         or (self._eenheid is not None and knoop.eenheid is None)):
@@ -100,7 +100,7 @@ class Lijn(pycom.BasisObject):
         self._array = np.array(tmp_knopen, dtype='float64')
 
     @property
-    def eenheid(self):
+    def eenheid(self) -> str:
         """Geeft eenheid van Waarde. 'None' als geen eenheid."""
         return self._eenheid
 
@@ -111,7 +111,7 @@ class Lijn(pycom.BasisObject):
         oude_eenheid = self._eenheid
 
         for k_array in self.array:
-            k = pycom.Knoop(k_array.tolist())
+            k = Knoop(k_array.tolist())
             k.eenheid = oude_eenheid
             k.eenheid = eenheid
             tmp_knopen.append(k.array.tolist())
@@ -120,18 +120,18 @@ class Lijn(pycom.BasisObject):
         self._eenheid = eenheid
 
     @property
-    def array(self):
+    def array(self) -> np.array:
         """Retourneert Numpy array object met alle getallen (zonder eenheid)."""
         return self._array
 
-    def lijn_recht(self, naar):
+    def lijn_recht(self, naar:Knoop):
         """Verlengt lijn object met een extra rechte lijn naar opgegeven knoop."""
-        if not (isinstance(naar, pycom.Knoop)
+        if not (isinstance(naar, Knoop)
                 or isinstance(naar, list) or isinstance(naar, tuple)):
             raise TypeError('opgegeven argument is geen Knoop object of lijst met getallen/Waardes')
 
-        if not isinstance(naar, pycom.Knoop):
-            naar = pycom.Knoop(naar)
+        if not isinstance(naar, Knoop):
+            naar = Knoop(naar)
 
         if ((self.eenheid is None and naar.eenheid is not None)
                 or (self.eenheid is not None and naar.eenheid is None)):
@@ -142,19 +142,19 @@ class Lijn(pycom.BasisObject):
             self._array = np.append(self.array, [naar.array.tolist()], axis=0)
         return self
 
-    def lijn_bezier(self, richting, naar, stappen=100):
+    def lijn_bezier(self, richting:Knoop, naar:Knoop, stappen:int=100):
         """Verlengt lijn object als kwadratische Bezier kromme naar opgegeven knoop. Hierbij worden <aantal stappen> rechte lijnen gemaakt."""
-        if not (isinstance(richting, pycom.Knoop)
+        if not (isinstance(richting, Knoop)
                 or isinstance(richting, list) or isinstance(richting, tuple)):
             raise TypeError('opgegeven richting-knoop is geen Knoop object of lijst met getallen/Waardes')
-        if not (isinstance(naar, pycom.Knoop)
+        if not (isinstance(naar, Knoop)
                 or isinstance(naar, list) or isinstance(naar, tuple)):
             raise TypeError('opgegeven naar-knoop is geen Knoop object of lijst met getallen/Waardes')
 
-        if not isinstance(richting, pycom.Knoop):
-            richting = pycom.Knoop(richting)
-        if not isinstance(naar, pycom.Knoop):
-            naar = pycom.Knoop(naar)
+        if not isinstance(richting, Knoop):
+            richting = Knoop(richting)
+        if not isinstance(naar, Knoop):
+            naar = Knoop(naar)
 
         if ((self.eenheid is None and richting.eenheid is not None)
                 or (self.eenheid is not None and richting.eenheid is None)):
@@ -165,7 +165,7 @@ class Lijn(pycom.BasisObject):
             raise ValueError('knopen moeten zelfde type eenheid hebben')
         naar.eenheid = self.eenheid
 
-        start = pycom.Knoop(self[-1].tolist())
+        start = Knoop(self[-1].tolist())
         start.eenheid = self.eenheid
 
         tt = np.linspace(0, 1, num=stappen+1)
@@ -182,21 +182,21 @@ class Lijn(pycom.BasisObject):
         self._array = np.append(self.array, extra_knopen, axis=0)
         return self
 
-    def lijn_cirkelboog(self, middelpunt, gradenhoek:float, stappen=100):
+    def lijn_cirkelboog(self, middelpunt:Knoop, gradenhoek:float, stappen:int=100):
         """Verlengt lijn object als cirkel met middelpunt over x aantal graden. Hierbij worden <aantal stappen> rechte lijnen gemaakt. Positief is tegen klok in, negatief is met de klok mee."""
-        if not (isinstance(middelpunt, pycom.Knoop)
+        if not (isinstance(middelpunt, Knoop)
                 or isinstance(middelpunt, list) or isinstance(middelpunt, tuple)):
             raise TypeError('opgegeven middelpunt-knoop is geen Knoop object of lijst met getallen/Waardes')
 
-        if not isinstance(middelpunt, pycom.Knoop):
-            middelpunt = pycom.Knoop(middelpunt)
+        if not isinstance(middelpunt, Knoop):
+            middelpunt = Knoop(middelpunt)
 
         if ((self.eenheid is None and middelpunt.eenheid is not None)
                 or (self.eenheid is not None and middelpunt.eenheid is None)):
             raise ValueError('knopen moeten zelfde type eenheid hebben')
         middelpunt.eenheid = self.eenheid
 
-        start = pycom.Knoop(self[-1].tolist())
+        start = Knoop(self[-1].tolist())
         start.eenheid = self.eenheid
 
         P1 = start[:]
@@ -216,7 +216,7 @@ class Lijn(pycom.BasisObject):
         self._array = np.append(self.array, extra_knopen, axis=0)
         return self
 
-    def plot2d(self):
+    def plot(self):
         """Teken simpele plot van lijn (met 2 dimensies)."""
         plt.plot(self.array[:,0], self.array[:,1])
         plt.axis('equal')
@@ -236,13 +236,12 @@ class Lijn(pycom.BasisObject):
         """Controleert of Lijn zelfde type eenheid heeft als andere."""
         if not isinstance(andere, Lijn):
             raise TypeError('tweede waarde is geen Lijn object')
-        Waarde = pycom.Waarde
         return Waarde(1, self.eenheid) & Waarde(1, andere.eenheid)
 
     def __iter__(self):
         """Itereert over knopen en geeft Knoop objecten terug."""
         for k_array in self.array:
-            k = pycom.Knoop(k_array.tolist())
+            k = Knoop(k_array.tolist())
             k.eenheid = self.eenheid
             yield k
 
@@ -271,7 +270,7 @@ class Lijn(pycom.BasisObject):
 
     def __abs__(self):
         """Berekent de totale lengte van de lijnstukken als Waarde object."""
-        return pycom.Waarde(float(self), self.eenheid)
+        return Waarde(float(self), self.eenheid)
 
     def __format__(self, config:str=None):
         """Geeft tekst met geformatteerd getal en eenheid."""
