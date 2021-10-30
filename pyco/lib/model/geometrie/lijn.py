@@ -7,8 +7,58 @@ import pyco.model as pycom
 class Lijn(pycom.BasisObject):
     """Bevat een collectie met knopen, waartussen zich rechte lijnen bevinden.
 
-    Lijn((4, -5), (-10, 10)).lijn_cirkelboog(middelpunt=(0,0), gradenhoek=+270, stappen=100).lijn_recht(naar=(4, -5)).plot2d()
+    AANMAKEN LIJN               invoeren van één of meedere Knoop objecten
+        Lijn(Knoop(Waarde(1).cm, Waarde(2).cm)))    begin Knoop object
+        Lijn([1,2]) of Lijn((1,2))                  alleen begincoordinaat
+        Lijn((1,2), (3,4), (5,6))                   alle knoopcoordinaten
 
+    AANPASSEN EENHEID
+        l = Lijn((1,2), (3,4))
+        l.eenheid               opvragen huidige eenheid; in dit geval None
+        l.eenheid = 'm'         alle waarden in alle knoopobjecten naar 'm'
+
+    OMZETTEN LIJN NAAR TEKST    resulteert in nieuw string object
+        tekst = str(l)          of automatisch met bijvoorbeeld print(l)
+        tekst = format(l,'.2f') format configuratie meegeven voor getal
+
+    VERLENGEN LIJN              vanuit laatste knoop (of enige beginknoop)
+        l.lijn_recht(naar=(3,4))
+            rechte lijn naar een nieuwe knoop
+
+        l.lijn_bezier(richting=(3,4), naar=(5,6), stappen=100)
+            (kwadratische) Bezier kromme (met één richtingspunt) naar nieuwe
+            knoop waarbij de kromme lijn omgezet wordt in aantal (stappen)
+            rechte lijnen; standaard 100 stappen
+
+        l.lijn_cirkelboog(middelpunt=(3,4), gradenhoek=-90, stappen=100)
+            cirkelboog met opgegeven cirkel middelpunt over aantal opgegeven
+            graden (waarbij 360 is gehele cirkel tekenen; positief is tegen
+            klok in; negatief getal is met de klok mee) waarbij kromme lijn
+            omgezet wordt in aantal rechte lijnen; standaard 100 stappen
+
+    MOGELIJKE BEWERKINGEN
+        waarde = abs(l)         berekent lengte lijnstukken -> Waarde object
+        getal = float(l)        berekent lengte lijnstukken -> float object
+        for w in v1:            itereert en geeft Knoop object terug
+        getal = len(v1)         geeft aantal knopen terug
+
+    NUMPY BEWERKINGEN               gebruikt array object
+        2D numpy_array = l1.array   retourneert volledige Numpy array object
+                                      (bevat allen getallen, zonder eenheid)
+        1D_numpy_array = l1[2]      retourneert knoopcoordinaten op index
+        2D_numpy_array = l1[1:3]    retourneert knoopcoordinaten vanuit slice
+
+    WAARDEN VERGELIJKEN         resulteert in een boolean (True/False)
+        l1 == l2                is gelijk aan
+        l1 != l2                is niet gelijk aan
+        l1 &  l2                eenheden zijn zelfde type
+
+    EXTRA OPTIES
+        l.plot2d()              plot simpele weergave van lijn
+
+        Lijn((4, -5), (-10, 10)).lijn_cirkelboog(middelpunt=(0,0),
+            gradenhoek=+220, stappen=50).lijn_recht(naar=(4, 10)).lijn_bezier(
+            richting=(-10,-4), naar=(4, -5)).plot2d()
     """
 
     def __init__(self, *knopen):
@@ -182,6 +232,13 @@ class Lijn(pycom.BasisObject):
         """Vergelijkt negatief twee Lijn objecten."""
         return not self == andere
 
+    def __and__(self, andere):
+        """Controleert of Lijn zelfde type eenheid heeft als andere."""
+        if not isinstance(andere, Lijn):
+            raise TypeError('tweede waarde is geen Lijn object')
+        Waarde = pycom.Waarde
+        return Waarde(1, self.eenheid) & Waarde(1, andere.eenheid)
+
     def __iter__(self):
         """Itereert over knopen en geeft Knoop objecten terug."""
         for k_array in self.array:
@@ -196,6 +253,25 @@ class Lijn(pycom.BasisObject):
     def __len__(self):
         """Geeft aantal knopen."""
         return len(self.array)
+
+    def __float__(self):
+        """Berekent de totale lengte van de lijnstukken als float object."""
+        if len(self) < 2:
+            return 0.0
+        laatste_kn_arr = self[0]
+        lengte = 0.0
+        for kn_arr in self[1:]:
+            x1 = laatste_kn_arr[0]
+            x2 = kn_arr[0]
+            y1 = laatste_kn_arr[1]
+            y2 = kn_arr[1]
+            lengte += np.sqrt((x2-x1)**2 + (y2-y1)**2)
+            laatste_kn_arr = kn_arr
+        return lengte
+
+    def __abs__(self):
+        """Berekent de totale lengte van de lijnstukken als Waarde object."""
+        return pycom.Waarde(float(self), self.eenheid)
 
     def __format__(self, config:str=None):
         """Geeft tekst met geformatteerd getal en eenheid."""

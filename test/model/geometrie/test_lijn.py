@@ -52,6 +52,11 @@ class TestLijn(unittest.TestCase):
         l2 = Lijn(Knoop(1, 2), Knoop(3, 4))
         assert l1 != l2
 
+    def test___and__(self):
+        l1 = Lijn(Knoop(Waarde(1).cm, Waarde(2).cm), Knoop(Waarde(3).cm, Waarde(4).cm))
+        l2 = Lijn(Knoop(Waarde(1).m, Waarde(2).m), Knoop(Waarde(3).m, Waarde(4).m))
+        assert l1 & l2
+
     def test___iter__(self):
         assert tuple(Lijn(Knoop(1,2), Knoop(3,4))) == (Knoop(1,2), Knoop(3,4))
 
@@ -60,6 +65,12 @@ class TestLijn(unittest.TestCase):
 
     def test___len__(self):
         assert len(Lijn(Knoop(1,2), Knoop(3,4))) == 2
+
+    def test___float__(self):
+        assert float(Lijn(Knoop(1,1), Knoop(1,2), Knoop(2,2))) == 2.0
+
+    def test___abs__(self):
+        assert abs(Lijn(Knoop(Waarde(1).cm, Waarde(1).cm), Knoop(Waarde(3).cm, Waarde(1).cm))) == Waarde(20).mm
 
     def test___format__(self):
         assert format(Lijn((1, 2), (3, 4)), '.3f') == '((1.000, 2.000), (3.000, 4.000))'
