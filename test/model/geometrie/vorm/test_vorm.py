@@ -35,7 +35,7 @@ class TestVorm(unittest.TestCase):
         assert not self.fn.punt_op_lijn((0,0),(5,0), (10,0))
 
     def test_fn_lijn_raakt_lijn(self):
-        # kuisen diagonale lijnen
+        # kruisen diagonale lijnen
         assert self.fn.lijn_raakt_lijn((0,0),(10,10), (0,10),(10,0))
         assert self.fn.lijn_raakt_lijn((10,10),(0,0), (0,10),(10,0))
         assert self.fn.lijn_raakt_lijn((0,0),(10,10), (10,0),(0,10))
@@ -57,6 +57,13 @@ class TestVorm(unittest.TestCase):
         assert not self.fn.lijn_raakt_lijn((0,0),(0,2), (0,3),(0,5))
         assert not self.fn.lijn_raakt_lijn((0,0),(2,0), (3,0),(5,0))
 
+    def test_fn_bereken_hoek(self):
+        assert self.fn.bereken_hoek((0,10), (0,0), (10,0)) == 270
+        assert self.fn.bereken_hoek((0,10), (0,0), (10,0), True) == 90
+        assert self.fn.bereken_hoek((-10,0), (0,0), (10,0)) == 180
+        assert self.fn.bereken_hoek((5,5), (0,0), (10,0), True) == 45
+        assert self.fn.bereken_hoek((10,0), (0,0), (10,0)) == 0
+
     def test_Vorm(self):
         self.assertRaises(TypeError, lambda: Lijn('str', 'str'))
         assert Lijn(Knoop(1, 2), Knoop(3, 4)) == Lijn([Knoop(1, 2), Knoop(3, 4)])
@@ -68,15 +75,15 @@ l1 = Lijn(
     ).lijn_cirkelboog(
         middelpunt=(0,0),
         gradenhoek=+220,
-        stappen=50
+        stappen=10
     ).lijn_recht(
         naar=(4, 10)
     ).lijn_bezier(
         richting=(-10,-4),
         naar=(4, -5),
-        stappen=50)
+        stappen=10)
 
-l2 = Lijn((0,0), (10,0), (10,10), (0,10))
+l2 = Lijn((0,0), (5,0), (10,0), (10,10), (5,12), (0,10))
 l2.eenheid = 'cm'
 
 v1 = Vorm(l1)
