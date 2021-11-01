@@ -196,9 +196,17 @@ class Vorm(BasisObject):
             lijn = Lijn(*lijn)
 
         self._eenheid = lijn.eenheid
-        self._array = self._check_knopen(lijn.array.copy())
-        self._driehoeken = self._verdeel_in_driehoeken()
 
+        # bij check knopen wordt bepaald welke richting knopen zijn ingevoerd
+        self._coordinaten_met_klok_mee = None
+
+        # controleer knoop data en maak Numpy array
+        self._array = self._check_knopen(lijn.array.copy())
+
+        # maak net van driehoeken; lijsten verwijzen naar index knoop in array
+        self._driehoeken, self._driehoeken_lijnen_intern = self._genereer_net()
+
+        # corrigeer coordinaten in array n.a.v. transformeren vorm
         self.transformeren(translatie,
                            rotatie, rotatiepunt,
                            schaal, schaalpunt)
@@ -213,9 +221,19 @@ class Vorm(BasisObject):
         if np_array[0].tolist() == np_array[-1].tolist():
             np_array = np.delete(np_array, (-1), axis=0)
 
-
-        # TODO checken dat geen enkele lijn een andere lijn kruist!!
-
+        # zorgen dat omtrek lijnen elkaar nergens kruisen/raken
+        l = len(np_array)
+        for i in range(l):
+            # kies een lijn
+            p1 = [np_array[i][0], np_array[i][1]]
+            p2 = [np_array[(i+1)%l][0], np_array[(i+1)%l][1]]
+            for ii in range(l):
+                # check alle andere lijnen
+                if i != (ii-1)%l and i != ii and i != (ii+1)%l:
+                    pp1 = [np_array[ii][0], np_array[ii][1]]
+                    pp2 = [np_array[(ii+1)%l][0], np_array[(ii+1)%l][1]]
+                    if self.fn.lijn_raakt_lijn(p1, p2, pp1, pp2):
+                        raise ValueError('Omtrek van vorm mag zichzelf nergens raken/kruisen. Volgende lijnen doen dat wel: Lijn({}, {}) & Lijn({}, {})'.format(p1, p2, pp1, pp2))
 
         def verwijder_punt_op_lijn(c):
             nonlocal coordinaten_links_rechts
@@ -253,7 +271,7 @@ class Vorm(BasisObject):
         vorige_c = coordinaten[(linker_c[2] - 1 + l) % l]
         volgende_y = volgende_c[1]
         vorige_y = vorige_c[1]
-        met_klok_mee = True
+        self._coordinaten_met_klok_mee = True
         if volgende_c[0] > vorige_c[0]:
             interpol_y = self.fn.interpoleer_over_lijn(
                     linker_c, volgende_c, vorige_c[0])
@@ -265,7 +283,7 @@ class Vorm(BasisObject):
             if interpol_y != 99999:
                 vorige_y = interpol_y
         if volgende_y < vorige_y:
-            met_klok_mee = False
+            self._coordinaten_met_klok_mee = False
 
         # hoek berekenen en toevoegen aan array
         for i in range(l):
@@ -273,132 +291,139 @@ class Vorm(BasisObject):
             vorige_p = coordinaten[(i - 1 + l) % l]
             volgende_p = coordinaten[(i + 1) % l]
             hoek = self.fn.bereken_hoek(
-                    vorige_p, p, volgende_p, not met_klok_mee)
+                    vorige_p, p, volgende_p,
+                    not self._coordinaten_met_klok_mee)
             coordinaten[i].append(hoek)
 
-        return np.array([[x, y, h] for x, y, _, h in coordinaten])
+        np_array = np.array([[x, y, h] for x, y, _, h in coordinaten])
 
-    def _verdeel_in_driehoeken(self):
+        if len(np_array) < 3:
+            raise ValueError('Vorm moet minimaal drie knopen bevatten (die niet op één lijn liggen).')
+
+        return np_array
+
+    def _genereer_net(self):
+        """Triangulatie van niet-convexe polygoon."""
         driehoeken = []
+        driehoeken_lijnen_intern = []
 
-        # var countIteration = 0,
-        #     triangulateIterator = function (polys) {
-        #         var found = false,
-        #             l, poly, p, pPrev, pNext, crossedLine, pSub, pSubNext,
-        #             anglePrev, angleNext, poly1, poly2, pTemp;
-        #         polys = w.isArray(polys) ? polys : [];
-        #         if (polys.length == 0) {
-        #             return true;
-        #         }
-        #         countIteration += 1;
-        #         if (countIteration > 9999) {
-        #             w.error('waon.CalcArea.triangulate :: reached \
-        #                 maximum number of iterations (9999)');
-        #             return false;
-        #         }
-        #         for (var polyIndex = 0, polyLength = polys.length;
-        #                 polyIndex < polyLength; polyIndex += 1) {
-        #             poly = polys[polyIndex];
-        #             if (found) {
-        #                 break;
-        #             }
-        #             l = poly.length;
-        #             if (l > 3) {
-        #                 for (var i = 0; i < l; i += 1) {
-        #                     p = [poly[i][0], poly[i][1],
-        #                         poly[i][2], poly[i][3]]; // x,y,i,angle
-        #                     pPrev = [poly[(i-1+l)%l][0], poly[(i-1+l)%l][1],
-        #                          poly[(i-1+l)%l][2], poly[(i-1+l)%l][3]];
-        #                     pNext = [poly[(i+1)%l][0], poly[(i+1)%l][1],
-        #                         poly[(i+1)%l][2], poly[(i+1)%l][3]];
-        #                     crossedLine = false;
-        #                     for (var iSub = 0; iSub < l; iSub += 1) {
-        #                         pSub = [poly[iSub][0], poly[iSub][1],
-        #                             poly[iSub][2], poly[iSub][3]];
-        #                         pSubNext = [poly[(iSub+1)%l][0],
-        #                             poly[(iSub+1)%l][1],
-        #                             poly[(iSub+1)%l][2],
-        #                             poly[(iSub+1)%l][3]];
-        #                         if (!(pPrev[0] == pSub[0] &&
-        #                                     pPrev[1] == pSub[1])
-        #                                 && !(pPrev[0] == pSubNext[0] &&
-        #                                     pPrev[1] == pSubNext[1])
-        #                                 && !(pNext[0] == pSub[0] &&
-        #                                     pNext[1] == pSub[1])
-        #                                 && !(pNext[0] == pSubNext[0] &&
-        #                                     pNext[1] == pSubNext[1])) {
-        #                             if (lineCrossLine(pPrev, pNext, pSub,
-        #                                     pSubNext, true)) {
-        #                                 crossedLine = true;
-        #                             }
-        #                         }
-        #                     }
-        #                     anglePrev = calcAngleLines(pNext, pPrev, p,
-        #                         !clockwise);
-        #                     if (anglePrev > 180) {
-        #                         anglePrev = 360 - anglePrev;
-        #                     }
-        #                     angleNext = calcAngleLines(p, pNext, pPrev,
-        #                         !clockwise);
-        #                     if (angleNext > 180) {
-        #                         angleNext = 360 - angleNext;
-        #                     }
-        #                     if (!crossedLine && p[3] < 180 &&
-        #                             anglePrev < pPrev[3] &&
-        #                             angleNext < pNext[3]) {
-        #                         poly1 = [
-        #                             [p[0], p[1], p[2], p[3]],
-        #                             [pPrev[0], pPrev[1], pPrev[2], anglePrev],
-        #                             [pNext[0], pNext[1], pNext[2], angleNext]
-        #                         ];
-        #                         poly2 = [];
-        #                         for (var iTemp = 0; iTemp < l; iTemp += 1) {
-        #                             pTemp = poly[iTemp];
-        #                             if (!(p[0]==pTemp[0] && p[1]==pTemp[1])) {
-        #                                 if (pPrev[0]==pTemp[0] &&
-        #                                         pPrev[1]==pTemp[1]) {
-        #                                     poly2.push([pTemp[0], pTemp[1],
-        #                                         pTemp[2],
-        #                                         (pTemp[3] - anglePrev)]);
-        #                                 } else if (pNext[0]==pTemp[0] &&
-        #                                         pNext[1]==pTemp[1]) {
-        #                                     poly2.push([pTemp[0], pTemp[1],
-        #                                         pTemp[2],
-        #                                         (pTemp[3] - angleNext)]);
-        #                                 } else {
-        #                                     poly2.push(pTemp);
-        #                                 }
-        #                             }
-        #                         }
-        #                         polys.push(w.cloneObject(poly1));
-        #                         polys.push(w.cloneObject(poly2));
-        #                         trianglesLines.push([[pPrev[0], pPrev[1]],
-        #                             [pNext[0], pNext[1]]]);
-        #                         polys.splice(polyIndex, 1);
-        #                         found = true;
-        #                         break;
-        #                     }
-        #                 }
-        #             } else if (l < 3) {
-        #                 w.error('waon.CalcArea.triangulateIterator :: \
-        #                     poly has less than 3 coords :: ' +
-        #                     w.jsonToString(poly));
-        #             } else { // l = 3
-        #                 triangles.push({'points' : w.cloneObject(poly)});
-        #                 polys.splice(polyIndex, 1);
-        #                 found = true;
-        #                 break;
-        #             }
-        #         }
-        #         if (found) {
-        #             triangulateIterator(polys);
-        #         }
-        #     };
-        # if (coords.length > 2) {
-        #     triangulateIterator([w.cloneObject(coords)]);
-        # }
+        aantal_iteraties = 0
 
-        return np.array(driehoeken)
+        def driehoek_iterator(polys):
+            nonlocal driehoeken
+            nonlocal driehoeken_lijnen_intern
+            nonlocal aantal_iteraties
+
+            aantal_iteraties += 1
+            if aantal_iteraties > 9999:
+                raise RecursionError('maximale aantal iteraties bereikt')
+
+            gevonden = False
+            for poly_i, poly in enumerate(polys):
+                if gevonden:
+                    break
+                l = len(poly)
+                if l > 3:
+                    for i in range(l):
+                        p = [poly[i][0], poly[i][1],
+                            poly[i][2], poly[i][3]] # x,y,i,angle
+                        p_vorige = [poly[(i-1+l)%l][0], poly[(i-1+l)%l][1],
+                              poly[(i-1+l)%l][2], poly[(i-1+l)%l][3]]
+                        p_volgende = [poly[(i+1)%l][0], poly[(i+1)%l][1],
+                            poly[(i+1)%l][2], poly[(i+1)%l][3]]
+                        over_lijn = False
+
+                        for i_sub in range(l):
+                            p_sub = [poly[i_sub][0], poly[i_sub][1],
+                                poly[i_sub][2], poly[i_sub][3]]
+                            p_sub_volgende = [poly[(i_sub+1)%l][0],
+                                poly[(i_sub+1)%l][1],
+                                poly[(i_sub+1)%l][2],
+                                poly[(i_sub+1)%l][3]]
+                            if (not (p_vorige[0] == p_sub[0]
+                                    and p_vorige[1] == p_sub[1])
+                                and not (p_vorige[0] == p_sub_volgende[0]
+                                    and p_vorige[1] == p_sub_volgende[1])
+                                and not (p_volgende[0] == p_sub[0]
+                                    and p_volgende[1] == p_sub[1])
+                                and not (p_volgende[0] == p_sub_volgende[0]
+                                    and p_volgende[1] == p_sub_volgende[1])):
+                                if self.fn.lijn_raakt_lijn(
+                                        p_vorige, p_volgende, p_sub,
+                                        p_sub_volgende):
+                                    over_lijn = True
+
+                        hoek_vorige = self.fn.bereken_hoek(
+                                p_volgende, p_vorige, p,
+                                not self._coordinaten_met_klok_mee)
+                        if hoek_vorige > 180:
+                            hoek_vorige = 360 - hoek_vorige
+
+                        hoek_volgende = self.fn.bereken_hoek(
+                                p, p_volgende, p_vorige,
+                                not self._coordinaten_met_klok_mee)
+                        if hoek_volgende > 180:
+                            hoek_volgende = 360 - hoek_volgende
+
+                        if ((not over_lijn) and p[3] < 180
+                                and hoek_vorige < p_vorige[3]
+                                and hoek_volgende < p_volgende[3]):
+                            poly1 = [
+                                [p[0], p[1], p[2], p[3]],
+                                [p_vorige[0], p_vorige[1],
+                                     p_vorige[2], hoek_vorige],
+                                [p_volgende[0], p_volgende[1],
+                                     p_volgende[2], hoek_volgende]]
+                            poly2 = []
+
+                            for i_temp in range(l):
+                                p_temp = poly[i_temp]
+                                if (not (p[0] == p_temp[0]
+                                         and p[1]==p_temp[1])):
+                                    if (p_vorige[0] == p_temp[0]
+                                             and p_vorige[1] == p_temp[1]):
+                                        poly2.append([
+                                            p_temp[0],
+                                            p_temp[1],
+                                            p_temp[2],
+                                            (p_temp[3] - hoek_vorige)])
+                                    elif (p_volgende[0] == p_temp[0]
+                                              and p_volgende[1] == p_temp[1]):
+                                        poly2.append([
+                                            p_temp[0],
+                                            p_temp[1],
+                                            p_temp[2],
+                                            (p_temp[3] - hoek_volgende)])
+                                    else:
+                                        poly2.append(p_temp)
+
+                            polys.append(poly1[:])
+                            polys.append(poly2[:])
+                            driehoeken_lijnen_intern.append([
+                                    p_vorige[2], p_volgende[2]])
+                            del polys[poly_i]
+                            gevonden = True
+                            break
+
+                elif l < 3:
+                    raise ValueError('opgegeven poly heeft minder dan drie punten')
+                else: # l = 3
+                    driehoeken.append(poly[:])
+                    del polys[poly_i]
+                    gevonden = True
+                    break
+
+            if gevonden:
+                driehoek_iterator(polys)
+
+        coordinaten = [[[x, y, i, h] for i, (x, y, h)
+                           in enumerate(self.array.tolist())]]
+
+        driehoek_iterator(coordinaten)
+
+        driehoeken = [[d[0][2], d[1][2], d[2][2]] for d in driehoeken]
+
+        return np.array(driehoeken), np.array(driehoeken_lijnen_intern)
 
     @property
     def eenheid(self) -> str:
@@ -439,9 +464,15 @@ class Vorm(BasisObject):
         """Verplaatst, roteert en/of verschaalt de vorm."""
         pass
 
+    def plot_net(self):
+        """Teken net van driehoeken, gebruikt voor berekenen vorm."""
+        plt.triplot(self[:,0], self[:,1], self._driehoeken, 'go-', lw=1)
+        plt.axis('equal')
+        plt.show()
+
     def plot(self):
-        """Teken simpele plot van lijn (met 2 dimensies)."""
-        plt.plot(self.array_gesloten[:,0], self.array_gesloten[:,1], 'ro-', lw=2)
+        """Teken vorm."""
+        plt.plot(self.array_gesloten[:,0], self.array_gesloten[:,1], 'r-', lw=2)
         plt.axis('equal')
         plt.show()
 
@@ -471,7 +502,7 @@ class Vorm(BasisObject):
             opp.append(self[i][0] * self[(i+1)%l][1]
                            - self[(i+1)%l][0] * self[i][1])
 
-        opp_totaal = 1/2*sum(opp)
+        opp_totaal = abs(1/2*sum(opp))
         return opp_totaal
 
     @property

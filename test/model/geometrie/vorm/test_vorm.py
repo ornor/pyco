@@ -11,7 +11,7 @@ Vorm = doc.model.Vorm
 
 class TestVorm(unittest.TestCase):
 
-    fn = Vorm([(0,0), (1,1)]).fn
+    fn = Vorm([(0,0), (1,0), (0,1)]).fn
 
     def test_fn_punt_aan_linker_zijde(self):
         assert self.fn.punt_aan_linker_zijde((3,4),(5,6), (4,10))
@@ -81,27 +81,26 @@ l1 = Lijn(
     ).lijn_bezier(
         richting=(-10,-4),
         naar=(4, -5),
-        stappen=10)
+        stappen=5)
 
-l2 = Lijn((0,0), (5,0), (10,0), (10,10), (5,12), (0,10))
+l2 = Lijn((0,0), (0,10), (4,10), (4,7), (6,7), (6,10), (10,10), (10,0))
 l2.eenheid = 'cm'
 
 v1 = Vorm(l1)
-#print(v1.array)
 v1.plot()
+v1.plot_net()
 print('A =', repr(v1.A_))
 print('z =', repr(v1.z_))
 print('O =', repr(v1.O_))
 print()
 
 v2 = Vorm(l2)
-#print(v2.array)
 v2.plot()
+v2.plot_net()
 print('A =', repr(v2.A_))
 print('z =', repr(v2.z_))
 print('O =', repr(v2.O_))
 print()
-
 
 if __name__ == '__main__':
     unittest.main()
