@@ -1,7 +1,5 @@
 import unittest
 
-import numpy as np
-
 from pyco.interface import Document
 
 doc = Document()
@@ -74,35 +72,41 @@ class TestVorm(unittest.TestCase):
 def print_props(obj):
     print('\n'.join(['{} = {}'.format(a, getattr(obj,a)) for a in obj.EIGENSCHAPPEN]))
 
-l1 = Lijn(
+v1 = Vorm(Lijn(
         (4, -5), (-10, 10)
     ).lijn_cirkelboog(
         middelpunt=(0,0),
         gradenhoek=+220,
-        stappen=100
+        stappen=20
     ).lijn_recht(
         naar=(4, 10)
     ).lijn_bezier(
         richting=(-10,-4),
         naar=(4, -5),
-        stappen=20)
-
-l2 = Lijn((0,0), (0,10), (4,10), (4,7), (6,7), (6,10), (10,10), (10,0))
-l2.eenheid = 'cm'
-
-v1 = Vorm(l1)
+        stappen=10))
 v1.plot()
 v1.plot_net()
 print()
 print_props(v1)
 print()
 
-v2 = Vorm(l2, E=10000)
+
+l2 = Lijn((0,0), (0,10), (4,10), (4,7), (6,7), (6,10), (10,10), (10,0))
+l2.eenheid = 'cm'
+v2 = Vorm(l2, E=10000, referentiepunt=(3,3))
 v2.plot()
 v2.plot_net()
 print()
 print_props(v2)
 print()
+
+# v3= Vorm(Lijn([-1,0]).lijn_cirkelboog(middelpunt=(0,0),
+#                                       gradenhoek=360,
+#                                       stappen=200))
+# v3.plot()
+# print()
+# print_props(v3)
+# print()
 
 if __name__ == '__main__':
     unittest.main()

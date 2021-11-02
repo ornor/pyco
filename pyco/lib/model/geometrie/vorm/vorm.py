@@ -457,11 +457,10 @@ class Vorm(BasisObject):
     def __init__(self,
                  lijn:Lijn,
                  E:float=0.0,
-                 translatie:Vector=None,
-                 rotatie:Union[Waarde, float, int]=None,
-                 rotatiepunt:Knoop=None,
-                 schaal:Union[Waarde, float, int]=None,
-                 schaalpunt:Knoop=None):
+                 translatie:Union[Vector, list, tuple]=None,
+                 rotatiehoek:Union[Waarde, float, int]=None,
+                 schaalfactor:Union[Waarde, float, int]=None,
+                 referentiepunt:Union[Knoop, list, tuple]=None):
         super().__init__()
 
         if not isinstance(lijn, Lijn):
@@ -534,9 +533,8 @@ class Vorm(BasisObject):
         self.kymax_ = None
 
         # corrigeer coordinaten in array n.a.v. transformeren vorm
-        self.transformeren(translatie,
-                           rotatie, rotatiepunt,
-                           schaal, schaalpunt)
+        self.transformeren(translatie, rotatiehoek,
+                           schaalfactor, referentiepunt)
 
     def _check_knopen(self, np_array):
         """Checkt knopen en berekent hoeken."""
@@ -780,14 +778,46 @@ class Vorm(BasisObject):
         return np.array(array)
 
     def transformeren(self,
-                      translatie:Vector=None,
-                      rotatie:Union[Waarde, float, int]=None,
-                      rotatiepunt:Knoop=None,
-                      schaal:Union[Waarde, float, int]=None,
-                      schaalpunt:Knoop=None):
+                      translatie:Union[Vector, list, tuple]=None,
+                      rotatiehoek:Union[Waarde, float, int]=None,
+                      schaalfactor:Union[Waarde, float, int]=None,
+                      referentiepunt:Knoop=None):
         """Verplaatst, roteert en/of verschaalt de vorm."""
 
-        # TODO
+        array = self.array.tolist()
+
+        # bepalen zwaartepunt doorsnede
+        l = len(array)
+        opp = []
+        ncx_tot = []
+        ncy_tot = []
+        for i in range(l):
+            opp.append(array[i][0]*array[(i+1)%l][1]
+                    - array[(i+1)%l][0]*array[i][1])
+        A = self._float(1/2*sum(opp))
+        for i in range(l):
+            ncx_tot.append((array[i][0]
+                    + array[(i+1)%l][0]) * (array[i][0]*array[(i+1)%l][1]
+                    - array[(i+1)%l][0]*array[i][1]))
+            ncy_tot.append((array[i][1]
+                    + array[(i+1)%l][1]) * (array[i][0]*array[(i+1)%l][1]
+                    - array[(i+1)%l][0]*array[i][1]))
+        ncx = self._float(1/(6*A)*sum(ncx_tot))
+        ncy= self._float(1/(6*A)*sum(ncy_tot))
+
+        referentiepunt = (
+            referentiepunt.array.tolist()
+            if referentiepunt is not None
+                and isinstance(referentiepunt, Knoop)
+            else (
+                [referentiepunt[0], referentiepunt[1]]
+                if referentiepunt is not None
+                    and (isinstance(referentiepunt, tuple)
+                         or isinstance(referentiepunt, list))
+                else [ncx, ncy]
+            ))
+
+        print(referentiepunt)
 
         self._bereken_eigenschappen()
 
