@@ -1,5 +1,7 @@
 import unittest
 
+import numpy as np
+
 from pyco.interface import Document
 
 doc = Document()
@@ -69,19 +71,21 @@ class TestVorm(unittest.TestCase):
         assert Lijn(Knoop(1, 2), Knoop(3, 4)) == Lijn([Knoop(1, 2), Knoop(3, 4)])
 
 
+def print_props(obj):
+    print('\n'.join(['{} = {}'.format(a, getattr(obj,a)) for a in obj.EIGENSCHAPPEN]))
 
 l1 = Lijn(
         (4, -5), (-10, 10)
     ).lijn_cirkelboog(
         middelpunt=(0,0),
         gradenhoek=+220,
-        stappen=10
+        stappen=100
     ).lijn_recht(
         naar=(4, 10)
     ).lijn_bezier(
         richting=(-10,-4),
         naar=(4, -5),
-        stappen=5)
+        stappen=20)
 
 l2 = Lijn((0,0), (0,10), (4,10), (4,7), (6,7), (6,10), (10,10), (10,0))
 l2.eenheid = 'cm'
@@ -89,17 +93,15 @@ l2.eenheid = 'cm'
 v1 = Vorm(l1)
 v1.plot()
 v1.plot_net()
-print('A =', repr(v1.A_))
-print('z =', repr(v1.z_))
-print('O =', repr(v1.O_))
+print()
+print_props(v1)
 print()
 
-v2 = Vorm(l2)
+v2 = Vorm(l2, E=10000)
 v2.plot()
 v2.plot_net()
-print('A =', repr(v2.A_))
-print('z =', repr(v2.z_))
-print('O =', repr(v2.O_))
+print()
+print_props(v2)
 print()
 
 if __name__ == '__main__':

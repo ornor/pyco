@@ -172,13 +172,39 @@ class VormFuncties:
         return [ncx, ncy]
 
     @classmethod
+    def bereken_traagheidsmomenten_driehoek(cls, p1, p2, p3):
+        nc = cls.bereken_zwaartepunt_driehoek(p1, p2, p3)
+        ncx = nc[0]
+        ncy = nc[1]
+        c = [p1, p2, p3]
+        Ixx = 0.0
+        Iyy = 0.0
+        Ixy = 0.0
+        l = len(c)
+        for i in range(l):
+            p = [c[i][0] - ncx, c[i][1] - ncy]
+            p_volgende = [c[(i + 1) % l][0] - ncx,
+                          c[(i + 1) % l][1] - ncy]
+            a = abs(p[0] * p_volgende[1] - p_volgende[0] * p[1])
+            Ixx += (p[0] * p[0] + p[0] * p_volgende[0] +
+                    p_volgende[0] * p_volgende[0]) * a
+            Iyy += (p[1] * p[1] + p[1] * p_volgende[1] +
+                    p_volgende[1] * p_volgende[1]) * a
+            Ixy += (p[0] * p_volgende[1] + 2 * p[0] * p[1] +
+                2 * p_volgende[0] * p_volgende[1] + p_volgende[0] * p[1]) * a
+        Ixx /= 12.0
+        Iyy /= 12.0
+        Ixy /= 24.0
+        return [Ixx, Iyy, Ixy]
+
+    @classmethod
     def optimaliseer_net(cls, np_array, driehoeken, driehoeken_lijnen_intern):
         """Triangulatie van niet-convexe polygoon optimatliseren.
 
         Deze functie wordt gebruikt aan het einde van 'genereer_net' functie.
 
         Scherpe hoeken kunnen met floating points tot onnauwkeurigheden leiden.
-        Als lijn tussen twee driehoeken (vierhoek) hele scherpe hoek oplevert,
+        Als lijn tussen twee driehoeken (vierhoek) een scherpe hoek oplevert,
         dan lijn flippen en andere hoekpunten in deze vierhoek laten verbinden.
         """
 
@@ -214,6 +240,7 @@ class VormFuncties:
                 tmp2 = driehoek2[1][:]
                 del tmp2[tmp2.index(lijn_intern[0])]
                 del tmp2[tmp2.index(lijn_intern[1])]
+
                 # zoek waarden van hoekpunten van vierhoek op
                 ip1 = lijn_intern[0]
                 ip2 = lijn_intern[1]
@@ -223,6 +250,12 @@ class VormFuncties:
                 p2 = np_array[ip2][:2].tolist()
                 p3 = np_array[ip3][:2].tolist()
                 p4 = np_array[ip4][:2].tolist()
+
+                # check of nieuwe diagonaal wel de oude diagonaal kruist
+                #    (anders komt nieuwe diagonaal wellicht buiten Vorm
+                if not cls.lijn_raakt_lijn(p1, p2, p3, p4):
+                    continue
+
                 # bereken hoeken van diagonalen en check of nieuwe groter zijn
                 hoek_bestaand_1 = min(cls.bereken_hoek(p1, p2, p3, True),
                                       cls.bereken_hoek(p1, p2, p3, False))
@@ -243,11 +276,9 @@ class VormFuncties:
                 min_hoek_bestaand = min(hoek_bestaand_1, hoek_bestaand_2,
                                         hoek_bestaand_3, hoek_bestaand_4)
                 min_hoek_nieuw = min(hoek_nieuw_1, hoek_nieuw_2,
-                                        hoek_nieuw_3, hoek_nieuw_4)
+                                     hoek_nieuw_3, hoek_nieuw_4)
 
                 if min_hoek_nieuw > min_hoek_bestaand:
-                    # TODO check ook of lijnen niet andere lijnen kruisen??
-                    print('gevonden:', ip1, ip2, '-->', ip3, ip4)
                     gevonden = True
                     # vervang huidige driehoeken
                     tmp_driehoeken = []
@@ -419,8 +450,13 @@ class Vorm(BasisObject):
 
     fn = VormFuncties()
 
+    EIGENSCHAPPEN = 'O A xmin xmax ymin ymax ncx ncy Ixx Iyy Ixy Iyy I1 I2 alpha Wxmin Wxmax Wymin Wymax kxmin kxmax kymin kymax E EA EIxx EIyy EIxy'.split()
+
+    AFRONDEN_NAAR_NUL = 1e-13
+
     def __init__(self,
                  lijn:Lijn,
+                 E:float=0.0,
                  translatie:Vector=None,
                  rotatie:Union[Waarde, float, int]=None,
                  rotatiepunt:Knoop=None,
@@ -432,14 +468,70 @@ class Vorm(BasisObject):
             lijn = Lijn(*lijn)
 
         self._eenheid = lijn.eenheid
+        self.E = float(E)  # TODO maak elasticiteit ook Waarde met eenheid; en maak ook @property zodat met aanroepen _bereken_waardes
 
         # controleer knoop data en maak Numpy array
         self._array, coordinaten_met_klok_mee = \
             self._check_knopen(lijn.array.copy())
 
-        # maak net van driehoeken; lijsten verwijzen naar index knoop in array
+        # maak net van driehoeken; lijsten verwijzen naar INDEX knoop in array
         self._driehoeken, self._driehoeken_lijnen_intern = \
             self.fn.genereer_net(self._array, coordinaten_met_klok_mee)
+
+        # aanmaken vorm eigenschappen
+        # normaal een float object, met underscore erachter een Waarde object
+        self.O = None       # omtrek
+        self.O_ = None
+        self.A = None       # oppervlakte
+        self.A_ = None
+        self.EA = None      # rekstijfheid
+        self.EA_ = None
+        self.xmin = None    # laagste x-waarde (links)
+        self.xmin_ = None
+        self.xmax = None    # hoogste x-waarde (rechts)
+        self.xmax_ = None
+        self.ymin = None    # laagste y-waarde (onder)
+        self.ymin_ = None
+        self.ymax = None    # hoogste y-waarde (boven)
+        self.ymax_ = None
+        self.ncx = None     # normaalkrachtcentrum x (zwaartepunt horizontaal)
+        self.ncx_ = None
+        self.ncy = None     # normaalkrachtcentrum y (zwaartepunt verticaal)
+        self.ncy_ = None
+        self.Ixx = None     # traagheidsmoment xx (buiging belasting x-richting)
+        self.Ixx_ = None
+        self.Iyy = None     # traagheidsmoment yy (buiging belasting y-richting)
+        self.Iyy_ = None
+        self.Ixy = None     # wringtraagheidsmoment xy
+        self.Ixy_ = None
+        self.EIxx = None    # traagheidsmoment xx met elasticiteit
+        self.EIxx_ = None
+        self.EIyy = None    # traagheidsmoment yy met elasticiteit
+        self.EIyy_ = None
+        self.EIxy = None    # traagheidsmoment xy met elasticiteit
+        self.EIxy_ = None
+        self.I1 = None      # hoofdtraagheidsmoment 1 (sterke as)
+        self.I1_ = None
+        self.I2 = None      # hoofdtraagheidsmoment 2 (zwakke as)
+        self.I1_ = None
+        self.alpha = None   # hoek van hoofdtraagheidsassen in graden
+        self.alpha_ = None
+        self.Wxmin = None   # weerstandsmoment t.p.v. laagste x-waarde (links)
+        self.Wxmin_ = None
+        self.Wxmax = None   # weerstandsmoment t.p.v. hoogste x-waarde (rechts)
+        self.Wxmax_ = None
+        self.Wymin = None   # weerstandsmoment t.p.v. laagste y-waarde (onder)
+        self.Wymin_ = None
+        self.Wymax = None   # weerstandsmoment t.p.v. hoogste y-waarde (boven)
+        self.Wymax_ = None
+        self.kxmin = None   # laagste x-waarde kern (links)
+        self.kxmin_ = None
+        self.kxmax = None   # hoogste x-waarde kern (rechts)
+        self.kxmax_ = None
+        self.kymin = None   # laagste y-waarde kern (onder)
+        self.kymin_ = None
+        self.kymax = None   # hoogste y-waarde kern (boven)
+        self.kymax_ = None
 
         # corrigeer coordinaten in array n.a.v. transformeren vorm
         self.transformeren(translatie,
@@ -520,7 +612,7 @@ class Vorm(BasisObject):
         if volgende_y < vorige_y:
             coordinaten_met_klok_mee = False
 
-        # hoek berekenen en toevoegen aan array
+        # hoeken berekenen en toevoegen aan array
         for i in range(l):
             p = coordinaten[i]
             vorige_p = coordinaten[(i - 1 + l) % l]
@@ -537,6 +629,114 @@ class Vorm(BasisObject):
 
         return np_array, coordinaten_met_klok_mee
 
+    def _float(self, waarde):
+        """Zet object om naar een float en rond hele kleine waarden af naar nul."""
+        f = float(waarde)
+        if f > -1*self.AFRONDEN_NAAR_NUL and f < 1*self.AFRONDEN_NAAR_NUL:
+            f = 0.0
+        return f
+
+    def _bereken_eigenschappen(self):
+        """Berekent alle vorm eigenschappen. Wordt aangeroepen op einde van
+        functie: self.transfomeren."""
+
+        # startwaarden
+        self.A = 0.0
+        self.EA = 0.0
+        self.xmin = self.driehoeken_array[0][0][0]
+        self.xmax = self.driehoeken_array[0][0][0]
+        self.ymin = self.driehoeken_array[0][0][1]
+        self.ymax = self.driehoeken_array[0][0][1]
+        self.ncx = 0.0
+        self.ncy = 0.0
+        self.Ixx = 0.0
+        self.Iyy = 0.0
+        self.Ixy = 0.0
+
+        for driehoek in self.driehoeken_array:
+            p1 = driehoek[0]
+            p2 = driehoek[1]
+            p3 = driehoek[2]
+            self.xmin = min(self.xmin, p1[0], p2[0], p3[0])
+            self.xmax = max(self.xmax, p1[0], p2[0], p3[0])
+            self.ymin = min(self.ymin, p1[1], p2[1], p3[1])
+            self.ymax = max(self.ymax, p1[1], p2[1], p3[1])
+            A_dr = self.fn.bereken_oppervlakte_driehoek(p1, p2, p3)
+            self.A += A_dr
+            self.EA += self.E * A_dr
+            nc_dr = self.fn.bereken_zwaartepunt_driehoek(p1, p2, p3)
+            ncx_dr = nc_dr[0]
+            ncy_dr = nc_dr[1]
+            if self.E: # geen none en niet gelijk aan 0
+                self.ncx += self.E * A_dr * ncx_dr
+                self.ncy += self.E * A_dr * ncy_dr
+            else:
+                self.ncx += A_dr * ncx_dr
+                self.ncy += A_dr * ncy_dr
+
+        if self.E: # geen none en niet gelijk aan 0
+            self.ncx /= self.EA
+            self.ncy /= self.EA
+        else:
+            self.ncx /= self.A
+            self.ncy /= self.A
+
+        for driehoek in self.driehoeken_array:
+            p1 = driehoek[0]
+            p2 = driehoek[1]
+            p3 = driehoek[2]
+            A_dr = self.fn.bereken_oppervlakte_driehoek(p1, p2, p3)
+            I = self.fn.bereken_traagheidsmomenten_driehoek(p1, p2, p3)
+            nc_dr = self.fn.bereken_zwaartepunt_driehoek(p1, p2, p3)
+            ncx_dr = nc_dr[0]
+            ncy_dr = nc_dr[1]
+            self.Ixx += I[0] + A_dr * (ncx_dr - self.ncx)**2
+            self.Iyy += I[1] + A_dr * (ncy_dr - self.ncy)**2
+            self.Ixy += I[2] + A_dr * (ncx_dr - self.ncx) * (ncy_dr - self.ncy)
+
+        self.O = self._float(Lijn(self.array_gesloten.tolist()))
+        self.A = self._float(self.A)
+        self.xmin = self._float(self.xmin)
+        self.xmax = self._float(self.xmax)
+        self.ymin = self._float(self.ymin)
+        self.ymax = self._float(self.ymax)
+        self.ncx = self._float(self.ncx)
+        self.ncy = self._float(self.ncy)
+        self.Ixx = self._float(self.Ixx)
+        self.Iyy = self._float(self.Iyy)
+        self.Ixy = self._float(self.Ixy)
+        self.EIxx = self._float(self.E * self.Ixx)
+        self.EIyy = self._float(self.E * self.Iyy)
+        self.EIxy = self._float(self.E * self.Ixy)
+        self.Wxmin = self._float(self.Ixx / abs(self.ncx - self.xmin))
+        self.Wxmax = self._float(self.Ixx / abs(self.ncx - self.xmax))
+        self.Wymin = self._float(self.Iyy / abs(self.ncx - self.xmin))
+        self.Wymax = self._float(self.Iyy / abs(self.ncx - self.xmax))
+        self.kxmin = self._float(-1 * self.Wxmax / self.A)
+        self.kxmax = self._float(self.Wxmin / self.A)
+        self.kymin = self._float(-1 * self.Wxmax / self.A)
+        self.kymax = self._float(self.Wxmin / self.A)
+        self.I1 = self._float((self.Ixx + self.Iyy) / 2
+                   + math.sqrt((self.Ixx - self.Iyy) * (self.Ixx - self.Iyy)
+                   + 4 * self.Ixy**2) / 2)
+        self.I2 = self._float((self.Ixx + self.Iyy) / 2
+                   - math.sqrt((self.Ixx - self.Iyy) * (self.Ixx - self.Iyy)
+                   + 4 * self.Ixy**2) / 2)
+        if self.Ixx - self.Iyy != 0:
+            self.alpha = self._float((math.atan(2 * self.Ixy /
+                (self.Ixx - self.Iyy))/2) * (360 / (2 * math.pi)))
+        else:
+            self.alpha = 0.0
+
+        # maak Waarde objecten met eenheid
+        # w = Waarde(self.A)
+        # if self.eenheid is not None:
+        #     opp_eenheid = '{}2'.format(self.eenheid)
+        #     w[opp_eenheid]
+        # self.A_ = w
+        # self.ncx_ = Waarde(self.ncx, self.eenheid)
+        # self.ncy_ = Waarde(self.ncy, self.eenheid)
+        # self.O_ = Waarde(self.O, self.eenheid)
 
 
     @property
@@ -569,6 +769,16 @@ class Vorm(BasisObject):
         """Retourneert Numpy array object met alle getallen (zonder eenheid) waarbij startpunt OOK als laatste punt wordt aangehouden."""
         return np.append(self.array, [self[0].tolist()], axis=0)
 
+    @property
+    def driehoeken_array(self) -> np.array:
+        """Retourneert Numpy array object met alle getallen (zonder eenheid)."""
+        array = []
+        for dh in self._driehoeken:
+            array.append([[self[dh[0]][0], self[dh[0]][1]],
+                          [self[dh[1]][0], self[dh[1]][1]],
+                          [self[dh[2]][0], self[dh[2]][1]]])
+        return np.array(array)
+
     def transformeren(self,
                       translatie:Vector=None,
                       rotatie:Union[Waarde, float, int]=None,
@@ -576,7 +786,10 @@ class Vorm(BasisObject):
                       schaal:Union[Waarde, float, int]=None,
                       schaalpunt:Knoop=None):
         """Verplaatst, roteert en/of verschaalt de vorm."""
-        pass
+
+        # TODO
+
+        self._bereken_eigenschappen()
 
     def plot_net(self):
         """Teken net van driehoeken, gebruikt voor berekenen vorm."""
@@ -605,62 +818,3 @@ class Vorm(BasisObject):
             k = Knoop(k_array.tolist())
             k.eenheid = self.eenheid
             yield k
-
-    @property
-    def A(self) -> float:
-        """Berekent oppervlakte en retourneert een float object."""
-        opp = []
-        l = len(self)
-
-        for i in range(l):
-            opp.append(self[i][0] * self[(i+1)%l][1]
-                           - self[(i+1)%l][0] * self[i][1])
-
-        opp_totaal = abs(1/2*sum(opp))
-        return opp_totaal
-
-    @property
-    def A_(self) -> Waarde:
-        """Berekent oppervlakte en retourneert een Waarde object."""
-        w = Waarde(self.A)
-        if self.eenheid is not None:
-            opp_eenheid = '{}2'.format(self.eenheid)
-            w[opp_eenheid]
-        return w
-
-    @property
-    def z(self) -> list:
-        """Berekent zwaartepunt in twee dimensies en retourneert een list met float."""
-        z1 = []
-        z2 = []
-        l = len(self)
-
-        for i in range(l):
-            z1.append((self[i][0] + self[(i+1)%l][0])
-                          * (self[i][0] * self[(i+1)%l][1]
-                          - self[(i+1)%l][0] * self[i][1]))
-            z2.append((self[i][1] + self[(i+1)%l][1])
-                          * (self[i][0] * self[(i+1)%l][1]
-                          - self[(i+1)%l][0] * self[i][1]))
-
-        z1_totaal = 1/(6*self.A)*sum(z1)
-        z2_totaal = 1/(6*self.A)*sum(z2)
-
-        return [z1_totaal, z2_totaal]
-
-    @property
-    def z_(self) -> Knoop:
-        """Berekent zwaartepunt in twee dimensies en retourneert een Knoop object."""
-        k = Knoop(self.z)
-        k.eenheid = self.eenheid
-        return k
-
-    @property
-    def O(self) -> float:
-        """Berekent omtrek en retourneert een float."""
-        return float(Lijn(self.array.tolist()))
-
-    @property
-    def O_(self) -> Waarde:
-        """Berekent omtrek en retourneert een Waarde object."""
-        return Waarde(self.O, self.eenheid)
