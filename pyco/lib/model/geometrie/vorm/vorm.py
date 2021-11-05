@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 from pyco.model import BasisObject, Waarde, Vector, Lijn, Knoop
 
+
 class VormFuncties:
     """Statische hulpfuncties voor uitrekenen eigenschappen vorm."""
 
@@ -37,7 +38,8 @@ class VormFuncties:
 
     @classmethod
     def lijn_raakt_lijn(cls, l1a, l1b, l2a, l2b):
-        """Checkt of lijn l1a-l1b de lijn l2a-l2b kruist of raakt, op de lijnstukken TUSSEN de punten en INCLUSIEF de punten zelf."""
+        """Checkt of lijn l1a-l1b de lijn l2a-l2b kruist of raakt, op de
+        lijnstukken TUSSEN de punten en INCLUSIEF de punten zelf."""
         if (cls.punt_op_lijn(l1a, l1b, l2a) or
                 cls.punt_op_lijn(l1a, l1b, l2b) or
                 cls.punt_op_lijn(l2a, l2b, l1a) or
@@ -198,119 +200,92 @@ class VormFuncties:
         return [Ixx, Iyy, Ixy]
 
     @classmethod
-    def optimaliseer_net(cls, np_array, driehoeken, driehoeken_lijnen_intern):
-        """Triangulatie van niet-convexe polygoon optimatliseren.
-
-        Deze functie wordt gebruikt aan het einde van 'genereer_net' functie.
-
-        Scherpe hoeken kunnen met floating points tot onnauwkeurigheden leiden.
-        Als lijn tussen twee driehoeken (vierhoek) een scherpe hoek oplevert,
-        dan lijn flippen en andere hoekpunten in deze vierhoek laten verbinden.
-        """
-
-        aantal_iteraties = 0
-
-        def iterator_optimaliseren():
-            nonlocal driehoeken
-            nonlocal driehoeken_lijnen_intern
-            nonlocal aantal_iteraties
-
-            aantal_iteraties += 1
-            if aantal_iteraties > 9999:
-                raise RecursionError('maximale aantal iteraties bereikt')
-
-            gevonden = False
-            for i_intern, lijn_intern in enumerate(driehoeken_lijnen_intern):
-                # zoek corresponderende driehoeken
-                driehoek1 = None
-                driehoek2 = None
-                for i_driehoek, driehoek in enumerate(driehoeken):
-                    if (lijn_intern[0] in driehoek
-                            and lijn_intern[1] in driehoek):
-                        if driehoek1 is None:
-                            driehoek1 = (int(str(i_driehoek)), driehoek[:])
-                        else:
-                            driehoek2 = (int(str(i_driehoek)), driehoek[:])
-                            break
-                if driehoek1 is None or driehoek2 is None:
-                    continue
-                tmp1 = driehoek1[1][:]
-                del tmp1[tmp1.index(lijn_intern[0])]
-                del tmp1[tmp1.index(lijn_intern[1])]
-                tmp2 = driehoek2[1][:]
-                del tmp2[tmp2.index(lijn_intern[0])]
-                del tmp2[tmp2.index(lijn_intern[1])]
-
-                # zoek waarden van hoekpunten van vierhoek op
-                ip1 = lijn_intern[0]
-                ip2 = lijn_intern[1]
-                ip3 = tmp1[0]
-                ip4 = tmp2[0]
-                p1 = np_array[ip1][:2].tolist()
-                p2 = np_array[ip2][:2].tolist()
-                p3 = np_array[ip3][:2].tolist()
-                p4 = np_array[ip4][:2].tolist()
-
-                # check of nieuwe diagonaal wel de oude diagonaal kruist
-                #    (anders komt nieuwe diagonaal wellicht buiten Vorm
-                if not cls.lijn_raakt_lijn(p1, p2, p3, p4):
-                    continue
-
-                # bereken hoeken van diagonalen en check of nieuwe groter zijn
-                hoek_bestaand_1 = min(cls.bereken_hoek(p1, p2, p3, True),
-                                      cls.bereken_hoek(p1, p2, p3, False))
-                hoek_bestaand_2 = min(cls.bereken_hoek(p2, p1, p3, True),
-                                      cls.bereken_hoek(p2, p1, p3, False))
-                hoek_bestaand_3 = min(cls.bereken_hoek(p1, p2, p4, True),
-                                      cls.bereken_hoek(p1, p2, p4, False))
-                hoek_bestaand_4 = min(cls.bereken_hoek(p2, p1, p4, True),
-                                      cls.bereken_hoek(p2, p1, p4, False))
-                hoek_nieuw_1 = min(cls.bereken_hoek(p3, p4, p1, True),
-                                         cls.bereken_hoek(p3, p4, p1, False))
-                hoek_nieuw_2 = min(cls.bereken_hoek(p4, p3, p1, True),
-                                         cls.bereken_hoek(p4, p3, p1, False))
-                hoek_nieuw_3 = min(cls.bereken_hoek(p3, p4, p2, True),
-                                         cls.bereken_hoek(p3, p4, p2, False))
-                hoek_nieuw_4 = min(cls.bereken_hoek(p4, p3, p2, True),
-                                         cls.bereken_hoek(p4, p3, p2, False))
-                min_hoek_bestaand = min(hoek_bestaand_1, hoek_bestaand_2,
-                                        hoek_bestaand_3, hoek_bestaand_4)
-                min_hoek_nieuw = min(hoek_nieuw_1, hoek_nieuw_2,
-                                     hoek_nieuw_3, hoek_nieuw_4)
-
-                if min_hoek_nieuw > min_hoek_bestaand:
-                    gevonden = True
-                    # vervang huidige driehoeken
-                    tmp_driehoeken = []
-                    for i, driehoek in enumerate(driehoeken):
-                        if i == driehoek1[0]:
-                            tmp_driehoeken.append([ip3, ip4, ip1])
-                        elif i == driehoek2[0]:
-                            tmp_driehoeken.append([ip3, ip4, ip2])
-                        else:
-                            tmp_driehoeken.append(driehoek)
-                    driehoeken = tmp_driehoeken
-                    # vervang huidige interne lijn
-                    tmp_lijnen_intern = []
-                    for i, lijn in enumerate(driehoeken_lijnen_intern):
-                        if i == i_intern:
-                            tmp_lijnen_intern.append([ip3, ip4])
-                        else:
-                            tmp_lijnen_intern.append(lijn)
-                    driehoeken_lijnen_intern = tmp_lijnen_intern
-                    break
-
-            if gevonden:
-                iterator_optimaliseren()
-
-        # start proces
-        iterator_optimaliseren()
-
-        return driehoeken, driehoeken_lijnen_intern
-
-    @classmethod
-    def genereer_net(cls, np_array, coordinaten_met_klok_mee):
+    def genereer_net(cls, np_array):
         """Triangulatie van niet-convexe polygoon."""
+
+        coordinaten = []
+        coordinaten_links_rechts = []
+
+        # zorgen dat laatste knoop niet zelfde is als eerste
+        if np_array[0].tolist() == np_array[-1].tolist():
+            np_array = np.delete(np_array, (-1), axis=0)
+
+        # zorgen dat omtrek lijnen elkaar nergens kruisen/raken
+        l = len(np_array)
+        for i in range(l):
+            # kies een lijn
+            p1 = [np_array[i][0], np_array[i][1]]
+            p2 = [np_array[(i+1)%l][0], np_array[(i+1)%l][1]]
+            for ii in range(i, l):
+                # check alle andere lijnen
+                if i != (ii-1)%l and i != ii and i != (ii+1)%l:
+                    pp1 = [np_array[ii][0], np_array[ii][1]]
+                    pp2 = [np_array[(ii+1)%l][0], np_array[(ii+1)%l][1]]
+                    if cls.lijn_raakt_lijn(p1, p2, pp1, pp2):
+                        raise ValueError('Omtrek van vorm mag zichzelf nergens raken/kruisen. Volgende lijnen doen dat wel: Lijn({}, {}) & Lijn({}, {})'.format(p1, p2, pp1, pp2))
+
+        def verwijder_punt_op_lijn(c):
+            nonlocal coordinaten_links_rechts
+            punt_op_lijn_gevonden = False
+            c = c if (isinstance(c, list) or isinstance(c, tuple)) else []
+            n = len(c)
+
+            for i in range(n):
+                x = c[i][0]
+                y = c[i][1]
+                vorige_x = c[(i - 1 + n) % n][0]
+                vorige_y = c[(i - 1 + n) % n][1]
+                volgende_x = c[(i + 1) % n][0]
+                volgende_y = c[(i + 1) % n][1]
+                if cls.punt_op_lijn([vorige_x, vorige_y],
+                                        [volgende_x, volgende_y], [x, y]):
+                    del c[i]
+                    punt_op_lijn_gevonden = True
+                    break
+            if punt_op_lijn_gevonden:
+                verwijder_punt_op_lijn(c)
+            else:
+                n = len(c)
+                for i in range(n):
+                    coordinaten.append([c[i][0], c[i][1], i])
+                coordinaten_links_rechts = sorted(
+                        coordinaten, key=lambda x: x[0])
+
+        verwijder_punt_op_lijn(np_array.tolist())
+
+        # uitzoeken of vorm met klok mee gaat of tegen klok in
+        linker_c = coordinaten_links_rechts[0]
+        l = len(coordinaten)
+        volgende_c = coordinaten[(linker_c[2] + 1) % l]
+        vorige_c = coordinaten[(linker_c[2] - 1 + l) % l]
+        volgende_y = volgende_c[1]
+        vorige_y = vorige_c[1]
+        coordinaten_met_klok_mee = True
+        if volgende_c[0] > vorige_c[0]:
+            interpol_y = cls.interpoleer_over_lijn(
+                    linker_c, volgende_c, vorige_c[0])
+            if interpol_y != 99999:
+                volgende_y = interpol_y
+        else:
+            interpol_y = cls.interpoleer_over_lijn(
+                    linker_c, vorige_c, volgende_c[0])
+            if interpol_y != 99999:
+                vorige_y = interpol_y
+        if volgende_y < vorige_y:
+            coordinaten_met_klok_mee = False
+
+        # hoek berekenen en toevoegen aan array
+        for i in range(l):
+            p = coordinaten[i]
+            vorige_p = coordinaten[(i - 1 + l) % l]
+            volgende_p = coordinaten[(i + 1) % l]
+            hoek = cls.bereken_hoek(
+                    vorige_p, p, volgende_p,
+                    not coordinaten_met_klok_mee)
+            coordinaten[i].append(hoek)
+
+        np_array = np.array([[x, y, h] for x, y, _, h in coordinaten])
+
         driehoeken = []
         driehoeken_lijnen_intern = []
 
@@ -436,7 +411,119 @@ class VormFuncties:
         return np.array(driehoeken), np.array(driehoeken_lijnen_intern)
 
 
-#==============================================================================
+    @classmethod
+    def optimaliseer_net(cls, np_array, driehoeken, driehoeken_lijnen_intern):
+        """Triangulatie van niet-convexe polygoon optimatliseren.
+
+        Deze functie wordt gebruikt aan het einde van 'genereer_net' functie.
+
+        Scherpe hoeken kunnen met floating points tot onnauwkeurigheden leiden.
+        Als lijn tussen twee driehoeken (vierhoek) een scherpe hoek oplevert,
+        dan lijn flippen en andere hoekpunten in deze vierhoek laten verbinden.
+        """
+
+        aantal_iteraties = 0
+
+        def iterator_optimaliseren():
+            nonlocal driehoeken
+            nonlocal driehoeken_lijnen_intern
+            nonlocal aantal_iteraties
+
+            aantal_iteraties += 1
+            if aantal_iteraties > 9999:
+                raise RecursionError('maximale aantal iteraties bereikt')
+
+            gevonden = False
+            for i_intern, lijn_intern in enumerate(driehoeken_lijnen_intern):
+                # zoek corresponderende driehoeken
+                driehoek1 = None
+                driehoek2 = None
+                for i_driehoek, driehoek in enumerate(driehoeken):
+                    if (lijn_intern[0] in driehoek
+                            and lijn_intern[1] in driehoek):
+                        if driehoek1 is None:
+                            driehoek1 = (int(str(i_driehoek)), driehoek[:])
+                        else:
+                            driehoek2 = (int(str(i_driehoek)), driehoek[:])
+                            break
+                if driehoek1 is None or driehoek2 is None:
+                    continue
+                tmp1 = driehoek1[1][:]
+                del tmp1[tmp1.index(lijn_intern[0])]
+                del tmp1[tmp1.index(lijn_intern[1])]
+                tmp2 = driehoek2[1][:]
+                del tmp2[tmp2.index(lijn_intern[0])]
+                del tmp2[tmp2.index(lijn_intern[1])]
+
+                # zoek waarden van hoekpunten van vierhoek op
+                ip1 = lijn_intern[0]
+                ip2 = lijn_intern[1]
+                ip3 = tmp1[0]
+                ip4 = tmp2[0]
+                p1 = np_array[ip1][:2].tolist()
+                p2 = np_array[ip2][:2].tolist()
+                p3 = np_array[ip3][:2].tolist()
+                p4 = np_array[ip4][:2].tolist()
+
+                # check of nieuwe diagonaal wel de oude diagonaal kruist
+                #    (anders komt nieuwe diagonaal wellicht buiten Vorm
+                if not cls.lijn_raakt_lijn(p1, p2, p3, p4):
+                    continue
+
+                # bereken hoeken van diagonalen en check of nieuwe groter zijn
+                hoek_bestaand_1 = min(cls.bereken_hoek(p1, p2, p3, True),
+                                      cls.bereken_hoek(p1, p2, p3, False))
+                hoek_bestaand_2 = min(cls.bereken_hoek(p2, p1, p3, True),
+                                      cls.bereken_hoek(p2, p1, p3, False))
+                hoek_bestaand_3 = min(cls.bereken_hoek(p1, p2, p4, True),
+                                      cls.bereken_hoek(p1, p2, p4, False))
+                hoek_bestaand_4 = min(cls.bereken_hoek(p2, p1, p4, True),
+                                      cls.bereken_hoek(p2, p1, p4, False))
+                hoek_nieuw_1 = min(cls.bereken_hoek(p3, p4, p1, True),
+                                         cls.bereken_hoek(p3, p4, p1, False))
+                hoek_nieuw_2 = min(cls.bereken_hoek(p4, p3, p1, True),
+                                         cls.bereken_hoek(p4, p3, p1, False))
+                hoek_nieuw_3 = min(cls.bereken_hoek(p3, p4, p2, True),
+                                         cls.bereken_hoek(p3, p4, p2, False))
+                hoek_nieuw_4 = min(cls.bereken_hoek(p4, p3, p2, True),
+                                         cls.bereken_hoek(p4, p3, p2, False))
+                min_hoek_bestaand = min(hoek_bestaand_1, hoek_bestaand_2,
+                                        hoek_bestaand_3, hoek_bestaand_4)
+                min_hoek_nieuw = min(hoek_nieuw_1, hoek_nieuw_2,
+                                     hoek_nieuw_3, hoek_nieuw_4)
+
+                if min_hoek_nieuw > min_hoek_bestaand:
+                    gevonden = True
+                    # vervang huidige driehoeken
+                    tmp_driehoeken = []
+                    for i, driehoek in enumerate(driehoeken):
+                        if i == driehoek1[0]:
+                            tmp_driehoeken.append([ip3, ip4, ip1])
+                        elif i == driehoek2[0]:
+                            tmp_driehoeken.append([ip3, ip4, ip2])
+                        else:
+                            tmp_driehoeken.append(driehoek)
+                    driehoeken = tmp_driehoeken
+                    # vervang huidige interne lijn
+                    tmp_lijnen_intern = []
+                    for i, lijn in enumerate(driehoeken_lijnen_intern):
+                        if i == i_intern:
+                            tmp_lijnen_intern.append([ip3, ip4])
+                        else:
+                            tmp_lijnen_intern.append(lijn)
+                    driehoeken_lijnen_intern = tmp_lijnen_intern
+                    break
+
+            if gevonden:
+                iterator_optimaliseren()
+
+        # start proces
+        iterator_optimaliseren()
+
+        return driehoeken, driehoeken_lijnen_intern
+
+
+# =============================================================================
 
 
 class Vorm(BasisObject):
@@ -450,13 +537,15 @@ class Vorm(BasisObject):
 
     fn = VormFuncties()
 
-    EIGENSCHAPPEN = 'O A xmin xmax ymin ymax ncx ncy Ixx Iyy Ixy Iyy I1 I2 alpha Wxmin Wxmax Wymin Wymax kxmin kxmax kymin kymax E EA EIxx EIyy EIxy'.split()
+    EIGENSCHAPPEN = ('O A xmin xmax ymin ymax ncx ncy Ixx Iyy Ixy I1 I2 '
+                     'alpha Wxmin Wxmax Wymin Wymax kxmin kxmax kymin kymax E '
+                     'EA EIxx EIyy EIxy').split()
 
     AFRONDEN_NAAR_NUL = 1e-13
 
     def __init__(self,
-                 lijn:Lijn,
-                 E:float=0.0,
+                 lijn:Union[Lijn, list, tuple],
+                 E:Union[Waarde, float, int]=0.0,
                  translatie:Union[Vector, list, tuple]=None,
                  rotatiehoek:Union[Waarde, float, int]=None,
                  schaalfactor:Union[Waarde, float, int]=None,
@@ -467,15 +556,17 @@ class Vorm(BasisObject):
             lijn = Lijn(*lijn)
 
         self._eenheid = lijn.eenheid
-        self.E = float(E)  # TODO maak elasticiteit ook Waarde met eenheid; en maak ook @property zodat met aanroepen _bereken_waardes
+        self.E = float(E)
+        self.E_ = E if isinstance(E, Waarde) else Waarde(E)
+        # check of eenheid van E juiste type eenheid heeft
+        if self.E_ and (not ((self._eenheid is None and self.E_.eenheid is None)
+            or (Waarde(1, 'N') / (Waarde(1, self._eenheid)**2) & self.E_))):
+            raise ValueError('opgegeven type eenheid van E ({}) kan niet '
+                             'gebruikt worden in combinatie met eenheid van '
+                             'Lijn ({})'.format(self.E_.eenheid, self._eenheid))
 
         # controleer knoop data en maak Numpy array
-        self._array, coordinaten_met_klok_mee = \
-            self._check_knopen(lijn.array.copy())
-
-        # maak net van driehoeken; lijsten verwijzen naar INDEX knoop in array
-        self._driehoeken, self._driehoeken_lijnen_intern = \
-            self.fn.genereer_net(self._array, coordinaten_met_klok_mee)
+        self._array = self._check_knopen(lijn.array.copy())
 
         # aanmaken vorm eigenschappen
         # normaal een float object, met underscore erachter een Waarde object
@@ -589,43 +680,10 @@ class Vorm(BasisObject):
 
         verwijder_punt_op_lijn(np_array.tolist())
 
-        # uitzoeken of vorm met klok mee gaat of tegen klok in
-        linker_c = coordinaten_links_rechts[0]
-        l = len(coordinaten)
-        volgende_c = coordinaten[(linker_c[2] + 1) % l]
-        vorige_c = coordinaten[(linker_c[2] - 1 + l) % l]
-        volgende_y = volgende_c[1]
-        vorige_y = vorige_c[1]
-        coordinaten_met_klok_mee = True
-        if volgende_c[0] > vorige_c[0]:
-            interpol_y = self.fn.interpoleer_over_lijn(
-                    linker_c, volgende_c, vorige_c[0])
-            if interpol_y != 99999:
-                volgende_y = interpol_y
-        else:
-            interpol_y = self.fn.interpoleer_over_lijn(
-                    linker_c, vorige_c, volgende_c[0])
-            if interpol_y != 99999:
-                vorige_y = interpol_y
-        if volgende_y < vorige_y:
-            coordinaten_met_klok_mee = False
-
-        # hoeken berekenen en toevoegen aan array
-        for i in range(l):
-            p = coordinaten[i]
-            vorige_p = coordinaten[(i - 1 + l) % l]
-            volgende_p = coordinaten[(i + 1) % l]
-            hoek = self.fn.bereken_hoek(
-                    vorige_p, p, volgende_p,
-                    not coordinaten_met_klok_mee)
-            coordinaten[i].append(hoek)
-
-        np_array = np.array([[x, y, h] for x, y, _, h in coordinaten])
-
         if len(np_array) < 3:
             raise ValueError('Vorm moet minimaal drie knopen bevatten (die niet op één lijn liggen).')
 
-        return np_array, coordinaten_met_klok_mee
+        return np_array
 
     def _float(self, waarde):
         """Zet object om naar een float en rond hele kleine waarden af naar nul."""
@@ -634,75 +692,55 @@ class Vorm(BasisObject):
             f = 0.0
         return f
 
-    def _bereken_eigenschappen(self):
+    def _bereken_eigenschappen(self, alleen_A_O_minmax_nc=False):
         """Berekent alle vorm eigenschappen. Wordt aangeroepen op einde van
         functie: self.transfomeren."""
 
-        # startwaarden
-        self.A = 0.0
-        self.EA = 0.0
-        self.xmin = self.driehoeken_array[0][0][0]
-        self.xmax = self.driehoeken_array[0][0][0]
-        self.ymin = self.driehoeken_array[0][0][1]
-        self.ymax = self.driehoeken_array[0][0][1]
-        self.ncx = 0.0
-        self.ncy = 0.0
-        self.Ixx = 0.0
-        self.Iyy = 0.0
-        self.Ixy = 0.0
+        arr = self.array
+        Xi = arr[:,0]
+        Yi = arr[:,1]
+        Xii = np.delete(np.hstack((Xi, np.array([Xi[0]]))), 0)
+        Yii = np.delete(np.hstack((Yi, np.array([Yi[0]]))), 0)
+        determinant = Xi*Yii - Xii*Yi
 
-        for driehoek in self.driehoeken_array:
-            p1 = driehoek[0]
-            p2 = driehoek[1]
-            p3 = driehoek[2]
-            self.xmin = min(self.xmin, p1[0], p2[0], p3[0])
-            self.xmax = max(self.xmax, p1[0], p2[0], p3[0])
-            self.ymin = min(self.ymin, p1[1], p2[1], p3[1])
-            self.ymax = max(self.ymax, p1[1], p2[1], p3[1])
-            A_dr = self.fn.bereken_oppervlakte_driehoek(p1, p2, p3)
-            self.A += A_dr
-            self.EA += self.E * A_dr
-            nc_dr = self.fn.bereken_zwaartepunt_driehoek(p1, p2, p3)
-            ncx_dr = nc_dr[0]
-            ncy_dr = nc_dr[1]
-            if self.E: # geen none en niet gelijk aan 0
-                self.ncx += self.E * A_dr * ncx_dr
-                self.ncy += self.E * A_dr * ncy_dr
-            else:
-                self.ncx += A_dr * ncx_dr
-                self.ncy += A_dr * ncy_dr
+        A = 1/2 * sum(determinant)
+        if not A:
+            return
 
-        if self.E: # geen none en niet gelijk aan 0
-            self.ncx /= self.EA
-            self.ncy /= self.EA
-        else:
-            self.ncx /= self.A
-            self.ncy /= self.A
+        # als coordinaten tegen de klok in zijn ingevoerd, dan positief
+        # als coordinaten met de klok mee zijn ingevoerd, dan negatief
+        teken = 1.0 if A > 0 else -1.0
 
-        for driehoek in self.driehoeken_array:
-            p1 = driehoek[0]
-            p2 = driehoek[1]
-            p3 = driehoek[2]
-            A_dr = self.fn.bereken_oppervlakte_driehoek(p1, p2, p3)
-            I = self.fn.bereken_traagheidsmomenten_driehoek(p1, p2, p3)
-            nc_dr = self.fn.bereken_zwaartepunt_driehoek(p1, p2, p3)
-            ncx_dr = nc_dr[0]
-            ncy_dr = nc_dr[1]
-            self.Ixx += I[0] + A_dr * (ncx_dr - self.ncx)**2
-            self.Iyy += I[1] + A_dr * (ncy_dr - self.ncy)**2
-            self.Ixy += I[2] + A_dr * (ncx_dr - self.ncx) * (ncy_dr - self.ncy)
-
+        self.A = self._float(teken * A)
         self.O = self._float(Lijn(self.array_gesloten.tolist()))
-        self.A = self._float(self.A)
-        self.xmin = self._float(self.xmin)
-        self.xmax = self._float(self.xmax)
-        self.ymin = self._float(self.ymin)
-        self.ymax = self._float(self.ymax)
-        self.ncx = self._float(self.ncx)
-        self.ncy = self._float(self.ncy)
-        self.Ixx = self._float(self.Ixx)
-        self.Iyy = self._float(self.Iyy)
-        self.Ixy = self._float(self.Ixy)
+        self.xmin = self._float(Xi.min())
+        self.xmax = self._float(Xi.max())
+        self.ymin = self._float(Yi.min())
+        self.ymax = self._float(Yi.max())
+        self.ncx = self._float(
+            teken * 1/6/self.A * sum((Xi + Xii) * determinant))
+        self.ncy = self._float(
+            teken * 1/6/self.A * sum((Yi + Yii) * determinant))
+
+        if alleen_A_O_minmax_nc:
+            return
+
+        # vanaf nu alle coordinaten t.o.v. zwaartepunt relativeren
+        Xi_ = Xi - self.ncx
+        Yi_ = Yi - self.ncy
+        Xii_ = np.delete(np.hstack((Xi_, np.array([Xi_[0]]))), 0)
+        Yii_ = np.delete(np.hstack((Yi_, np.array([Yi_[0]]))), 0)
+        determinant_ = Xi_*Yii_ - Xii_*Yi_
+
+        self.Ixx = self._float(
+            teken * 1/12 * sum((Xi_**2 + Xi_*Xii_ + Xii_**2) * determinant_))
+        self.Iyy = self._float(
+            teken * 1/12 * sum((Yi_**2 + Yi_*Yii_ + Yii_**2) * determinant_))
+        self.Ixy = self._float(
+            teken * 1/24 * sum((Xi_*Yii_ + 2*Xi_*Yi_ + 2*Xii_+Yii_ + Xii_*Yi_)
+                               * determinant_))
+
+        self.EA = self._float(self.E * self.A)
         self.EIxx = self._float(self.E * self.Ixx)
         self.EIyy = self._float(self.E * self.Iyy)
         self.EIxy = self._float(self.E * self.Ixy)
@@ -715,18 +753,18 @@ class Vorm(BasisObject):
         self.kymin = self._float(-1 * self.Wxmax / self.A)
         self.kymax = self._float(self.Wxmin / self.A)
         self.I1 = self._float((self.Ixx + self.Iyy) / 2
-                   + math.sqrt((self.Ixx - self.Iyy) * (self.Ixx - self.Iyy)
-                   + 4 * self.Ixy**2) / 2)
+                   + np.sqrt((self.Ixx - self.Iyy)**2 + 4*self.Ixy**2)/2)
         self.I2 = self._float((self.Ixx + self.Iyy) / 2
-                   - math.sqrt((self.Ixx - self.Iyy) * (self.Ixx - self.Iyy)
-                   + 4 * self.Ixy**2) / 2)
+                   - np.sqrt((self.Ixx - self.Iyy)**2 + 4*self.Ixy**2)/2)
         if self.Ixx - self.Iyy != 0:
             self.alpha = self._float((math.atan(2 * self.Ixy /
                 (self.Ixx - self.Iyy))/2) * (360 / (2 * math.pi)))
         else:
             self.alpha = 0.0
+            # TODO klopt niet voor een ruit: dan Ixx == Iyy, maar alpha=45
 
         # maak Waarde objecten met eenheid
+        # TODO
         # w = Waarde(self.A)
         # if self.eenheid is not None:
         #     opp_eenheid = '{}2'.format(self.eenheid)
@@ -767,16 +805,6 @@ class Vorm(BasisObject):
         """Retourneert Numpy array object met alle getallen (zonder eenheid) waarbij startpunt OOK als laatste punt wordt aangehouden."""
         return np.append(self.array, [self[0].tolist()], axis=0)
 
-    @property
-    def driehoeken_array(self) -> np.array:
-        """Retourneert Numpy array object met alle getallen (zonder eenheid)."""
-        array = []
-        for dh in self._driehoeken:
-            array.append([[self[dh[0]][0], self[dh[0]][1]],
-                          [self[dh[1]][0], self[dh[1]][1]],
-                          [self[dh[2]][0], self[dh[2]][1]]])
-        return np.array(array)
-
     def transformeren(self,
                       translatie:Union[Vector, list, tuple]=None,
                       rotatiehoek:Union[Waarde, float, int]=None,
@@ -784,26 +812,7 @@ class Vorm(BasisObject):
                       referentiepunt:Knoop=None):
         """Verplaatst, roteert en/of verschaalt de vorm."""
 
-        array = self.array.tolist()
-
-        # bepalen zwaartepunt doorsnede
-        l = len(array)
-        opp = []
-        ncx_tot = []
-        ncy_tot = []
-        for i in range(l):
-            opp.append(array[i][0]*array[(i+1)%l][1]
-                    - array[(i+1)%l][0]*array[i][1])
-        A = self._float(1/2*sum(opp))
-        for i in range(l):
-            ncx_tot.append((array[i][0]
-                    + array[(i+1)%l][0]) * (array[i][0]*array[(i+1)%l][1]
-                    - array[(i+1)%l][0]*array[i][1]))
-            ncy_tot.append((array[i][1]
-                    + array[(i+1)%l][1]) * (array[i][0]*array[(i+1)%l][1]
-                    - array[(i+1)%l][0]*array[i][1]))
-        ncx = self._float(1/(6*A)*sum(ncx_tot))
-        ncy= self._float(1/(6*A)*sum(ncy_tot))
+        self._bereken_eigenschappen(alleen_A_O_minmax_nc=True)
 
         referentiepunt = (
             referentiepunt.array.tolist()
@@ -814,24 +823,42 @@ class Vorm(BasisObject):
                 if referentiepunt is not None
                     and (isinstance(referentiepunt, tuple)
                          or isinstance(referentiepunt, list))
-                else [ncx, ncy]
+                else [self.ncx, self.ncy]
             ))
 
-        print(referentiepunt)
+        # TODO schalen coordinaten
 
         self._bereken_eigenschappen()
 
-    def plot_net(self):
-        """Teken net van driehoeken, gebruikt voor berekenen vorm."""
-        plt.triplot(self[:,0], self[:,1], self._driehoeken, 'go-', lw=1)
-        plt.axis('equal')
-        plt.show()
-
     def plot(self):
         """Teken vorm."""
-        plt.plot(self.array_gesloten[:,0], self.array_gesloten[:,1], 'r-', lw=2)
         plt.axis('equal')
+
+        # omtrek vorm
+        plt.plot(self.array_gesloten[:,0], self.array_gesloten[:,1], 'r-', lw=2)
+
+        # hoofdtraagsheidsassens
+        marge = 0.1
+        hoek = self.alpha / 180 * math.pi
+        ymin = self.ymin - (self.ymax - self.ymin) * marge
+        ymax = self.ymax + (self.ymax - self.ymin) * marge
+        xmin = self.xmin - (self.xmax - self.xmin) * marge
+        xmax = self.xmax + (self.xmax - self.xmin) * marge
+        x_ymin = self.ncx + (self.ncy - ymin) * math.tan(hoek)
+        x_ymax = self.ncx - (ymax - self.ncy) * math.tan(hoek)
+        y_xmin = self.ncy - (self.ncx - xmin) * math.tan(hoek)
+        y_xmax = self.ncy + (xmax - self.ncx) * math.tan(hoek)
+        plt.plot([x_ymin, x_ymax], [ymin, ymax], 'g-', lw=1)
+        plt.plot([xmin, xmax], [y_xmin, y_xmax], 'g-', lw=1)
+
+        # zwaartepunt
+        plt.plot(self.ncx, self.ncy, 'bo')
+
         plt.show()
+
+    def print_eigenschappen(self):
+        print('\n'.join(['{} = {}'.format(a, getattr(self,a))
+                         for a in self.EIGENSCHAPPEN]))
 
     def __getitem__(self, index):
         """Retourneert subset Numpy array object met getallen (zonder eenheid)."""
