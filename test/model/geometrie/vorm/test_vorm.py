@@ -77,53 +77,51 @@ v1 = Vorm(Lijn(
         (4, -5), (-10, 10)
     ).lijn_cirkelboog(
         middelpunt=(0,0),
-        gradenhoek=+220,
-        stappen=50
+        gradenhoek=+220
     ).lijn_recht(
         naar=(4, 10)
     ).lijn_bezier(
         richting=(-10,-4),
-        naar=(4, -5),
-        stappen=100))
+        naar=(4, -5)))
 v1.plot()
 v1.print_eigenschappen()
 
 
-l2 = Lijn((0,0), (0,10), (4,10), (4,7), (6,7), (6,10), (10,10), (10,0))
+l2 = Lijn([0,0], [0,10], [4,10], [4,7], [6,7], [6,10], [10,10], [10,0])
 l2.eenheid = 'cm'
-v2 = Vorm(l2, E=Waarde(30, 'GPa'), referentiepunt=(3,3))
+v2 = Vorm(l2, referentiepunt=(3,3))
 v2.plot()
 v2.print_eigenschappen()
 
 
-v3= Vorm(Lijn([-1,0]).lijn_cirkelboog(middelpunt=(0,0),
-                                      gradenhoek=360, stappen=100), E=1e5)
+v3= Vorm(Lijn([-1,0]).lijn_cirkelboog(middelpunt=(0,0), gradenhoek=360))
 v3.plot()
 v3.print_eigenschappen()
 
 
-l4 = Lijn((0,0), (6,-3), (10,4))
+l4 = Lijn([0,0], [6,-3], [10,4])
 l4.eenheid = 'cm'
 v4 = Vorm(l4)
 v4.plot()
 v4.print_eigenschappen()
 
 
-l5 = Lijn((0,0), (10,0), (10,4), (0, 4))
+l5 = Lijn([0,0], [10,0], [10,4], [0, 4])
 l5.eenheid = 'cm'
 v5 = Vorm(l5)
 v5.plot()
 v5.print_eigenschappen()
 
 
-l6 = Lijn((2,0), (0,2), (8,10), (10, 8))
+l6 = Lijn([2,0], [0,2], [8,10], [10, 8])
 l6.eenheid = 'cm'
-v6 = Vorm(l6)
+v6 = Vorm(l6,
+          translatie=[10, 20])
 v6.plot()
 v6.print_eigenschappen()
 h = float(Lijn((2,0), (0,2)))
 b = float(Lijn((2,0), (10,8)))
-print(b, h, b*h, 1/12*b*h**3, 1/12*h**3)
+
 
 if __name__ == '__main__':
     unittest.main()

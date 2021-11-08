@@ -523,14 +523,14 @@ class VormFuncties:
         return driehoeken, driehoeken_lijnen_intern
 
 
-# =============================================================================
+# ============================================================================
 
 
 class Vorm(BasisObject):
     """Betreft een meetkundig 2D vorm met bijbehorende eigenschappen.
 
     AANMAKEN VORM               invoeren van één Lijn object
-        v1 = Vorm(Lijn(), translatie=, rotatie=, schaal=)
+        v1 = Vorm(Lijn, translatie=, rotatiehoek=, schaalfactor=, referentiepunt=)
 
 
     """
@@ -538,14 +538,13 @@ class Vorm(BasisObject):
     fn = VormFuncties()
 
     EIGENSCHAPPEN = ('O A xmin xmax ymin ymax ncx ncy Ixx Iyy Ixy I1 I2 '
-                     'alpha Wxmin Wxmax Wymin Wymax kxmin kxmax kymin kymax E '
-                     'EA EIxx EIyy EIxy').split()
+                     'alpha Wxmin Wxmax Wymin Wymax kxmin kxmax kymin kymax '
+                     ).split()
 
     AFRONDEN_NAAR_NUL = 1e-13
 
     def __init__(self,
                  lijn:Union[Lijn, list, tuple],
-                 E:Union[Waarde, float, int]=0.0,
                  translatie:Union[Vector, list, tuple]=None,
                  rotatiehoek:Union[Waarde, float, int]=None,
                  schaalfactor:Union[Waarde, float, int]=None,
@@ -556,14 +555,6 @@ class Vorm(BasisObject):
             lijn = Lijn(*lijn)
 
         self._eenheid = lijn.eenheid
-        self.E = float(E)
-        self.E_ = E if isinstance(E, Waarde) else Waarde(E)
-        # check of eenheid van E juiste type eenheid heeft
-        if self.E_ and (not ((self._eenheid is None and self.E_.eenheid is None)
-            or (Waarde(1, 'N') / (Waarde(1, self._eenheid)**2) & self.E_))):
-            raise ValueError('opgegeven type eenheid van E ({}) kan niet '
-                             'gebruikt worden in combinatie met eenheid van '
-                             'Lijn ({})'.format(self.E_.eenheid, self._eenheid))
 
         # controleer knoop data en maak Numpy array
         self._array = self._check_knopen(lijn.array.copy())
@@ -574,8 +565,6 @@ class Vorm(BasisObject):
         self.O_ = None
         self.A = None       # oppervlakte
         self.A_ = None
-        self.EA = None      # rekstijfheid
-        self.EA_ = None
         self.xmin = None    # laagste x-waarde (links)
         self.xmin_ = None
         self.xmax = None    # hoogste x-waarde (rechts)
@@ -594,12 +583,6 @@ class Vorm(BasisObject):
         self.Iyy_ = None
         self.Ixy = None     # wringtraagheidsmoment xy
         self.Ixy_ = None
-        self.EIxx = None    # traagheidsmoment xx met elasticiteit
-        self.EIxx_ = None
-        self.EIyy = None    # traagheidsmoment yy met elasticiteit
-        self.EIyy_ = None
-        self.EIxy = None    # traagheidsmoment xy met elasticiteit
-        self.EIxy_ = None
         self.I1 = None      # hoofdtraagheidsmoment 1 (sterke as)
         self.I1_ = None
         self.I2 = None      # hoofdtraagheidsmoment 2 (zwakke as)
@@ -737,13 +720,8 @@ class Vorm(BasisObject):
         self.Iyy = self._float(
             teken * 1/12 * sum((Yi_**2 + Yi_*Yii_ + Yii_**2) * determinant_))
         self.Ixy = self._float(
-            teken * 1/24 * sum((Xi_*Yii_ + 2*Xi_*Yi_ + 2*Xii_+Yii_ + Xii_*Yi_)
-                               * determinant_))
+            teken * 1/24 * sum((Xi_*Yii_ + 2*Xi_*Yi_ + 2*Xii_*Yii_ + Xii_*Yi_) * determinant_))
 
-        self.EA = self._float(self.E * self.A)
-        self.EIxx = self._float(self.E * self.Ixx)
-        self.EIyy = self._float(self.E * self.Iyy)
-        self.EIxy = self._float(self.E * self.Ixy)
         self.Wxmin = self._float(self.Ixx / abs(self.ncx - self.xmin))
         self.Wxmax = self._float(self.Ixx / abs(self.ncx - self.xmax))
         self.Wymin = self._float(self.Iyy / abs(self.ncx - self.xmin))
@@ -756,12 +734,14 @@ class Vorm(BasisObject):
                    + np.sqrt((self.Ixx - self.Iyy)**2 + 4*self.Ixy**2)/2)
         self.I2 = self._float((self.Ixx + self.Iyy) / 2
                    - np.sqrt((self.Ixx - self.Iyy)**2 + 4*self.Ixy**2)/2)
-        if self.Ixx - self.Iyy != 0:
+        if self.Ixx - self.Iyy != 0:  # kan niet delen door 0
             self.alpha = self._float((math.atan(2 * self.Ixy /
                 (self.Ixx - self.Iyy))/2) * (360 / (2 * math.pi)))
-        else:
+        elif self.Ixy == 0: # hor/vert symmetrisch: bijvoorbeeld rechthoek
             self.alpha = 0.0
-            # TODO klopt niet voor een ruit: dan Ixx == Iyy, maar alpha=45
+        else: # Ixx == Iyy, maar niet hor/vert symmetrisch: bijvoorbeeld ruit
+            self.alpha = 45.0
+
 
         # maak Waarde objecten met eenheid
         # TODO
@@ -826,7 +806,13 @@ class Vorm(BasisObject):
                 else [self.ncx, self.ncy]
             ))
 
-        # TODO schalen coordinaten
+        if translatie is not None and len(translatie) >= 2:
+            self._array = self.array + np.array(
+                    [translatie[0], translatie[1]])
+
+        # TODO rotatie
+
+        # TODO schalen
 
         self._bereken_eigenschappen()
 
