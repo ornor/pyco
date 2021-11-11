@@ -10,6 +10,7 @@ class Knoop(pycom.Vector):
     AANPASSEN EENHEID           omzetten van eenheid naar andere eenheid
         k.eenheid               huidige eenheid opvragen (tekst of None)
         k.eenheid = 'N/mm2'     eenheid aanpassen
+        k.gebruik_eenheid('m')  zelfde als bovenstaande, retourneert object
 
     OMZETTEN KNOOP NAAR TEKST   resulteert in nieuw string object
         tekst = str(k)          of automatisch met bijvoorbeeld print(w)

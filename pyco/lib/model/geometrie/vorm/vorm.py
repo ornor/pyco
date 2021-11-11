@@ -543,12 +543,7 @@ class Vorm(BasisObject):
 
     AFRONDEN_NAAR_NUL = 1e-13
 
-    def __init__(self,
-                 lijn:Union[Lijn, list, tuple],
-                 translatie:Union[Vector, list, tuple]=None,
-                 rotatiehoek:Union[Waarde, float, int]=None,
-                 schaalfactor:Union[Waarde, float, int]=None,
-                 referentiepunt:Union[Knoop, list, tuple]=None):
+    def __init__(self, lijn:Union[Lijn, list, tuple]):
         super().__init__()
 
         if not isinstance(lijn, Lijn):
@@ -606,9 +601,7 @@ class Vorm(BasisObject):
         self.kymax = None   # hoogste y-waarde kern (boven)
         self.kymax_ = None
 
-        # corrigeer coordinaten in array n.a.v. transformeren vorm
-        self.transformeren(translatie, rotatiehoek,
-                           schaalfactor, referentiepunt)
+        self._bereken_eigenschappen()
 
     def _check_knopen(self, np_array):
         """Checkt knopen en berekent hoeken."""
@@ -744,16 +737,35 @@ class Vorm(BasisObject):
 
 
         # maak Waarde objecten met eenheid
-        # TODO
-        # w = Waarde(self.A)
-        # if self.eenheid is not None:
-        #     opp_eenheid = '{}2'.format(self.eenheid)
-        #     w[opp_eenheid]
-        # self.A_ = w
-        # self.ncx_ = Waarde(self.ncx, self.eenheid)
-        # self.ncy_ = Waarde(self.ncy, self.eenheid)
-        # self.O_ = Waarde(self.O, self.eenheid)
-
+        oppervlakte_eenheid = None
+        weerstand_eenheid = None
+        traagheid_eenheid = None
+        if self.eenheid is not None:
+            oppervlakte_eenheid = '{}2'.format(self.eenheid)
+            weerstand_eenheid = '{}3'.format(self.eenheid)
+            traagheid_eenheid = '{}4'.format(self.eenheid)
+        self.O_ = Waarde(self.O, self.eenheid)
+        self.A_ = Waarde(self.A, oppervlakte_eenheid)
+        self.xmin_ = Waarde(self.xmin, self.eenheid)
+        self.xmax_ = Waarde(self.xmax, self.eenheid)
+        self.ymin_ = Waarde(self.ymin, self.eenheid)
+        self.ymax_ = Waarde(self.ymax, self.eenheid)
+        self.ncx_ = Waarde(self.ncx, self.eenheid)
+        self.ncy_ = Waarde(self.ncy, self.eenheid)
+        self.Ixx_ = Waarde(self.Ixx, traagheid_eenheid)
+        self.Iyy_ = Waarde(self.Iyy, traagheid_eenheid)
+        self.Ixy_ = Waarde(self.Ixy, traagheid_eenheid)
+        self.I1_ = Waarde(self.I1, traagheid_eenheid)
+        self.I2_ = Waarde(self.I2, traagheid_eenheid)
+        self.alpha_ = Waarde(self.alpha, 'deg')
+        self.Wxmin_ = Waarde(self.Wxmin, weerstand_eenheid)
+        self.Wxmax_ = Waarde(self.Wxmax, weerstand_eenheid)
+        self.Wymin_ = Waarde(self.Wymin, weerstand_eenheid)
+        self.Wymax_ = Waarde(self.Wymax, weerstand_eenheid)
+        self.kxmin_ = Waarde(self.kxmin, self.eenheid)
+        self.kxmax_ = Waarde(self.kxmax, self.eenheid)
+        self.kymin_ = Waarde(self.kymin, self.eenheid)
+        self.kymax_ = Waarde(self.kymax, self.eenheid)
 
     @property
     def eenheid(self) -> str:
@@ -785,37 +797,6 @@ class Vorm(BasisObject):
         """Retourneert Numpy array object met alle getallen (zonder eenheid) waarbij startpunt OOK als laatste punt wordt aangehouden."""
         return np.append(self.array, [self[0].tolist()], axis=0)
 
-    def transformeren(self,
-                      translatie:Union[Vector, list, tuple]=None,
-                      rotatiehoek:Union[Waarde, float, int]=None,
-                      schaalfactor:Union[Waarde, float, int]=None,
-                      referentiepunt:Knoop=None):
-        """Verplaatst, roteert en/of verschaalt de vorm."""
-
-        self._bereken_eigenschappen(alleen_A_O_minmax_nc=True)
-
-        referentiepunt = (
-            referentiepunt.array.tolist()
-            if referentiepunt is not None
-                and isinstance(referentiepunt, Knoop)
-            else (
-                [referentiepunt[0], referentiepunt[1]]
-                if referentiepunt is not None
-                    and (isinstance(referentiepunt, tuple)
-                         or isinstance(referentiepunt, list))
-                else [self.ncx, self.ncy]
-            ))
-
-        if translatie is not None and len(translatie) >= 2:
-            self._array = self.array + np.array(
-                    [translatie[0], translatie[1]])
-
-        # TODO rotatie
-
-        # TODO schalen
-
-        self._bereken_eigenschappen()
-
     def plot(self):
         """Teken vorm."""
         plt.axis('equal')
@@ -843,8 +824,14 @@ class Vorm(BasisObject):
         plt.show()
 
     def print_eigenschappen(self):
-        print('\n'.join(['{} = {}'.format(a, getattr(self,a))
+        print()
+        print('coördinaten (afgerond op 2 decimalen): {} {}'.format(
+                [(round(k[0], 2), round(k[1], 2)) for k in self.array],
+                self.eenheid if self.eenheid is not None else '').strip())
+        print()
+        print('\n'.join(['{:>8} = {:.2f}'.format(a, getattr(self, a+'_'))
                          for a in self.EIGENSCHAPPEN]))
+        print()
 
     def __getitem__(self, index):
         """Retourneert subset Numpy array object met getallen (zonder eenheid)."""
@@ -852,7 +839,6 @@ class Vorm(BasisObject):
 
     def __len__(self):
         """Geeft aantal knopen."""
-        # laatste knoop is zelfde als eerste knoop
         return len(self.array)
 
     def __iter__(self):
@@ -861,3 +847,5 @@ class Vorm(BasisObject):
             k = Knoop(k_array.tolist())
             k.eenheid = self.eenheid
             yield k
+
+    # TODO __repr__ en __str__

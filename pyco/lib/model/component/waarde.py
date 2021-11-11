@@ -878,7 +878,8 @@ class Waarde(pycom.BasisComponent):
        if self._is_getal:
            waarde_getal, waarde_eenheid = tuple(self)
            format_str = '{:' + config + '} {}'
-           return format_str.format(waarde_getal, waarde_eenheid).strip()
+           return format_str.format(waarde_getal,
+                                    waarde_eenheid).strip().rstrip(' None')
        else:
            waarde_getal, _ = tuple(self)
            format_str = '{:' + config + '}'

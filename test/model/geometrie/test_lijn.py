@@ -26,6 +26,7 @@ class TestLijn(unittest.TestCase):
         l2 = Lijn(Knoop(Waarde(1).cm, Waarde(2).cm), Knoop(Waarde(3).cm, Waarde(4).cm))
         l2.eenheid = 'mm'
         assert str(l2) == '((10.0, 20.0), (30.0, 40.0)) mm'
+        assert str(Lijn(Knoop(Waarde(1).cm, Waarde(2).cm), Knoop(Waarde(3).cm, Waarde(4).cm)).gebruik_eenheid('mm')) == '((10.0, 20.0), (30.0, 40.0)) mm'
 
     def test_array(self):
         assert Lijn((1, 2), (3, 4)).array.tolist() == [[1.0, 2.0], [3.0, 4.0]]

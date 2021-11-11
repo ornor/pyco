@@ -36,6 +36,7 @@ class TestVector(unittest.TestCase):
         v = Vector(Waarde(5, 'cm'), Waarde(6, 'm'))
         v.eenheid = 'dm'
         assert str(v) == '(0.5, 60.0) dm'
+        assert str(Vector(Waarde(5, 'cm'), Waarde(6, 'm')).gebruik_eenheid('dm')) == '(0.5, 60.0) dm'
 
     def test_array(self):
         assert np.array([3, 4, 5]).tolist() == Vector(3, 4, 5).array.tolist()

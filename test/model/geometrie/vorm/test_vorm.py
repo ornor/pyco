@@ -82,14 +82,16 @@ v1 = Vorm(Lijn(
         naar=(4, 10)
     ).lijn_bezier(
         richting=(-10,-4),
-        naar=(4, -5)))
+        naar=(4, -5)
+    ).transformeren(
+        rotatiehoek=30,
+        translatie=[15, 5],
+    ))
 v1.plot()
 v1.print_eigenschappen()
 
 
-l2 = Lijn([0,0], [0,10], [4,10], [4,7], [6,7], [6,10], [10,10], [10,0])
-l2.eenheid = 'cm'
-v2 = Vorm(l2, referentiepunt=(3,3))
+v2 = Vorm([[0,0], [0,10], [4,10], [4,7], [6,7], [6,10], [10,10], [10,0]])
 v2.plot()
 v2.print_eigenschappen()
 
@@ -98,25 +100,22 @@ v3= Vorm(Lijn([-1,0]).lijn_cirkelboog(middelpunt=(0,0), gradenhoek=360))
 v3.plot()
 v3.print_eigenschappen()
 
-
-l4 = Lijn([0,0], [6,-3], [10,4])
-l4.eenheid = 'cm'
-v4 = Vorm(l4)
+v4 = Vorm(Lijn([0,0], [6,-3], [10,4]).gebruik_eenheid('cm'))
 v4.plot()
 v4.print_eigenschappen()
 
 
-l5 = Lijn([0,0], [10,0], [10,4], [0, 4])
-l5.eenheid = 'cm'
-v5 = Vorm(l5)
+v5 = Vorm(Lijn([-50,-20], [50,-20], [50,20], [-50, 20]).transformeren(
+          rotatiepunt=None, # bij None: neemt zwaartepunt
+          rotatiehoek=20, # graden tegen de klok in
+          schaalfactor=[1, -1], # vergroten om rotatiepunt; negatief:spiegelen
+          translatie=[20, 20] # verplaatsing
+    ).gebruik_eenheid('mm'))
 v5.plot()
 v5.print_eigenschappen()
 
 
-l6 = Lijn([2,0], [0,2], [8,10], [10, 8])
-l6.eenheid = 'cm'
-v6 = Vorm(l6,
-          translatie=[10, 20])
+v6 = Vorm(Lijn([2,0], [0,2], [8,10], [10, 8]).gebruik_eenheid('cm'))
 v6.plot()
 v6.print_eigenschappen()
 h = float(Lijn((2,0), (0,2)))

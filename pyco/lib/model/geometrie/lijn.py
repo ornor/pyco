@@ -1,7 +1,9 @@
+from typing import Union
+
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pyco.model import BasisObject, Waarde, Knoop
+from pyco.model import BasisObject, Waarde, Knoop, Vector
 
 
 class Lijn(BasisObject):
@@ -16,6 +18,7 @@ class Lijn(BasisObject):
         l = Lijn((1,2), (3,4))
         l.eenheid               opvragen huidige eenheid; in dit geval None
         l.eenheid = 'm'         alle waarden in alle knoopobjecten naar 'm'
+        l.gebruik_eenheid('m')  zelfde als bovenstaande, retourneert object
 
     OMZETTEN LIJN NAAR TEKST    resulteert in nieuw string object
         tekst = str(l)          of automatisch met bijvoorbeeld print(l)
@@ -35,6 +38,18 @@ class Lijn(BasisObject):
             graden (waarbij 360 is gehele cirkel tekenen; positief is tegen
             klok in; negatief getal is met de klok mee) waarbij kromme lijn
             omgezet wordt in aantal rechte lijnen; standaard 100 stappen
+
+    TRANSFORMEREN LIJN
+        l.transformeren(       # standaard zijn alle parameters None
+            rotatiepunt=[0,0], # xy Knoop/list; als None dan zwaartepunt
+            rotatiehoek=20,    # in graden, positief is tegen de klok in
+            schaalfactor=2,  # Waarde/getal: vergrootfactor t.o.v. rotatiepunt
+            schaalfactor=[2,3],# of Vector/list met x-schaalfactor en y-factor
+            schaalfactor=[1,-1],# verticaal spiegelen
+            schaalfactor=[-1,1],# horizontaal spiegelen
+            schaalfactor=[-5,3],# bovenstaande combineren
+            translatie=[10,5], # xy verschuiven (na roteren en schalen)
+        )
 
     MOGELIJKE BEWERKINGEN
         waarde = abs(l)         berekent lengte lijnstukken -> Waarde object
@@ -118,6 +133,11 @@ class Lijn(BasisObject):
 
         self._array = np.array(tmp_knopen, dtype='float64')
         self._eenheid = eenheid
+
+    def gebruik_eenheid(self, eenheid:str):
+        """Zet knopen om naar nieuwe eenheid en retourneert object."""
+        self.eenheid = eenheid
+        return self
 
     @property
     def array(self) -> np.array:
@@ -214,6 +234,71 @@ class Lijn(BasisObject):
             extra_knopen.append(extra_knoop)
 
         self._array = np.append(self.array, extra_knopen, axis=0)
+        return self
+
+    def transformeren(self,
+                      rotatiepunt:Knoop=None,
+                      rotatiehoek:Union[Waarde, float, int]=None,
+                      schaalfactor:Union[Waarde, float, int,
+                                         Vector, list, tuple]=None,
+                      translatie:Union[Vector, list, tuple]=None):
+        """Verplaatst, roteert en/of verschaalt de lijn."""
+
+        if rotatiepunt is not None and isinstance(rotatiepunt, Knoop):
+            rotatiepunt = rotatiepunt.array.tolist()
+        elif (rotatiepunt is not None
+                and (isinstance(rotatiepunt, tuple)
+                or isinstance(rotatiepunt, list))):
+            rotatiepunt = [rotatiepunt[0], rotatiepunt[1]]
+        else:
+            # als geen geldige coordinaten, dan bereken zwaartepunt
+            Xi = self.array[:,0]
+            Yi = self.array[:,1]
+            Xii = np.delete(np.hstack((Xi, np.array([Xi[0]]))), 0)
+            Yii = np.delete(np.hstack((Yi, np.array([Yi[0]]))), 0)
+            determinant = Xi*Yii - Xii*Yi
+            A = 1/2 * sum(determinant)
+            if not A:
+                return
+            teken = 1.0 if A > 0 else -1.0
+            A_ = float(teken * A)
+            ncx = float(teken * 1/6/A_ * sum((Xi + Xii) * determinant))
+            ncy = float(teken * 1/6/A_ * sum((Yi + Yii) * determinant))
+            rotatiepunt = [ncx, ncy]
+
+        if rotatiehoek is not None:
+            tmp_array = self.array - rotatiepunt
+
+            rh = np.radians(float(rotatiehoek))
+            rotatie_matrix = np.array([[np.cos(rh), -np.sin(rh)],
+                                       [np.sin(rh),  np.cos(rh)]])
+            tmp_array = np.matmul(rotatie_matrix, tmp_array.T).T
+
+            self._array = tmp_array + rotatiepunt
+
+        if schaalfactor is not None:
+            tmp_array = self.array - rotatiepunt
+
+            if ((isinstance(schaalfactor, list)
+                    or isinstance(schaalfactor, tuple)
+                    or isinstance(schaalfactor, Vector))
+                    and len(schaalfactor) >= 2):
+                sf1 = float(schaalfactor[0])
+                sf2 = float(schaalfactor[1])
+            else:
+                sf1 = float(schaalfactor)
+                sf2 = float(schaalfactor)
+
+            schaal_matrix = np.array([[sf1,  0],
+                                      [ 0, sf2]])
+            tmp_array = np.matmul(schaal_matrix, tmp_array.T).T
+
+            self._array = tmp_array + rotatiepunt
+
+        if translatie is not None and len(translatie) >= 2:
+            self._array = self.array + np.array(
+                    [translatie[0], translatie[1]])
+
         return self
 
     def plot(self):

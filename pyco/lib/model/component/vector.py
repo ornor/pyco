@@ -16,6 +16,7 @@ class Vector(pycom.BasisComponent):
     AANPASSEN EENHEID           omzetten van eenheid naar andere eenheid
         v.eenheid               huidige eenheid opvragen (tekst of None)
         v.eenheid = 'N/mm2'     eenheid aanpassen
+        v.gebruik_eenheid('m')  zelfde als bovenstaande, retourneert object
 
     OMZETTEN VECTOR NAAR TEKST  resulteert in nieuw string object
         tekst = str(v)          of automatisch met bijvoorbeeld print(w)
@@ -117,6 +118,11 @@ class Vector(pycom.BasisComponent):
                 tmp_waardes.append(w)
             self._array = np.array(tmp_waardes, dtype='float64')
             self._eenheid = eenheid
+
+    def gebruik_eenheid(self, eenheid:str):
+        """Zet om naar nieuwe eenheid en retourneert object."""
+        self.eenheid = eenheid
+        return self
 
     @property
     def array(self):
