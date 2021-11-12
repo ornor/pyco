@@ -10,6 +10,8 @@ Waarde = doc.model.Waarde
 Knoop = doc.model.Knoop
 Lijn = doc.model.Lijn
 Vorm = doc.model.Vorm
+Rechthoek = doc.model.Rechthoek
+Cirkel = doc.model.Cirkel
 
 # class TestVorm(unittest.TestCase):
 
@@ -118,6 +120,14 @@ v5.print_eigenschappen()
 v6 = Vorm(Lijn([2,0], [0,2], [8,10], [10, 8]).gebruik_eenheid('cm'))
 v6.plot()
 v6.print_eigenschappen()
+
+v7 = Rechthoek(breedte=20, hoogte=50)
+v7.plot()
+v7.print_eigenschappen()
+
+v8 = Cirkel(straal=20)
+v8.plot()
+v8.print_eigenschappen()
 
 
 if __name__ == '__main__':

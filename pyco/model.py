@@ -7,4 +7,7 @@ from .lib.model.component.figuur import Figuur
 
 from .lib.model.geometrie.knoop import Knoop
 from .lib.model.geometrie.lijn import Lijn
+
 from .lib.model.geometrie.vorm.vorm import Vorm
+from .lib.model.geometrie.vorm.rechthoek import Rechthoek
+from .lib.model.geometrie.vorm.cirkel import Cirkel
