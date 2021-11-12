@@ -41,7 +41,7 @@ class Lijn(BasisObject):
 
     TRANSFORMEREN LIJN
         l.transformeren(       # standaard zijn alle parameters None
-            rotatiepunt=[0,0], # xy Knoop/list; als None dan zwaartepunt
+            rotatiepunt=[0,0], # xy Knoop/list; als None dan zwaartepunt vorm
             rotatiehoek=20,    # in graden, positief is tegen de klok in
             schaalfactor=2,  # Waarde/getal: vergrootfactor t.o.v. rotatiepunt
             schaalfactor=[2,3],# of Vector/list met x-schaalfactor en y-factor

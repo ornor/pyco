@@ -4,7 +4,7 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
-from pyco.model import BasisObject, Waarde, Vector, Lijn, Knoop
+from pyco.model import BasisObject, Waarde, Lijn, Knoop
 
 
 class VormFuncties:
@@ -603,6 +603,9 @@ class Vorm(BasisObject):
 
         self._bereken_eigenschappen()
 
+        self._kern_array = np.array([])  # xy coordinaten van kern
+        self._bereken_kern_array()
+
     def _check_knopen(self, np_array):
         """Checkt knopen en berekent hoeken."""
 
@@ -669,8 +672,7 @@ class Vorm(BasisObject):
         return f
 
     def _bereken_eigenschappen(self, alleen_A_O_minmax_nc=False):
-        """Berekent alle vorm eigenschappen. Wordt aangeroepen op einde van
-        functie: self.transfomeren."""
+        """Berekent alle geometrische eigenschappen."""
 
         arr = self.array
         Xi = arr[:,0]
@@ -767,6 +769,97 @@ class Vorm(BasisObject):
         self.kymin_ = Waarde(self.kymin, self.eenheid)
         self.kymax_ = Waarde(self.kymax, self.eenheid)
 
+    def _bereken_kern_array(self):
+        """Berekent het gebied daar waar een normaaldrukkracht NIET in trekspanningen resulteert."""
+        kernpunten = [] # lijst met xy coordinaten van kern
+        elastiek_lijn = [] # lijst met xy coordinaten als elastiek om vorm
+
+        def bereken_geroteerde_coordinaten(p, alpha, z):
+            alpha = -alpha
+            xrot = (1.0 * math.cos(alpha * (2 * math.pi / 360)) *
+                    (p[0] - z[0]) + math.sin(alpha * (2 * math.pi / 360)) *
+                    (p[1] - z[1]))
+            yrot = (-1.0 * math.sin(alpha * (2 * math.pi / 360)) *
+                    (p[0] - z[0]) + math.cos(alpha * (2 * math.pi / 360)) *
+                    (p[1] - z[1]))
+            return [xrot + z[0], yrot + z[1]]
+
+        def maak_groot_getal(x):
+            return math.floor(x * 1e12)
+
+        c = self.array.tolist()
+        l = len(c)
+        p = [c[0][0], c[0][1]]
+
+        for i in range(l):
+            geldig = True
+            p_volgende = [c[(i + 1) % l][0], c[(i + 1) % l][1]]
+            test_lijn = [p.copy(), p_volgende.copy()]
+            if test_lijn[0][0] == test_lijn[1][0]: # verticale lijn
+                if (test_lijn[0][0] < self.xmax
+                        and test_lijn[0][0] > self.xmin):
+                    geldig = False
+            else: # horizontaal of diagonaal
+                a = (1.0 * (test_lijn[1][1] - test_lijn[0][1]) /
+                    (test_lijn[1][0] - test_lijn[0][0]))
+                b = 1.0 * test_lijn[0][1] - test_lijn[0][0] * a
+                is_hoger = False
+                is_lager = False
+                for ii in range(l):
+                    if (maak_groot_getal(c[ii][1])
+                            > maak_groot_getal(a * c[ii][0] + b) + 10):
+                        is_hoger = True
+                    elif (maak_groot_getal(c[ii][1])
+                            < maak_groot_getal(a * c[ii][0] + b) - 10):
+                        is_lager = True
+                if is_hoger and is_lager:
+                    geldig = False
+            if geldig:
+                elastiek_lijn.append([p.copy(), p_volgende.copy()])
+                p = [c[(i + 1) % l][0], c[(i + 1) % l][1]]
+
+        ncx = self.ncx
+        ncy = self.ncy
+        n = len(elastiek_lijn)
+        for i in range(n):
+            rand_lijn = elastiek_lijn[i]
+            lijn = [[rand_lijn[0][0] - ncx, rand_lijn[0][1] - ncy],
+                    [rand_lijn[1][0] - ncx, rand_lijn[1][1] - ncy]]
+            inverse_x1 = 0
+            inverse_y1 = 0
+            if lijn[0][0] == lijn[1][0]: # verticale lijn
+                if lijn[0][0] == 0:
+                    inverse_x1 = 99e99
+                else:
+                    inverse_x1 = 1 / lijn[0][0]
+                inverse_y1 = 0
+            elif lijn[0][1] == lijn[1][1]: # horizontale lijn
+                inverse_x1 = 0
+                if lijn[0][1] == 0:
+                    inverse_y1 = 99e99
+                else:
+                    inverse_y1 = 1/ lijn[0][1]
+            else: # diagonale lijn
+                lijn = sorted(lijn, key=lambda x: x[0]) # sorteer op x-waarde
+                a = (1.0 * (lijn[1][1] - lijn[0][1])
+                     / (lijn[1][0] - lijn[0][0]))
+                b = 1.0 * lijn[0][1] - lijn[0][0] * a
+                if a == 0 or b == 0:
+                    inverse_x1 = 99e99
+                else:
+                    inverse_x1 = 1/ (-1 * b / a)
+                if b == 0:
+                    inverse_y1 = 99e99
+                else:
+                    inverse_y1 = 1 / b
+            ex = (-1.0 / self.A * (self.Ixx * inverse_x1
+                                   + self.Ixy * inverse_y1))
+            ey = (-1.0 / self.A * (self.Ixy * inverse_x1
+                                   + self.Iyy * inverse_y1))
+            kernpunten.append([ex + ncx, ey + ncy])
+
+        self._kern_array = np.array(kernpunten)
+
     @property
     def eenheid(self) -> str:
         """Geeft eenheid van Waarde. 'None' als geen eenheid."""
@@ -795,14 +888,42 @@ class Vorm(BasisObject):
     @property
     def array_gesloten(self) -> np.array:
         """Retourneert Numpy array object met alle getallen (zonder eenheid) waarbij startpunt OOK als laatste punt wordt aangehouden."""
-        return np.append(self.array, [self[0].tolist()], axis=0)
+        if len(self.array) > 0:
+            return np.append(self.array, [self[0].tolist()], axis=0)
+        else:
+            return np.array([])
+
+    @property
+    def kern_array(self) -> np.array:
+        """Retourneert Numpy array object met alle knopen van kern (zonder eenheid)."""
+        return self._kern_array
+
+    @property
+    def kern_array_gesloten(self) -> np.array:
+        """Retourneert Numpy array object met allen knopen van kern (zonder eenheid) waarbij startpunt OOK als laatste punt wordt aangehouden."""
+        if len(self.kern_array) > 0:
+            return np.append(self.kern_array,
+                         [self.kern_array[0].tolist()], axis=0)
+        else:
+            return np.array([])
 
     def plot(self):
         """Teken vorm."""
         plt.axis('equal')
 
         # omtrek vorm
-        plt.plot(self.array_gesloten[:,0], self.array_gesloten[:,1], 'r-', lw=2)
+        if len(self.array > 2):
+            X = self.array_gesloten[:,0]
+            Y = self.array_gesloten[:,1]
+            plt.fill(X, Y, 'r', alpha=0.2)
+            plt.plot(X, Y, 'r-', lw=2)
+
+        # kern vorm
+        if len(self.kern_array > 2):
+            X = self.kern_array_gesloten[:,0]
+            Y = self.kern_array_gesloten[:,1]
+            plt.fill(X, Y, 'b', alpha=0.2)
+            plt.plot(X, Y, 'b-', lw=1)
 
         # hoofdtraagsheidsassens
         marge = 0.1
@@ -824,14 +945,19 @@ class Vorm(BasisObject):
         plt.show()
 
     def print_eigenschappen(self):
-        print()
-        print('coördinaten (afgerond op 2 decimalen): {} {}'.format(
+        print_queue = []
+
+        print_queue.append(
+                'coördinaten (afgerond op 2 decimalen):\n{} {}'.format(
                 [(round(k[0], 2), round(k[1], 2)) for k in self.array],
                 self.eenheid if self.eenheid is not None else '').strip())
-        print()
-        print('\n'.join(['{:>8} = {:.2f}'.format(a, getattr(self, a+'_'))
-                         for a in self.EIGENSCHAPPEN]))
-        print()
+
+        print_queue.append('')
+
+        print_queue.append('\n'.join(['{:>8} = {:.3f}'.format(
+                a, getattr(self, a+'_')) for a in self.EIGENSCHAPPEN]))
+
+        print('\n{}\n'.format('\n'.join(print_queue)))
 
     def __getitem__(self, index):
         """Retourneert subset Numpy array object met getallen (zonder eenheid)."""
@@ -848,4 +974,13 @@ class Vorm(BasisObject):
             k.eenheid = self.eenheid
             yield k
 
-    # TODO __repr__ en __str__
+    def __repr__(self):
+        cls_naam = type(self).__name__
+        knopen = ', '.join(repr(k) for k in self)
+        return '{}(Lijn({}))'.format(cls_naam, knopen)
+
+    def __str__(self):
+        return '{} {}'.format(
+                # coordinaten afgerond op twee decimalen
+                [(round(k[0], 2), round(k[1], 2)) for k in self.array],
+                self.eenheid if self.eenheid is not None else '').strip()
