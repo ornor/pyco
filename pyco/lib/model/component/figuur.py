@@ -31,6 +31,12 @@ class Figuur(pycom.BasisComponent):
             x = (-2, 3),
         ).plot_console()        # afronden -> laat plot zien
 
+    LIJN OBJECT             in plaats van tuple/list met coordinaten,
+                            mag ook Lijn object invoeren
+        Figuur().punt(
+            coordinaten=Lijn([1,2],[3,4],[5,6])
+        ).plot_console()
+
     CONFIGURATIE
         Figuur(
             breedte=7,
@@ -165,7 +171,10 @@ class Figuur(pycom.BasisComponent):
     def _check_coordinaten(self, coordinaten:Union[list, tuple]):
         """Controleert coordinaten en bepaalt globaal minimum en maximum."""
         if not isinstance(coordinaten, list) and not isinstance(coordinaten, tuple):
-            raise ValueError('coordinaten is geen lijst of tupel')
+            if isinstance(coordinaten, pycom.Lijn):
+                coordinaten.array.tolist()
+            else:
+                raise ValueError('coordinaten is geen Lijn, lijst of tupel')
         for coordinaat in coordinaten:
             if len(coordinaat) != 2:
                 raise ValueError('coordinaat heeft minder of meer dan 2 elementen: {}'.format(coordinaat))

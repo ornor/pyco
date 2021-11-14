@@ -1,20 +1,20 @@
 from typing import Union
 import math
 
-from pyco.model import Vorm, Lijn, Waarde
+import pyco.model as pycom
 
-class Cirkel(Vorm):
+class Cirkel(pycom.Vorm):
     """Creeert een cirkelvormig Vorm object."""
 
     def __init__(self,
                  straal:Union[float, int]):
 
         eenheid = None
-        if isinstance(straal, Waarde):
+        if isinstance(straal, pycom.Waarde):
             eenheid = straal.eenheid
         r = float(straal)
 
-        lijn = Lijn([-1*r, 0]).lijn_cirkelboog(
+        lijn = pycom.Lijn([-1*r, 0]).lijn_cirkelboog(
                     middelpunt=(0,0),
                     gradenhoek=360,
                     stappen=200,

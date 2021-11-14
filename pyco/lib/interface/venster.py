@@ -41,6 +41,7 @@ class TekstVenster(Venster):
         t.pack(side=tk.LEFT, fill=tk.BOTH)
         s.config(command=t.yview)
 
+        self.root.focus_force()
         self.root.mainloop()
 
 
@@ -56,6 +57,7 @@ class FiguurVenster(Venster):
         canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1.0)
         canvas.draw()
 
+        self.root.focus_force()
         self.root.mainloop()
 
 class BestandsnaamVenster(Venster):
