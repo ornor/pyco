@@ -602,6 +602,7 @@ class Vorm(BasisObject):
         self.kymax_ = None
 
         self._bereken_eigenschappen()
+        self._bereken_waardes()
 
         self._kern_array = np.array([])  # xy coordinaten van kern
         self._bereken_kern_array()
@@ -737,7 +738,7 @@ class Vorm(BasisObject):
         else: # Ixx == Iyy, maar niet hor/vert symmetrisch: bijvoorbeeld ruit
             self.alpha = 45.0
 
-
+    def _bereken_waardes(self):
         # maak Waarde objecten met eenheid
         oppervlakte_eenheid = None
         weerstand_eenheid = None
@@ -880,6 +881,15 @@ class Vorm(BasisObject):
         self._array = self._check_knopen(np.array(tmp_knopen, dtype='float64'))
         self._eenheid = eenheid
 
+        self._bereken_eigenschappen()
+        self._bereken_waardes()
+        self._bereken_kern_array()
+
+    def gebruik_eenheid(self, eenheid:str):
+        """Zet knopen om naar nieuwe eenheid en retourneert object."""
+        self.eenheid = eenheid
+        return self
+
     @property
     def array(self) -> np.array:
         """Retourneert Numpy array object met alle getallen (zonder eenheid)."""
@@ -906,6 +916,12 @@ class Vorm(BasisObject):
                          [self.kern_array[0].tolist()], axis=0)
         else:
             return np.array([])
+
+    @property
+    def lijn(self) -> Lijn:
+        """Retourneert Lijn object dat correspondeert met (gesloten) Vorm."""
+        knoop_objecten = [k for k in self]
+        return Lijn(knoop_objecten + [knoop_objecten[0]])
 
     def plot(self):
         """Teken vorm."""
@@ -944,22 +960,23 @@ class Vorm(BasisObject):
 
         plt.show()
 
-    def print_eigenschappen(self):
+    def print_eigenschappen(self, knopen=False):
         print_queue = []
 
-        print_queue.append(
-                'coördinaten (afgerond op 2 decimalen):\n{} {}'.format(
-                [(round(k[0], 2), round(k[1], 2)) for k in self.array],
-                self.eenheid if self.eenheid is not None else '').strip())
+        if knopen:
+            print_queue.append(
+                    'knopen (afgerond op 2 decimalen):\n{} {}'.format(
+                    [(round(k[0], 2), round(k[1], 2)) for k in self.array],
+                    self.eenheid if self.eenheid is not None else '').strip())
 
-        print_queue.append('')
+            print_queue.append('')
 
         print_queue.append('\n'.join(['{:>8} = {:.3f}'.format(
                 a, getattr(self, a+'_')) for a in self.EIGENSCHAPPEN]))
 
         print('\n{}\n'.format('\n'.join(print_queue)))
 
-    def __getitem__(self, index):
+    def __getitem__(self, index) -> np.array:
         """Retourneert subset Numpy array object met getallen (zonder eenheid)."""
         return self.array[index]
 

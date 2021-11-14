@@ -73,8 +73,6 @@ Cirkel = doc.model.Cirkel
 #         assert Lijn(Knoop(1, 2), Knoop(3, 4)) == Lijn([Knoop(1, 2), Knoop(3, 4)])
 
 
-
-
 v1 = Vorm(Lijn(
         (4, -5), (-10, 10)
     ).lijn_cirkelboog(
@@ -121,11 +119,13 @@ v6 = Vorm(Lijn([2,0], [0,2], [8,10], [10, 8]).gebruik_eenheid('cm'))
 v6.plot()
 v6.print_eigenschappen()
 
-v7 = Rechthoek(breedte=20, hoogte=50)
+
+v7 = Rechthoek(breedte=Waarde(20, 'cm'), hoogte=Waarde(0.5).m)
 v7.plot()
 v7.print_eigenschappen()
 
-v8 = Cirkel(straal=20)
+
+v8 = Cirkel(straal=Waarde(1).dm).gebruik_eenheid('m')
 v8.plot()
 v8.print_eigenschappen()
 
