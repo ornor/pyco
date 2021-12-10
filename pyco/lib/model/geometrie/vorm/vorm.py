@@ -526,6 +526,7 @@ class Vorm(pycom.BasisObject):
 
 if __name__ == '__main__':
 
+    print('v1 - lijn met cirkelboog en bezier')
     v1 = Vorm(pycom.Lijn(
             (4, -5), (-10, 10)
         ).lijn_cirkelboog(
@@ -543,35 +544,42 @@ if __name__ == '__main__':
     v1.plot()
     v1.print_eigenschappen()
 
+    print('v2 - polygon')
     v2 = Vorm([[0,0], [0,10], [4,10], [4,7], [6,7], [6,10], [10,10], [10,0]])
     v2.plot()
     v2.print_eigenschappen()
 
+    print('v3 - cirkel benaderd d.m.v. een lijn met cirkelboog')
     v3= Vorm(pycom.Lijn([-1,0]).lijn_cirkelboog(middelpunt=(0,0), gradenhoek=360))
     v3.plot()
     v3.print_eigenschappen()
 
+    print('v4 - driehoek')
     v4 = Vorm(pycom.Lijn([0,0], [6,-3], [10,4]).gebruik_eenheid('cm'))
     v4.plot()
     v4.print_eigenschappen()
 
+    print('v5 - rechthoek met transformatie')
     v5 = Vorm(pycom.Lijn([-50,-20], [50,-20], [50,20], [-50, 20]).transformeren(
               rotatiepunt=None, # bij None: neemt zwaartepunt
-              rotatiehoek=0, # graden tegen de klok in
+              rotatiehoek=45, # graden tegen de klok in
               schaalfactor=[1, 1], # vergroten om rotatiepunt; negatief:spiegelen
               translatie=[0, 0] # verplaatsing
         ).gebruik_eenheid('mm'))
     v5.plot()
     v5.print_eigenschappen()
 
+    print('v6 - gedraaide rechthoek met eenheid')
     v6 = Vorm(pycom.Lijn([2,0], [0,2], [8,10], [10, 8]).gebruik_eenheid('cm'))
     v6.plot()
     v6.print_eigenschappen()
 
+    print('v7 - Rechthoek object')
     v7 = pycom.Rechthoek(breedte=30, hoogte=50)
     v7.plot()
     v7.print_eigenschappen()
 
+    print('v8 - Cirkel object')
     v8 = pycom.Cirkel(straal=pycom.Waarde(1).dm).gebruik_eenheid('m')
     v8.plot()
     v8.print_eigenschappen()

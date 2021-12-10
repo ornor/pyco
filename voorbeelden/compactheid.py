@@ -27,11 +27,13 @@ def norm_compactheid_kubus(b):
     return n
 
 print()
-print('compactheid kubus b  = {} --> {}'.format(b1, compactheid_kubus(b1)))
-print('compactheid kubus b  = {} --> {}'.format(b2, compactheid_kubus(b2)))
-print('compactheid kubus b  = {} --> {}'.format(b3, compactheid_kubus(b3)))
+frmt_compactheid = 'compactheid kubus b  = {} --> {}'
+print(frmt_compactheid.format(b1, compactheid_kubus(b1)))
+print(frmt_compactheid.format(b2, compactheid_kubus(b2)))
+print(frmt_compactheid.format(b3, compactheid_kubus(b3)))
 
 print()
-print('genormeerde compactheid kubus b  = {} --> {}'.format(b1, norm_compactheid_kubus(b1)))
-print('genormeerde compactheid kubus b  = {} --> {}'.format(b2, norm_compactheid_kubus(b2)))
-print('genormeerde compactheid kubus b  = {} --> {}'.format(b3, norm_compactheid_kubus(b3)))
+frmt_genorm_compactheid = 'genormeerde compactheid kubus b  = {} --> {}'
+print(frmt_genorm_compactheid.format(b1, norm_compactheid_kubus(b1)))
+print(frmt_genorm_compactheid.format(b2, norm_compactheid_kubus(b2)))
+print(frmt_genorm_compactheid.format(b3, norm_compactheid_kubus(b3)))

@@ -11,3 +11,7 @@ from .lib.model.geometrie.lijn import Lijn
 from .lib.model.geometrie.vorm.vorm import Vorm
 from .lib.model.geometrie.vorm.rechthoek import Rechthoek
 from .lib.model.geometrie.vorm.cirkel import Cirkel
+
+from .lib.model.materiaal.materiaal import Materiaal
+
+from .lib.model.mechanica.doorsnede import Doorsnede

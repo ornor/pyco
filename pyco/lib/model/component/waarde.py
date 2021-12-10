@@ -88,12 +88,12 @@ class Waarde(pycom.BasisComponent):
     dm3_min dm3_s dm4 dm_d dm_h dm_j dm_min dm_s ds Eg Em Es F fg floz fm fs ft
     g gallon Gg Gm GN gon GPa grain Gs h ha hg hl hm hm2 hm3 hs inch K kg kip
     kl km km2 km3 km3_d km3_h km3_j km3_min km3_s km4 km_d km_h km_j km_min
-    km_s kN kNm kNmm kN_m2 kN_mm2 kPa ks kton l l_d l_h l_j l_min l_s m m2 m3
-    m3_d m3_h m3_j m3_min m3_s m4 Mg mg mijl minuut ml ml_d ml_h ml_j ml_min
-    ml_s Mm mm mm2 mm3 mm3_d mm3_h mm3_j mm3_min mm3_s mm4 mm_d mm_h mm_j
-    mm_min mm_s MN MNm MNmm MN_m2 MN_mm2 MPa Ms ms Mton mug mum mus m_d m_h
-    m_j m_min m_s N ng Nm nm Nmm ns N_m2 N_mm2 ounce Pa Pg pg pint Pm pm pound
-    Ps ps rad s stone tbs Tg Tm TN ton TPa Ts tsp yard zeemijl
+    km_s kN kNm kNmm kN_m kN_mm kN_m2 kN_mm2 kPa ks kton l l_d l_h l_j l_min
+    l_s m m2 m3 m3_d m3_h m3_j m3_min m3_s m4 Mg mg mijl minuut ml ml_d ml_h
+    ml_j ml_min ml_s Mm mm mm2 mm3 mm3_d mm3_h mm3_j mm3_min mm3_s mm4 mm_d
+    mm_h mm_j mm_min mm_s MN MNm MNmm MN_m2 MN_mm2 MPa Ms ms Mton mug mum mus
+    m_d m_h m_j m_min m_s N ng Nm nm Nmm ns N_m N_mm N_m2 N_mm2 ounce Pa Pg pg
+    pint Pm pm pound Ps ps rad s stone tbs Tg Tm TN ton TPa Ts tsp yard zeemijl
     """
 
     # hulp functie om lijst hierboven te gegeneren; hierna nog bepaalde eigenschappen/methodes verwijderen
@@ -397,7 +397,7 @@ class Waarde(pycom.BasisComponent):
         self._is_getal = waarde._is_getal
         self._eenheidbreuk = waarde._eenheidbreuk
         self._getal = waarde._getal
-        self._config = waarde.config
+        self._config = waarde._config
 
     def _init_waarde_tekst(self, waarde:str):
         self._is_getal = False
@@ -879,7 +879,7 @@ class Waarde(pycom.BasisComponent):
            waarde_getal, waarde_eenheid = tuple(self)
            format_str = '{:' + config + '} {}'
            return format_str.format(waarde_getal,
-                                    waarde_eenheid).strip().rstrip(' None')
+                            waarde_eenheid).strip().split(' None', 1)[0]
        else:
            waarde_getal, _ = tuple(self)
            format_str = '{:' + config + '}'
@@ -1773,3 +1773,21 @@ class Waarde(pycom.BasisComponent):
     @property
     def ml_s(self):
         return self._verander_eenheid('ml/s')
+
+    # lijnlast
+
+    @property
+    def kN_m(self):
+        return self._verander_eenheid('kN/m')
+
+    @property
+    def N_m(self):
+        return self._verander_eenheid('N/m')
+
+    @property
+    def kN_mm(self):
+        return self._verander_eenheid('kN/mm')
+
+    @property
+    def N_mm(self):
+        return self._verander_eenheid('N/mm')
