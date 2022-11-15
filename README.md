@@ -1,6 +1,6 @@
 # pyco
 
-Jara van Veldhoven, 2022
+Jara van Veldhoven, 2020-2022
 
 Python bibliotheek voor Civiele Techniek onderwijs
 
