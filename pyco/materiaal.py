@@ -10,10 +10,21 @@ class Materiaal(pc.BasisObject):
     """Betreft een materiaal met diverse eigenschappen.
 
     AANMAKEN MATERIAAL
-        m1 = Materiaal()            invoeren van vorm objecten
+        m = Materiaal(E=Waarde(210, 'GPa'),     # elasticiteitsmodulus
+                      G=Waarde(75, 'GPa'),      # glijdings(schuif)modulus
+                      v=Waarde(0.4),            # dwarscontractiecoëfficiënt
+                                                               (Poisson factor)
+                      sm=Waarde(7850, 'kg/m3'), # soortelijke massa (dichtheid)
+                      sg=Waarde(78.5, 'kN/m3')) # soortelijk gewicht
         
-    #TODO
-
+    RELATIE E, G EN v
+        Indien E en v bekend zijn, dan wordt G zelf bepaald: G = E/(2(1+v))
+        Indien E en G bekend zijn, dan wordt v zelf bepaald: v = (E/2G)-1
+        Alledrie grootheden kunnen handmatig worden overschreven.
+        
+    OPVRAGEN EN AANPASSEN MATERIAALEIGENSCHAPPEN
+        m.E                             # retourneert Waarde object
+        m.E = Waarde(180).GPa           # past waarde E aan
     """
     
     DEFAULT_E = pc.Waarde(0, 'N/m2') 
@@ -25,11 +36,11 @@ class Materiaal(pc.BasisObject):
     def __init__(self, E=None, G=None, v=None, sm=None, sg=None):
         super().__init__()
 
-        self._E = self.DEFAULT_E     # elasticiteitsmodulus
-        self._G = self.DEFAULT_G     # glijdingsmodulus
-        self._v = self.DEFAULT_v     # dwarscontractiecoefficient
-        self._sm = self.DEFAULT_sm   # soortelijke massa
-        self._sg = self.DEFAULT_sg   # soortelijk gewicht
+        self._E = self.DEFAULT_E 
+        self._G = self.DEFAULT_G  
+        self._v = self.DEFAULT_v  
+        self._sm = self.DEFAULT_sm 
+        self._sg = self.DEFAULT_sg
         
         if E is not None:
             self.E = E
@@ -59,9 +70,7 @@ class Materiaal(pc.BasisObject):
 
     @property
     def G(self):
-        """Glijdingsmodulus.
-        https://nl.wikipedia.org/wiki/Schuifmodulus
-        """
+        """Glijdingsmodulus."""
         if (self._G == self.DEFAULT_G
                 and self._E != self.DEFAULT_E
                 and self._v != self.DEFAULT_v):

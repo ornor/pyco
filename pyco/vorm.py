@@ -552,7 +552,7 @@ class Vorm(pc.BasisObject):
         v.A             oppervlakte
         v.xmin v.xmax   minimum en maximum x-waarde
         v.ymin v.ymax   minimum en maximum y-waarde
-        v.ncx  v.nvy    x- en y-waarde normaalkrachtencetrum (zwaartepunt)
+        v.ncx  v.ncy    x- en y-waarde normaalkrachtencetrum (zwaartepunt)
         v.Ixx  v.Iyy    oppervlakte traagheidsmoment in x- en y-richting
         v.Ixy           traagheidsproduct (is 0 voor symmetrische vormen)
         v.I1   v.I2     hoofdtraagheidsmomenten (1 sterke richting, 2 zwakke)

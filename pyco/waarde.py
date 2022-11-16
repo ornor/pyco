@@ -17,10 +17,12 @@ class Waarde(pc.BasisObject):
         w = Waarde(getal, eenheid_tekst)
 
     AANPASSEN EENHEID           omzetten van eenheid naar andere eenheid
-        w = w['N/mm2']          kan voor alle eenheden
+        w.eenheid               huidige eenheid opvragen (tekst of None)
+        w.eenheid = 'N/mm2'     eenheid aanpassen
+        w = w['N/mm2']          eenheid aanpassen, retourneert object
+        w.gebruik_eenheid('mm') eenheid aanpassen, retourneert object
+        w.eh('mm')              eenheid aanpassen, retourneert object
         w = w.N_mm2             kan voor een aantal standaard gevallen (zie lijst onderaan)
-        w.eenheid               eenheid opvragen
-        w.eenheid = 'N/mm2'     alternatief om eenheid om te zetten
 
     AANPASSEN AFRONDING         pas afgerond wanneer waarde wordt getoond als tekst
         w = w[0]                kan voor alle gehele getallen
@@ -662,6 +664,16 @@ class Waarde(pc.BasisObject):
     def eenheid(self, nieuwe_eenheid:str):
         """Zet Waarde om naar nieuwe eenheid."""
         self._verander_eenheid(nieuwe_eenheid)
+    
+    def gebruik_eenheid(self, nieuwe_eenheid:str):
+        """Zet om naar nieuwe eenheid en retourneert object."""
+        self._verander_eenheid(nieuwe_eenheid)
+        return self
+    
+    def eh(self, nieuwe_eenheid:str):
+        """Zet om naar nieuwe eenheid en retourneert object."""
+        self._verander_eenheid(nieuwe_eenheid)
+        return self
 
     def __add__(self, andere_waarde):
         """Telt twee waarden bij elkaar op."""
@@ -675,7 +687,6 @@ class Waarde(pc.BasisObject):
         getal = self._getal + andere_waarde._getal
         cls = type(self)
         return cls(getal, self._eenheidbreuk, config = self._config)
-
 
     def __sub__(self, andere_waarde):
         """Trekt waarde van andere waarde af."""
@@ -956,6 +967,12 @@ class Waarde(pc.BasisObject):
     @property
     def _9(self):
         return self._verander_aantal_decimalen(9)
+
+    
+    
+###############################################################################
+#  ALLES HIERONDER MOET ZELFDE ZIJN ALS BIJ VECTOR OBJECT
+############################################################################### 
 
     # MASSA
 

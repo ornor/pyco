@@ -15,7 +15,14 @@ class Cirkel(pc.Vorm):
     """
     Creeert een cirkelvormig Vorm object.
     
-    #TODO
+    AANMAKEN CIRKEL
+        c = Cirkel(straal=Waarde(3).mm)
+        
+    Vormeigenschappen worden exact bepaald, daar waar een Vorm object een ronde
+    rand benadert met kleine rechte lijnen.
+    
+    Verder zijn alle eigenschappen en methoden van toepassing als van een
+    Vorm object.
     """
 
     def __init__(self,

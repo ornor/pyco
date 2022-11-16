@@ -14,7 +14,10 @@ class Rechthoek(pc.Vorm):
     """
     Creeert een rechthoekig Vorm object.
     
-    #TODO    
+    AANMAKEN RECHTHOEK
+        r = Rechthoek(breedte=Waarde(300).mm, hoogte=Waarde(500).mm)
+        
+    Verder zijn alle eigenschappen van toepassing als van een Vorm object. 
     """
 
     def __init__(self,
