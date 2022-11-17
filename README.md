@@ -521,7 +521,7 @@ pc.Lijn(k1, k2, k3).plot3D()
 ```
 
 
-![png](output_19_0.png)
+![png](img/output_19_0.png)
 
 
 ## Vorm
@@ -598,7 +598,7 @@ print(f'het grootste hoofdtraagheidsmoment is: {v1.I1:.2e} mm4')
 ```
 
 
-![png](output_22_0.png)
+![png](img/output_22_0.png)
 
 
     
@@ -656,7 +656,7 @@ pc.Rechthoek(breedte=30, hoogte=50).plot()
 ```
 
 
-![png](output_25_0.png)
+![png](img/output_25_0.png)
 
 
 ## Vorm::Cirkel
@@ -691,7 +691,7 @@ pc.Cirkel(straal=pc.Waarde(1).dm).gebruik_eenheid('m').plot()
 ```
 
 
-![png](output_28_0.png)
+![png](img/output_28_0.png)
 
 
 ## Materiaal
