@@ -1,6 +1,8 @@
 # pyco API
 
-Bibliotheek voor Civiele Techniek constructie onderwijs. Geschreven door Jara van Veldhoven 2020-2022.
+Jara van Veldhoven 2020-2022.
+
+Bibliotheek voor Civiele Techniek constructie onderwijs.
 
 Begin alle documenten met onderstaande import.
 
