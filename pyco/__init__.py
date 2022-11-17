@@ -114,21 +114,25 @@ WISKUNDIGE FUNCTIES                   (gebaseerd op Numpy module)
     stdafw_n(lijst)                   bepaalt standaardafwijking voor steekproef
     mediaan(lijst)                    bepaalt de mediaan
     percentiel(lijst, percentage)     percentage getal tussen 0 en 100
-
-    .corrcoef
-    .sort
-    .where
-    .isnan
-    .isinf
-    .equal
-    .greater
-    .greaterequal
-    .less
-    .lessequal
-    .all
-    .any
-    .logical_or
-    .logical_and, logical_not, logical_xor
+    correlatie(lijst_a, lijst_b)      bepaalt correlatie matrix
+    sorteer(lijst)                    sorteert een lijst van klein naar groot
+    omdraaien(lijst)                  draai de volgorde van de lijst om
+    alsdan(voorwaarde, als, dan)      bewerk lijst met voorwaarde per item
+    is_nan(x)                         bepaalt of waarde een niet-getal is
+    is_inf(x)                         bepaalt of waarde oneindig is
+    gelijk(lijst_a, lijst_b)          per element kijken of waarden gelijk zijn
+    groter(lijst_a, lijst_b)          per element kijken of waarde groter dan
+    groter_gelijk(lijst_a, lijst_b)   idem, maar dan ook gelijk
+    kleiner(lijst_a, lijst_b)         per element kijken of waarde kleiner dan
+    kleiner_gelijk(lijst_a, lijst_b)  idem, maar dan ook gelijk
+    alle(lijst)                       kijkt of alle elementen True zijn
+    sommige(lijst)                    kijkt of er minimaal 1 element True is
+    niet_alle(lijst)                  kijkt of er minimaal 1 element False is
+    geen(lijst)                       kijkt of alle elementen False zijn
+    of(a, b)                          kijkt of a of b True is
+    en(a, b)                          kijkt of a en b True is
+    niet(x)                           omdraaien van True naar False en andersom
+    xof(a, b)                         True als a of b True is, en niet beide
     
 WISKUNDIGE EIGENSCHAPPEN              (gebaseerd op Numpy module)
     nan                               float die geen getal is (not a number)
@@ -137,11 +141,22 @@ WISKUNDIGE EIGENSCHAPPEN              (gebaseerd op Numpy module)
     e                                 2.718281828459045
 
     """.strip())
+    
+    
+###############################################################################
+
+# eigenschappen
+
+nan = np.nan
+inf = np.inf
+pi = np.pi
+e = np.e
 
     
 ###############################################################################
     
-    
+# functies
+
 _numpy_functions = dict(
     sin = np.sin,
     cos = np.cos,
@@ -197,6 +212,25 @@ _numpy_functions = dict(
     stdafw_n = lambda x: np.std(x, ddof=1),
     mediaan = np.median,
     percentiel = np.percentile,
+    correlatie = np.corrcoef,
+    sorteer = np.sort,
+    omdraaien = np.flip,
+    alsdan = np.where,
+    is_nan = np.isnan,
+    is_inf = np.isinf,
+    gelijk = np.equal,
+    groter = np.greater,
+    groter_gelijk = np.greater_equal,
+    kleiner = np.less,
+    kleiner_gelijk = np.less_equal,
+    alle = np.all,
+    sommige = np.any,
+    niet_alle = lambda x: ~np.all(x),
+    geen = lambda x: ~np.any(x),
+    of = np.logical_or,
+    en = np.logical_and,
+    niet = np.logical_not,
+    xof = np.logical_xor,
 )
 _numpy_functions['min'] = np.amin # reserverd keywords
 _numpy_functions['max'] = np.amax
@@ -242,8 +276,3 @@ for fn_name, fn in _numpy_functions.items():
     
 ###############################################################################
     
-    
-nan = np.nan
-inf = np.inf
-pi = np.pi
-e = np.e
