@@ -20,9 +20,9 @@ De pyco model is afhankelijk van drie externe bibliotheken:
 Deze bibliotheken zijn beschikbaar via pyco:
 
 > pc.np # numpy
->
-> pc.pd # pandas
->
+>  
+> pc.pd # pandas 
+> 
 > pc.plt # pyplot module van matplotlib
 
 ## Inhoud
@@ -401,12 +401,9 @@ pc.Lijn.print_help()
 
 
 ```python
-pc.Lijn(k1, k2, k3).plot3D()
+l1 = pc.Lijn(k1, k2, k3)
+#l1.plot3D()
 ```
-
-
-![png](img/output_15_0.png)
-
 
 ## Vorm
 <a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
@@ -476,14 +473,10 @@ v1 = pc.Vorm(pc.Lijn([-50,-40], [-40, -40], [-30, 15], [30, 15], [40, -40], [50,
           schaalfactor=[-2, 1], # vergroten om rotatiepunt; negatief:spiegelen
           translatie=[50, -120] # verplaatsing
     ).gebruik_eenheid('mm'))
-v1.plot()
+#v1.plot()
 v1.print_eigenschappen()
 print(f'het grootste hoofdtraagheidsmoment is: {v1.I1:.2e} mm4')
 ```
-
-
-![png](img/output_18_0.png)
-
 
     
            O = 658.439 mm
@@ -536,12 +529,9 @@ pc.Rechthoek.print_help()
 
 
 ```python
-pc.Rechthoek(breedte=30, hoogte=50).plot()
+rh = pc.Rechthoek(breedte=30, hoogte=50)
+#rh.plot()
 ```
-
-
-![png](img/output_21_0.png)
-
 
 ## Cirkel
 <a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
@@ -571,12 +561,9 @@ pc.Cirkel.print_help()
 
 
 ```python
-pc.Cirkel(straal=pc.Waarde(1).dm).gebruik_eenheid('m').plot()
+c1 = pc.Cirkel(straal=pc.Waarde(1).dm).gebruik_eenheid('m')
+#c1.plot()
 ```
-
-
-![png](img/output_24_0.png)
-
 
 ## Materiaal
 <a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
@@ -638,13 +625,13 @@ pc.functies_print_help()
     +-------------------------------------------+
     |  algemene pyco functies en eigenschappen  |
     +-------------------------------------------+
-
+    
     ALGEMEEN GEBRUIK VAN FUNCTIES         alle namen met () erachter zijn functies
         pc.wortel(9) == 3.0               direct aan te roepen vanuit pc object
-
+        
     ALGEMEEN GEBRUIK VAN EIGENSCHAPPEN
         pc.pi == 3.141592653589793        direct aan te roepen vanuit pc object
-
+    
     WISKUNDIGE FUNCTIES                   (gebaseerd op Numpy module)
         invoerwaarden:  int, float, np.array, Waarde of Vector
         uitvoerwaarden: indien invoer Waarde/Vector, uitvoer ook Waarde/Vector met
@@ -677,7 +664,7 @@ pc.functies_print_help()
         delen(a, b)                       a / b
         delen_aantal(a, b)                a // b -> afgerond naar beneden
         delen_rest(a, b)                  a % b -> restant na afronden naar beneden
-        macht(a, b)                       a ** b
+        macht(a, b)                       a ** b 
         reciproke(x)                      1 / x
         negatief(x)                       -x
         kruisproduct(a, b)                a x b: staat loodrecht op vector a en b
@@ -693,9 +680,9 @@ pc.functies_print_help()
         wortel(x)                         vierkantswortel
         wortel3(x)                        kubieke wortel
         abs(x)                            absolute waarde (altijd positief)
-        teken(x)                          positief getal: 1.0   negatief: -1.0
+        teken(x)                          positief getal: 1.0   negatief: -1.0 
         kopieer_teken(a, b)               neem getal a, met het teken (+-) van b
-        is_positief(a, b)                 stap functie:a<0 -> 0, a=0 -> b, a>0 -> 1
+        is_positief(a, b)                 stap functie:a<0 -> 0, a=0 -> b, a>0 -> 1 
         verwijder_nan(lijst)              verwijder niet-getallen (not a number)
         vervang_nan(lijst)                vervang: nan=0, inf=1.7e+308 (heel groot)
         interp(x, lijst_x, lijst_y)       interpoleer x in y; lijst_x MOET oplopen
@@ -725,13 +712,13 @@ pc.functies_print_help()
         en(a, b)                          kijkt of a en b True is
         niet(x)                           omdraaien van True naar False en andersom
         xof(a, b)                         True als a of b True is, en niet beide
-
+        
     WISKUNDIGE EIGENSCHAPPEN              (gebaseerd op Numpy module)
         nan                               float die geen getal is (not a number)
         inf                               oneindig groot
         pi                                3.141592653589793
         e                                 2.718281828459045
-
+    
 
 
 ```python
@@ -740,4 +727,4 @@ print(f"het gemiddelde van vector v is: {pc.gemiddelde(v)}")
 ```
 
     het gemiddelde van vector v is: 4.666666666666667 mm
-
+    
