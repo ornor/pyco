@@ -14,145 +14,27 @@ De pyco model is afhankelijk van drie externe bibliotheken:
 * numpy (https://numpy.org)
 * pandas (https://pandas.pydata.org/)
 * matplotlib (https://matplotlib.org/)
-pc.np     # numpy
-pc.pd     # pandas 
-pc.plt    # pyplot module van matplotlib
+
+Deze bibliotheken zijn beschikbaar via pyco:
+
+> pc.np # numpy
+>
+> pc.pd # pandas
+>
+> pc.plt # pyplot module van matplotlib
+
 ## Inhoud
-Alle pyco objecten beginnen met een hoofdletter.
+Alle pyco objecten beginnen met een hoofdletter. Alle functies en eigenschappen beginnen met een kleine letter.
 
 * [Waarde](#Waarde)
 * [Vector](#Vector)
 * [Knoop](#Knoop)
 * [Lijn](#Lijn)
 * [Vorm](#Vorm)
-    - [Rechthoek](#Vorm::Rechthoek)
-    - [Cirkel](#Vorm::Cirkel)
+    - [Rechthoek](#Rechthoek)
+    - [Cirkel](#Cirkel)
 * [Materiaal](#Materiaal)
-
-## Algemene pyco functies en eigenschappen
-Naast bovenstaande pyco objecten, zijn er ook pyco functies en eigenschappen beschikbaar. Deze beginnen altijd met een kleine letter.
-
-
-```python
-pc.functies_print_help()
-```
-
-    +-------------------------------------------+
-    |  algemene pyco functies en eigenschappen  |
-    +-------------------------------------------+
-    
-    ALGEMEEN GEBRUIK VAN FUNCTIES         alle namen met () erachter zijn functies
-        pc.wortel(9) == 3.0               direct aan te roepen vanuit pc object
-        
-    ALGEMEEN GEBRUIK VAN EIGENSCHAPPEN
-        pc.pi == 3.141592653589793        direct aan te roepen vanuit pc object
-    
-    WISKUNDIGE FUNCTIES                   (gebaseerd op Numpy module)
-        invoerwaarden:  int, float, np.array, Waarde of Vector
-        uitvoerwaarden: indien invoer Waarde/Vector, uitvoer ook Waarde/Vector met
-                        ALTIJD zelfde eenheid als invoer; ook als niet correct is!!
-        sin(x)                            sinus
-        cos(x)                            cosinus
-        tan(x)                            tangens
-        asin(x)                           arcsinus (omgekeerde sin)
-        acos(x)                           arccosinus (omgekeerde cos)
-        atan(x)                           arctangens (omgekeerde tan)
-        hypot(a, b)                       hypotenuse (c in: a^2 + b^c = c^2)
-        graden(rad)                       van radialen naar graden
-        radialen(deg)                     van graden naar radialen
-        sinh(x)                           hyperbolische sinus
-        cosh(x)                           hyperbolische cosinus
-        tanh(x)                           hyperbolische tangens
-        asinh(x)                          arc hyperb. sinus (omgekeerde sinh)
-        acosh(x)                          arc hyperb. cosinus (omgekeerde cosh)
-        atanh(x)                          arc hyperb. tangens (omgekeerde tanh)
-        afronden(x, n)                    rond af op n decimalen (standaard 0)
-        plafond(x)                        rond af naar boven (geheel getal)
-        vloer(x)                          rond af naar beneden (geheel getal)
-        plafond_0_vloer(x)                rond af richting 0 (geheel getal)
-        som(lijst)                        de som van de elementen
-        product(lijst)                    het product van de elementen
-        verschil(lijst)                   lijst met verschillen tussen elementen
-        optellen(a, b)                    a + b
-        aftrekken(a, b)                   a - b
-        vermenigvuldigen(a, b)            a * b
-        delen(a, b)                       a / b
-        delen_aantal(a, b)                a // b -> afgerond naar beneden
-        delen_rest(a, b)                  a % b -> restant na afronden naar beneden
-        macht(a, b)                       a ** b 
-        reciproke(x)                      1 / x
-        negatief(x)                       -x
-        kruisproduct(a, b)                a x b: staat loodrecht op vector a en b
-        inwendigproduct(a, b)             a . b: is |a| * |b| * cos(theta)
-        exp(x)                            exponentieel: berekent e^x
-        ln(x)                             natuurlijke logaritme (grondgetal e)
-        log(x)                            logaritme met grondgetal 10
-        kgv(a, b)                         kleinste gemene veelvoud: a=12 b=20: 60
-        ggd(a, b)                         grootste gemene deler: a=12 b=20: 4
-        min(lijst)                        bepaalt minimum waarde lijst
-        max(lijst)                        bepaalt maximum waarde lijst
-        bijsnijden(lijst, min, max)       snij alle elementen af tot minmax bereik
-        wortel(x)                         vierkantswortel
-        wortel3(x)                        kubieke wortel
-        abs(x)                            absolute waarde (altijd positief)
-        teken(x)                          positief getal: 1.0   negatief: -1.0 
-        kopieer_teken(a, b)               neem getal a, met het teken (+-) van b
-        is_positief(a, b)                 stap functie:a<0 -> 0, a=0 -> b, a>0 -> 1 
-        verwijder_nan(lijst)              verwijder niet-getallen (not a number)
-        vervang_nan(lijst)                vervang: nan=0, inf=1.7e+308 (heel groot)
-        interp(x, lijst_x, lijst_y)       interpoleer x in y; lijst_x MOET oplopen
-        van_totmet_n(van, tot_met, n)     genereert vast aantal getallen (incl. tot)
-        van_tot_stap(van, tot, stap)      genereert vaste stappen (excl. tot)
-        gemiddelde(lijst)                 bepaalt het gemiddelde
-        stdafw_pop(lijst)                 bepaalt standaardafwijking voor populatie
-        stdafw_n(lijst)                   bepaalt standaardafwijking voor steekproef
-        mediaan(lijst)                    bepaalt de mediaan
-        percentiel(lijst, percentage)     percentage getal tussen 0 en 100
-        correlatie(lijst_a, lijst_b)      bepaalt correlatie matrix
-        sorteer(lijst)                    sorteert een lijst van klein naar groot
-        omdraaien(lijst)                  draai de volgorde van de lijst om
-        alsdan(voorwaarde, als, dan)      bewerk lijst met voorwaarde per item
-        is_nan(x)                         bepaalt of waarde een niet-getal is
-        is_inf(x)                         bepaalt of waarde oneindig is
-        gelijk(lijst_a, lijst_b)          per element kijken of waarden gelijk zijn
-        groter(lijst_a, lijst_b)          per element kijken of waarde groter dan
-        groter_gelijk(lijst_a, lijst_b)   idem, maar dan ook gelijk
-        kleiner(lijst_a, lijst_b)         per element kijken of waarde kleiner dan
-        kleiner_gelijk(lijst_a, lijst_b)  idem, maar dan ook gelijk
-        alle(lijst)                       kijkt of alle elementen True zijn
-        sommige(lijst)                    kijkt of er minimaal 1 element True is
-        niet_alle(lijst)                  kijkt of er minimaal 1 element False is
-        geen(lijst)                       kijkt of alle elementen False zijn
-        of(a, b)                          kijkt of a of b True is
-        en(a, b)                          kijkt of a en b True is
-        niet(x)                           omdraaien van True naar False en andersom
-        xof(a, b)                         True als a of b True is, en niet beide
-        
-    WISKUNDIGE EIGENSCHAPPEN              (gebaseerd op Numpy module)
-        nan                               float die geen getal is (not a number)
-        inf                               oneindig groot
-        pi                                3.141592653589793
-        e                                 2.718281828459045
-    
-
-
-```python
-v = pc.Vector(3, 4, 7).mm
-print(f"het gemiddelde van vector v is: {pc.gemiddelde(v)}")
-
-x = pc.van_totmet_n(0, pc.pi, 10)
-pc.sin(x).cm
-```
-
-    het gemiddelde van vector v is: 4.666666666666667 mm
-    
-
-
-
-
-    Vector(Waarde(0.0, 'cm'), Waarde(0.3420201433256687, 'cm'), Waarde(0.6427876096865393, 'cm'), Waarde(0.8660254037844386, 'cm'), Waarde(0.984807753012208, 'cm'), Waarde(0.984807753012208, 'cm'), Waarde(0.8660254037844386, 'cm'), Waarde(0.6427876096865395, 'cm'), Waarde(0.3420201433256689, 'cm'), Waarde(1.2246467991473532e-16, 'cm'))
-
-
+* [pyco functies en eigenschappen](#Functies)
 
 ## Waarde
 <a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
@@ -521,7 +403,7 @@ pc.Lijn(k1, k2, k3).plot3D()
 ```
 
 
-![png](img/output_19_0.png)
+![png](img/output_15_0.png)
 
 
 ## Vorm
@@ -598,7 +480,7 @@ print(f'het grootste hoofdtraagheidsmoment is: {v1.I1:.2e} mm4')
 ```
 
 
-![png](img/output_22_0.png)
+![png](img/output_18_0.png)
 
 
     
@@ -628,7 +510,7 @@ print(f'het grootste hoofdtraagheidsmoment is: {v1.I1:.2e} mm4')
     het grootste hoofdtraagheidsmoment is: 2.20e+07 mm4
     
 
-## Vorm::Rechthoek
+## Rechthoek
 <a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
 
 
@@ -656,10 +538,10 @@ pc.Rechthoek(breedte=30, hoogte=50).plot()
 ```
 
 
-![png](img/output_25_0.png)
+![png](img/output_21_0.png)
 
 
-## Vorm::Cirkel
+## Cirkel
 <a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
 
 
@@ -691,7 +573,7 @@ pc.Cirkel(straal=pc.Waarde(1).dm).gebruik_eenheid('m').plot()
 ```
 
 
-![png](img/output_28_0.png)
+![png](img/output_24_0.png)
 
 
 ## Materiaal
@@ -741,3 +623,119 @@ print(f'dwarscontractiecoëfficiënt is: {S235.v}')
 
     dwarscontractiecoëfficiënt is: 0.3999999999999999
     
+
+## Functies
+<a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
+Naast bovenstaande pyco objecten, zijn er ook algemene pyco functies en eigenschappen beschikbaar. Deze beginnen altijd met een kleine letter.
+
+
+```python
+pc.functies_print_help()
+```
+
+    +-------------------------------------------+
+    |  algemene pyco functies en eigenschappen  |
+    +-------------------------------------------+
+
+    ALGEMEEN GEBRUIK VAN FUNCTIES         alle namen met () erachter zijn functies
+        pc.wortel(9) == 3.0               direct aan te roepen vanuit pc object
+
+    ALGEMEEN GEBRUIK VAN EIGENSCHAPPEN
+        pc.pi == 3.141592653589793        direct aan te roepen vanuit pc object
+
+    WISKUNDIGE FUNCTIES                   (gebaseerd op Numpy module)
+        invoerwaarden:  int, float, np.array, Waarde of Vector
+        uitvoerwaarden: indien invoer Waarde/Vector, uitvoer ook Waarde/Vector met
+                        ALTIJD zelfde eenheid als invoer; ook als niet correct is!!
+        sin(x)                            sinus
+        cos(x)                            cosinus
+        tan(x)                            tangens
+        asin(x)                           arcsinus (omgekeerde sin)
+        acos(x)                           arccosinus (omgekeerde cos)
+        atan(x)                           arctangens (omgekeerde tan)
+        hypot(a, b)                       hypotenuse (c in: a^2 + b^c = c^2)
+        graden(rad)                       van radialen naar graden
+        radialen(deg)                     van graden naar radialen
+        sinh(x)                           hyperbolische sinus
+        cosh(x)                           hyperbolische cosinus
+        tanh(x)                           hyperbolische tangens
+        asinh(x)                          arc hyperb. sinus (omgekeerde sinh)
+        acosh(x)                          arc hyperb. cosinus (omgekeerde cosh)
+        atanh(x)                          arc hyperb. tangens (omgekeerde tanh)
+        afronden(x, n)                    rond af op n decimalen (standaard 0)
+        plafond(x)                        rond af naar boven (geheel getal)
+        vloer(x)                          rond af naar beneden (geheel getal)
+        plafond_0_vloer(x)                rond af richting 0 (geheel getal)
+        som(lijst)                        de som van de elementen
+        product(lijst)                    het product van de elementen
+        verschil(lijst)                   lijst met verschillen tussen elementen
+        optellen(a, b)                    a + b
+        aftrekken(a, b)                   a - b
+        vermenigvuldigen(a, b)            a * b
+        delen(a, b)                       a / b
+        delen_aantal(a, b)                a // b -> afgerond naar beneden
+        delen_rest(a, b)                  a % b -> restant na afronden naar beneden
+        macht(a, b)                       a ** b
+        reciproke(x)                      1 / x
+        negatief(x)                       -x
+        kruisproduct(a, b)                a x b: staat loodrecht op vector a en b
+        inwendigproduct(a, b)             a . b: is |a| * |b| * cos(theta)
+        exp(x)                            exponentieel: berekent e^x
+        ln(x)                             natuurlijke logaritme (grondgetal e)
+        log(x)                            logaritme met grondgetal 10
+        kgv(a, b)                         kleinste gemene veelvoud: a=12 b=20: 60
+        ggd(a, b)                         grootste gemene deler: a=12 b=20: 4
+        min(lijst)                        bepaalt minimum waarde lijst
+        max(lijst)                        bepaalt maximum waarde lijst
+        bijsnijden(lijst, min, max)       snij alle elementen af tot minmax bereik
+        wortel(x)                         vierkantswortel
+        wortel3(x)                        kubieke wortel
+        abs(x)                            absolute waarde (altijd positief)
+        teken(x)                          positief getal: 1.0   negatief: -1.0
+        kopieer_teken(a, b)               neem getal a, met het teken (+-) van b
+        is_positief(a, b)                 stap functie:a<0 -> 0, a=0 -> b, a>0 -> 1
+        verwijder_nan(lijst)              verwijder niet-getallen (not a number)
+        vervang_nan(lijst)                vervang: nan=0, inf=1.7e+308 (heel groot)
+        interp(x, lijst_x, lijst_y)       interpoleer x in y; lijst_x MOET oplopen
+        van_totmet_n(van, tot_met, n)     genereert vast aantal getallen (incl. tot)
+        van_tot_stap(van, tot, stap)      genereert vaste stappen (excl. tot)
+        gemiddelde(lijst)                 bepaalt het gemiddelde
+        stdafw_pop(lijst)                 bepaalt standaardafwijking voor populatie
+        stdafw_n(lijst)                   bepaalt standaardafwijking voor steekproef
+        mediaan(lijst)                    bepaalt de mediaan
+        percentiel(lijst, percentage)     percentage getal tussen 0 en 100
+        correlatie(lijst_a, lijst_b)      bepaalt correlatie matrix
+        sorteer(lijst)                    sorteert een lijst van klein naar groot
+        omdraaien(lijst)                  draai de volgorde van de lijst om
+        alsdan(voorwaarde, als, dan)      bewerk lijst met voorwaarde per item
+        is_nan(x)                         bepaalt of waarde een niet-getal is
+        is_inf(x)                         bepaalt of waarde oneindig is
+        gelijk(lijst_a, lijst_b)          per element kijken of waarden gelijk zijn
+        groter(lijst_a, lijst_b)          per element kijken of waarde groter dan
+        groter_gelijk(lijst_a, lijst_b)   idem, maar dan ook gelijk
+        kleiner(lijst_a, lijst_b)         per element kijken of waarde kleiner dan
+        kleiner_gelijk(lijst_a, lijst_b)  idem, maar dan ook gelijk
+        alle(lijst)                       kijkt of alle elementen True zijn
+        sommige(lijst)                    kijkt of er minimaal 1 element True is
+        niet_alle(lijst)                  kijkt of er minimaal 1 element False is
+        geen(lijst)                       kijkt of alle elementen False zijn
+        of(a, b)                          kijkt of a of b True is
+        en(a, b)                          kijkt of a en b True is
+        niet(x)                           omdraaien van True naar False en andersom
+        xof(a, b)                         True als a of b True is, en niet beide
+
+    WISKUNDIGE EIGENSCHAPPEN              (gebaseerd op Numpy module)
+        nan                               float die geen getal is (not a number)
+        inf                               oneindig groot
+        pi                                3.141592653589793
+        e                                 2.718281828459045
+
+
+
+```python
+v = pc.Vector(3, 4, 7).mm
+print(f"het gemiddelde van vector v is: {pc.gemiddelde(v)}")
+```
+
+    het gemiddelde van vector v is: 4.666666666666667 mm
+
