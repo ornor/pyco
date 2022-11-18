@@ -4,6 +4,8 @@
 
 Module voor Civiel Technisch ontwerpen in Python.
 
+Jara van Veldhoven 2020-2023.
+
 ## Installatie
 
 Je kan de module installeren vanuit PyPi met `pip`.
