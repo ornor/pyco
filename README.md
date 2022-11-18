@@ -1,7 +1,15 @@
 # pyco
 
-Jara van Veldhoven 2020-2022.
+[https://pyco.nl](https://pyco.nl)
 
-Python bibliotheek voor Constructief Ontwerpen.
+Module voor Civiel Technisch ontwerpen in Python.
 
-Er is een [API](docs/api/pyco_API.md) beschikbaar.
+## Installatie
+
+Je kan de module installeren vanuit PyPi met `pip`.
+
+    pip install pyconl
+
+## Documenten
+
+Een API is via [deze link](https://github.com/ornor/pyco/blob/master/docs/api/pyco_API.md) beschikbaar.
