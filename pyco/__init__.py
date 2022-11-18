@@ -54,8 +54,6 @@ ALGEMEEN GEBRUIK VAN EIGENSCHAPPEN
 
 WISKUNDIGE FUNCTIES                   (gebaseerd op Numpy module)
     invoerwaarden:  int, float, np.array, Waarde of Vector
-    uitvoerwaarden: indien invoer Waarde/Vector, uitvoer ook Waarde/Vector met
-                    ALTIJD zelfde eenheid als invoer; ook als niet correct is!!
     sin(x)                            sinus
     cos(x)                            cosinus
     tan(x)                            tangens
@@ -157,21 +155,22 @@ e = np.e
 # functies
 
 _numpy_functions = dict(
-    sin = np.sin,
-    cos = np.cos,
-    tan = np.tan,
-    asin = np.arcsin,
-    acos = np.arccos,
-    atan = np.arctan,
+    # fn of tuple(fn, check_type_eenheid, pre_verander_eenheid_fn, post_verander_eenheid_fn)
+    sin = (np.sin, 'deg', lambda eh: 'rad', lambda eh: None),
+    cos = (np.cos, 'deg', lambda eh: 'rad', lambda eh: None),
+    tan = (np.tan, 'deg', lambda eh: 'rad', lambda eh: None),
+    asin = (np.arcsin, '-', None, lambda eh: 'rad'),
+    acos = (np.arccos, '-', None, lambda eh: 'rad'),
+    atan = (np.arctan, '-', None, lambda eh: 'rad'),
     hypot = np.hypot, 
-    graden = np.degrees,
-    radialen = np.radians,
-    sinh = np.sinh,
-    cosh = np.cosh,
-    tanh = np.tanh,
-    asinh = np.arcsinh,
-    acosh = np.arccosh,
-    atanh = np.arctanh,
+    graden = (np.degrees, '-', None, None),
+    radialen = (np.radians, '-', None, None),
+    sinh = (np.sinh, 'deg', lambda eh: 'rad', lambda eh: None),
+    cosh = (np.cosh, 'deg', lambda eh: 'rad', lambda eh: None),
+    tanh = (np.tanh, 'deg', lambda eh: 'rad', lambda eh: None),
+    asinh = (np.arcsinh, '-', None, lambda eh: 'rad'),
+    acosh = (np.arccosh, '-', None, lambda eh: 'rad'),
+    atanh = (np.arctanh, '-', None, lambda eh: 'rad'),
     afronden = np.round,
     plafond = np.ceil,
     vloer = np.floor,
@@ -181,7 +180,7 @@ _numpy_functions = dict(
     verschil = np.diff,
     optellen = np.add,
     aftrekken = np.subtract,
-    vermenigvuldigen = np.multiply,
+    vermenigvuldigen = np.multiply, #################################### TODO
     delen = np.divide,
     delen_aantal = np.floor_divide,
     delen_rest = np.remainder,
@@ -235,27 +234,48 @@ _numpy_functions['min'] = np.amin # reserverd keywords
 _numpy_functions['max'] = np.amax
 _numpy_functions['abs'] = np.fabs
 
-def _wrap_function(fn):
+def _wrap_functie(fn, check_type_eenheid=None, pre_verander_eenheid_fn=None, post_verander_eenheid_fn=None):
     def return_fn(*args, **kwargs):
         # pre
         eenheid = None
         waarde = False
-        new_args = []
+        nieuwe_args = []
         for arg in args:
             if isinstance(arg, Waarde):
+                if (check_type_eenheid is not None
+                        and arg.eenheid is not None
+                        and arg._eenheidbreuk != Waarde(1)[check_type_eenheid]._eenheidbreuk):
+                    raise ValueError('Eenheid \'{}\' in functie \'{}\' is niet geldig. '
+                                     'Dit moet bijvoorbeeld \'{}\' zijn.'.format(
+                                     arg.eenheid, fn.__name__, check_type_eenheid))
                 waarde = True
                 eenheid = arg.eenheid if eenheid is None else eenheid
-                new_args.append(float(arg))
+                if pre_verander_eenheid_fn is not None:
+                    eenheid = pre_verander_eenheid_fn(eenheid)
+                    arg = arg.eh(eenheid)
+                nieuwe_args.append(float(arg))
             elif isinstance(arg, Vector):
+                arg_w = Waarde(1)[arg.eenheid]
+                if (check_type_eenheid is not None
+                        and arg.eenheid is not None
+                        and arg_w._eenheidbreuk != Waarde(1)[check_type_eenheid]._eenheidbreuk):
+                    raise ValueError('Eenheid \'{}\' in functie \'{}\' is niet geldig. '
+                                     'Dit moet bijvoorbeeld \'{}\' zijn.'.format(
+                                     arg_w.eenheid, fn.__name__, check_type_eenheid))
                 eenheid = arg.eenheid if eenheid is None else eenheid
-                new_args.append(arg.array)
+                if pre_verander_eenheid_fn is not None:
+                    eenheid = pre_verander_eenheid_fn(eenheid)
+                    arg = arg.eh(eenheid)
+                nieuwe_args.append(arg.array)
             else:
-                new_args.append(arg)
+                nieuwe_args.append(arg)
             
         # call
-        value = fn(*new_args, **kwargs)
+        value = fn(*nieuwe_args, **kwargs)
         
         # post
+        if post_verander_eenheid_fn is not None:
+            eenheid = post_verander_eenheid_fn(eenheid)
         if isinstance(value, type(np.array([]))):
             v = Vector(np.array(value, dtype='float64'))
             if eenheid is not None:
@@ -269,8 +289,15 @@ def _wrap_function(fn):
         return value
     return return_fn
 
-for fn_name, fn in _numpy_functions.items():
-    setattr(pyco, fn_name, _wrap_function(fn))
+for fn_name, fn_arg in _numpy_functions.items():
+    if callable(fn_arg):
+        setattr(pyco, fn_name, _wrap_functie(fn_arg))
+    elif len(fn_arg) == 2:
+        setattr(pyco, fn_name, _wrap_functie(fn_arg[0], fn_arg[1]))
+    elif len(fn_arg) == 3:
+        setattr(pyco, fn_name, _wrap_functie(fn_arg[0], fn_arg[1], fn_arg[2]))
+    elif len(fn_arg) == 4:
+        setattr(pyco, fn_name, _wrap_functie(fn_arg[0], fn_arg[1], fn_arg[2], fn_arg[3]))
 
     
 ###############################################################################

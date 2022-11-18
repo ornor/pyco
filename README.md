@@ -2,7 +2,7 @@
 
 [https://pyco.nl](https://pyco.nl)
 
-Module voor Civiel Technisch ontwerpen in Python.
+Civiel Technisch ontwerpen in Python.
 
 Jara van Veldhoven 2020-2023.
 
