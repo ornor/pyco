@@ -1,9 +1,5 @@
 # pyco API
 
-Jara van Veldhoven 2020-2023.
-
-Module voor Civiel Technisch ontwerpen in Python.
-
 Begin alle documenten met onderstaande import.
 
 
@@ -13,14 +9,9 @@ import pyco as pc
 
 De pyco model is afhankelijk van drie externe bibliotheken:
 
-* numpy (https://numpy.org)
-* pandas (https://pandas.pydata.org/)
-* matplotlib (https://matplotlib.org/)
-
-
-    pc.np    # numpy
-    pc.pd    # pandas
-    pc.plt   # pyplot module van matplotlib
+* numpy (https://numpy.org) beschikbaar via `pc.np`
+* pandas (https://pandas.pydata.org/) beschikbaar via `pc.pd`
+* matplotlib (https://matplotlib.org/) pyplot module beschikbaar via `pc.plt`
 
 ## Inhoud
 Alle pyco objecten beginnen met een hoofdletter. Alle functies en eigenschappen beginnen met een kleine letter.
