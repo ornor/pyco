@@ -10,6 +10,73 @@ class pc:
     Waarde = pyco.waarde.Waarde
 
 class Vector(pc.BasisObject):
+    
+    def sin(self):
+        """Sinus"""
+        from pyco import sin
+        return sin(self)
+            
+    def cos(self):
+        """Cosinus"""
+        from pyco import cos
+        return cos(self)
+            
+    def tan(self):
+        """Tangens"""
+        from pyco import tan
+        return tan(self)
+            
+    def sinh(self):
+        """Hyperbolische sinus"""
+        from pyco import sinh
+        return sinh(self)
+            
+    def cosh(self):
+        """Hyperbolische cosinus"""
+        from pyco import cosh
+        return cosh(self)
+            
+    def tanh(self):
+        """Hyperbolische tangens"""
+        from pyco import tanh
+        return tanh(self)
+    
+    def afronden(self, n=0):
+        """Rond af op n decimalen (standaard 0)"""
+        from pyco import afronden
+        return afronden(self, n)
+    
+    def plafond(self):
+        """Rond af naar boven (geheel getal)"""
+        from pyco import plafond
+        return plafond(self)
+    
+    def vloer(self):
+        """Rond af naar beneden (geheel getal)"""
+        from pyco import vloer
+        return vloer(self)
+    
+    def plafond_0_vloer(self):
+        """Rond af richting 0 (geheel getal)"""
+        from pyco import plafond_0_vloer
+        return plafond_0_vloer(self)
+    
+    def som(self):
+        """De som van de elementen"""
+        from pyco import som
+        return som(self)
+    
+    def product(self):
+        """Het product van de elementen"""
+        from pyco import product
+        return product(self)
+    
+    def verschil(self):
+        """Lijst met verschillen tussen elementen"""
+        from pyco import verschil
+        return verschil(self)
+    
+    
     """
     Bevat een lijst van getallen of Waarde objecten met allen dezelfde eenheid.
 
@@ -60,6 +127,27 @@ class Vector(pc.BasisObject):
         v1 >= v2                de lengte van vector is groter dan of gelijk aan
         v1 <= v2                de lengte van vector is kleiner dan of gelijk aan
         v1 &  v2                eenheden zijn zelfde type
+        
+    WISKUNDIGE FUNCTIES         (geïmporteerd uit Numpy module)
+        v.sin()                 sinus (alleen getallen en hoeken)
+        v.cos()                 cosinus (alleen getallen en hoeken)
+        v.tan()                 tangens (alleen getallen en hoeken)
+        v.asin()                arcsinus (omgekeerde sin, alleen getallen)
+        v.acos()                arccosinus (omgekeerde cos, alleen getallen)
+        v.atan()                arctangens (omgekeerde tan, alleen getallen)
+        v.sinh()                hyperbolische sinus (getallen en hoeken)
+        v.cosh()                hyperbolische cosinus (getallen en hoeken)
+        v.tanh()                hyperbolische tangens (getallen en hoeken)
+        v.asinh()               arcsinus hyperb. (omgekeerde asinh, getallen)
+        v.acosh()               arccosinus hyperb. (omgekeerde acosh, getallen)
+        v.atanh()               arctangens hyperb. (omgekeerde atanh, getallen)
+        v.afronden(n)           rond af op n decimalen (standaard 0)
+        v.plafond()             rond af naar boven (geheel getal)
+        v.vloer()               rond af naar beneden (geheel getal)
+        v.plafond_0_vloer()     rond af richting 0 (geheel getal)
+        v.som()                 de som van de elementen
+        v.product()             het product van de elementen
+        v.verschil()            lijst met verschillen tussen elementen
         
     BESCHIKBARE EIGENSCHAPPEN   voor snel toekennen van eenheid aan waarde
     <object>.<eigenschap>       bijvoorbeeld toekennen inhoud: v.dm3

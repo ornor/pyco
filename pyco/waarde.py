@@ -1,5 +1,6 @@
 import re
 import math
+import numpy as np
 from fractions import Fraction
 from typing import Union
 
@@ -9,6 +10,57 @@ class pc:
     BasisObject = pyco.basis.BasisObject
 
 class Waarde(pc.BasisObject):
+    
+    def sin(self):
+        """Sinus"""
+        from pyco import sin
+        return sin(self)
+            
+    def cos(self):
+        """Cosinus"""
+        from pyco import cos
+        return cos(self)
+            
+    def tan(self):
+        """Tangens"""
+        from pyco import tan
+        return tan(self)
+            
+    def sinh(self):
+        """Hyperbolische sinus"""
+        from pyco import sinh
+        return sinh(self)
+            
+    def cosh(self):
+        """Hyperbolische cosinus"""
+        from pyco import cosh
+        return cosh(self)
+            
+    def tanh(self):
+        """Hyperbolische tangens"""
+        from pyco import tanh
+        return tanh(self)
+    
+    def afronden(self, n=0):
+        """Rond af op n decimalen (standaard 0)"""
+        from pyco import afronden
+        return afronden(self, n)
+    
+    def plafond(self):
+        """Rond af naar boven (geheel getal)"""
+        from pyco import plafond
+        return plafond(self)
+    
+    def vloer(self):
+        """Rond af naar beneden (geheel getal)"""
+        from pyco import vloer
+        return vloer(self)
+    
+    def plafond_0_vloer(self):
+        """Rond af richting 0 (geheel getal)"""
+        from pyco import plafond_0_vloer
+        return plafond_0_vloer(self)
+    
     """
     Bevat een getal en bijhorende eenheid.
 
@@ -60,9 +112,27 @@ class Waarde(pc.BasisObject):
         w1 >= w2                is groter dan of gelijk aan
         w1 <= w2                is kleiner dan of gelijk aan
         w1 &  w2                eenheden zijn zelfde type
+        
+    WISKUNDIGE FUNCTIES         (geïmporteerd uit Numpy module)
+        w.sin()                 sinus (alleen getallen en hoeken)
+        w.cos()                 cosinus (alleen getallen en hoeken)
+        w.tan()                 tangens (alleen getallen en hoeken)
+        w.asin()                arcsinus (omgekeerde sin, alleen getallen)
+        w.acos()                arccosinus (omgekeerde cos, alleen getallen)
+        w.atan()                arctangens (omgekeerde tan, alleen getallen)
+        w.sinh()                hyperbolische sinus (getallen en hoeken)
+        w.cosh()                hyperbolische cosinus (getallen en hoeken)
+        w.tanh()                hyperbolische tangens (getallen en hoeken)
+        w.asinh()               arcsinus hyperb. (omgekeerde asinh, getallen)
+        w.acosh()               arccosinus hyperb. (omgekeerde acosh, getallen)
+        w.atanh()               arctangens hyperb. (omgekeerde atanh, getallen)
+        w.afronden(n)           rond af op n decimalen (standaard 0)
+        w.plafond()             rond af naar boven (geheel getal)
+        w.vloer()               rond af naar beneden (geheel getal)
+        w.plafond_0_vloer()     rond af richting 0 (geheel getal)
 
     EENHEID TEKST
-        gebruik een getal achter standaard eenheid voor 'tot de macht' (bijv. mm3)
+        gebruik getal achter standaard eenheid voor 'tot de macht' (bijv. mm3)
         gebruik / (maximaal één keer) om teller en noemer te introduceren
         gebruik * om eenheden te combineren (zowel in teller als noemer)
         bijvoorbeeld: "m3*kPa/s4*m"

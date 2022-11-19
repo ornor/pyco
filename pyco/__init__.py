@@ -52,7 +52,7 @@ ALGEMEEN GEBRUIK VAN FUNCTIES         alle namen met () erachter zijn functies
 ALGEMEEN GEBRUIK VAN EIGENSCHAPPEN
     pc.pi == 3.141592653589793        direct aan te roepen vanuit pc object
 
-WISKUNDIGE FUNCTIES                   (gebaseerd op Numpy module)
+WISKUNDIGE FUNCTIES                   (geïmporteerd uit Numpy module)
     invoerwaarden:  int, float, np.array, Waarde of Vector
     sin(x)                            sinus
     cos(x)                            cosinus
@@ -82,7 +82,7 @@ WISKUNDIGE FUNCTIES                   (gebaseerd op Numpy module)
     delen(a, b)                       a / b
     delen_aantal(a, b)                a // b -> afgerond naar beneden
     delen_rest(a, b)                  a % b -> restant na afronden naar beneden
-    macht(a, b)                       a ** b 
+    macht(a, n)                       a ** n
     reciproke(x)                      1 / x
     negatief(x)                       -x
     kruisproduct(a, b)                a x b: staat loodrecht op vector a en b
@@ -178,9 +178,9 @@ _numpy_functions = dict(
     som = np.sum,
     product = np.prod,
     verschil = np.diff,
-    optellen = np.add,
+    optellen = np.add,  #################################### TODO
     aftrekken = np.subtract,
-    vermenigvuldigen = np.multiply, #################################### TODO
+    vermenigvuldigen = np.multiply,
     delen = np.divide,
     delen_aantal = np.floor_divide,
     delen_rest = np.remainder,
