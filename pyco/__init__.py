@@ -13,8 +13,8 @@ BasisObject = pyco.basis.BasisObject
 import pyco.waarde
 Waarde = pyco.waarde.Waarde
 
-import pyco.vector
-Vector = pyco.vector.Vector
+import pyco.lijst
+Lijst = pyco.lijst.Lijst
 
 import pyco.knoop
 Knoop = pyco.knoop.Knoop
@@ -156,21 +156,21 @@ e = np.e
 
 _numpy_functions = dict(
     # fn of tuple(fn, check_type_eenheid, pre_verander_eenheid_fn, post_verander_eenheid_fn)
-    sin = (np.sin, 'deg', lambda eh: 'rad', lambda eh: None),
-    cos = (np.cos, 'deg', lambda eh: 'rad', lambda eh: None),
-    tan = (np.tan, 'deg', lambda eh: 'rad', lambda eh: None),
-    asin = (np.arcsin, '-', None, lambda eh: 'rad'),
-    acos = (np.arccos, '-', None, lambda eh: 'rad'),
-    atan = (np.arctan, '-', None, lambda eh: 'rad'),
+    sin = (np.sin, 'deg', lambda eh, _: 'rad', lambda eh, _: None),
+    cos = (np.cos, 'deg', lambda eh, _: 'rad', lambda eh, _: None),
+    tan = (np.tan, 'deg', lambda eh, _: 'rad', lambda eh, _: None),
+    asin = (np.arcsin, '-', None, lambda eh, _: 'rad'),
+    acos = (np.arccos, '-', None, lambda eh, _: 'rad'),
+    atan = (np.arctan, '-', None, lambda eh, _: 'rad'),
     hypot = np.hypot, 
     graden = (np.degrees, '-', None, None),
     radialen = (np.radians, '-', None, None),
-    sinh = (np.sinh, 'deg', lambda eh: 'rad', lambda eh: None),
-    cosh = (np.cosh, 'deg', lambda eh: 'rad', lambda eh: None),
-    tanh = (np.tanh, 'deg', lambda eh: 'rad', lambda eh: None),
-    asinh = (np.arcsinh, '-', None, lambda eh: 'rad'),
-    acosh = (np.arccosh, '-', None, lambda eh: 'rad'),
-    atanh = (np.arctanh, '-', None, lambda eh: 'rad'),
+    sinh = (np.sinh, 'deg', lambda eh, _: 'rad', lambda eh, _: None),
+    cosh = (np.cosh, 'deg', lambda eh, _: 'rad', lambda eh, _: None),
+    tanh = (np.tanh, 'deg', lambda eh, _: 'rad', lambda eh, _: None),
+    asinh = (np.arcsinh, '-', None, lambda eh, _: 'rad'),
+    acosh = (np.arccosh, '-', None, lambda eh, _: 'rad'),
+    atanh = (np.arctanh, '-', None, lambda eh, _: 'rad'),
     afronden = np.round,
     plafond = np.ceil,
     vloer = np.floor,
@@ -178,57 +178,59 @@ _numpy_functions = dict(
     som = np.sum,
     product = np.prod,
     verschil = np.diff,
-    optellen = np.add,  #################################### TODO
+    optellen = np.add,
     aftrekken = np.subtract,
-    vermenigvuldigen = np.multiply,
-    delen = np.divide,
-    delen_aantal = np.floor_divide,
+    vermenigvuldigen = (np.multiply, None, lambda eh, _: (  #### TODO #######################
+        Waarde(1, (Waarde(1, eh)._eenheidbreuk)**2, config=None).eenheid)),
+    delen = np.divide, ## None
+    delen_aantal = np.floor_divide, ## None
     delen_rest = np.remainder,
-    macht = np.power,
-    reciproke = np.reciprocal,
+    macht = (np.power, None, lambda eh, args: (
+        Waarde(1, (Waarde(1, eh)._eenheidbreuk)**args[1], config=None).eenheid)),
+    reciproke = np.reciprocal, ## reciproke fraction
     negatief = np.negative,
-    kruisproduct = np.cross,
-    inwendigproduct = np.dot,
-    exp = np.exp,
-    ln = np.log,
-    log = np.log10,
-    kgv = np.lcm,
-    ggd = np.gcd,
-    bijsnijden = np.clip,
-    wortel = np.sqrt,
-    wortel3 = np.cbrt,
-    teken = np.sign,
-    kopieer_teken = np.copysign,
-    is_positief = np.heaviside,
-    vervang_nan = np.nan_to_num,
-    verwijder_nan = lambda x: x[np.logical_not(np.isnan(x))],
-    interp = np.interp,
-    van_totmet_n = np.linspace,
-    van_tot_stap = np.arange,
-    gemiddelde = np.mean,
-    stdafw_pop = lambda x: np.std(x, ddof=0),
-    stdafw_n = lambda x: np.std(x, ddof=1),
-    mediaan = np.median,
-    percentiel = np.percentile,
-    correlatie = np.corrcoef,
-    sorteer = np.sort,
-    omdraaien = np.flip,
-    alsdan = np.where,
-    is_nan = np.isnan,
-    is_inf = np.isinf,
-    gelijk = np.equal,
-    groter = np.greater,
-    groter_gelijk = np.greater_equal,
-    kleiner = np.less,
-    kleiner_gelijk = np.less_equal,
-    alle = np.all,
-    sommige = np.any,
-    niet_alle = lambda x: ~np.all(x),
-    geen = lambda x: ~np.any(x),
-    of = np.logical_or,
-    en = np.logical_and,
-    niet = np.logical_not,
-    xof = np.logical_xor,
+    # kruisproduct = np.cross,
+    # inwendigproduct = np.dot,
+    # exp = np.exp,
+    # ln = np.log,
+    # log = np.log10,
+    # kgv = np.lcm,
+    # ggd = np.gcd,
+    # bijsnijden = np.clip,
+    # wortel = np.sqrt,
+    # wortel3 = np.cbrt,
+    # teken = np.sign,
+    # kopieer_teken = np.copysign,
+    # is_positief = np.heaviside,
+    # vervang_nan = np.nan_to_num,
+    # verwijder_nan = lambda x: x[np.logical_not(np.isnan(x))],
+    # interp = np.interp,
+    # van_totmet_n = np.linspace,
+    # van_tot_stap = np.arange,
+    # gemiddelde = np.mean,
+    # stdafw_pop = lambda x: np.std(x, ddof=0),
+    # stdafw_n = lambda x: np.std(x, ddof=1),
+    # mediaan = np.median,
+    # percentiel = np.percentile,
+    # correlatie = np.corrcoef,
+    # sorteer = np.sort,
+    # omdraaien = np.flip,
+    # alsdan = np.where,
+    # is_nan = np.isnan,
+    # is_inf = np.isinf,
+    # gelijk = np.equal,
+    # groter = np.greater,
+    # groter_gelijk = np.greater_equal,
+    # kleiner = np.less,
+    # kleiner_gelijk = np.less_equal,
+    # alle = np.all,
+    # sommige = np.any,
+    # niet_alle = lambda x: ~np.all(x),
+    # geen = lambda x: ~np.any(x),
+    # of = np.logical_or,
+    # en = np.logical_and,
+    # niet = np.logical_not,
+    # xof = np.logical_xor,
 )
 _numpy_functions['min'] = np.amin # reserverd keywords
 _numpy_functions['max'] = np.amax
@@ -240,7 +242,7 @@ def _wrap_functie(fn, check_type_eenheid=None, pre_verander_eenheid_fn=None, pos
         eenheid = None
         waarde = False
         nieuwe_args = []
-        for arg in args:
+        for iarg, arg in enumerate(args):
             if isinstance(arg, Waarde):
                 if (check_type_eenheid is not None
                         and arg.eenheid is not None
@@ -249,12 +251,16 @@ def _wrap_functie(fn, check_type_eenheid=None, pre_verander_eenheid_fn=None, pos
                                      'Dit moet bijvoorbeeld \'{}\' zijn.'.format(
                                      arg.eenheid, fn.__name__, check_type_eenheid))
                 waarde = True
-                eenheid = arg.eenheid if eenheid is None else eenheid
                 if pre_verander_eenheid_fn is not None:
-                    eenheid = pre_verander_eenheid_fn(eenheid)
-                    arg = arg.eh(eenheid)
+                    eenheid = pre_verander_eenheid_fn(eenheid, args)
+                    arg = arg.gebruik_eenheid(eenheid, check_type=False)
+                else:
+                    if iarg == 0:
+                        eenheid = arg.eenheid
+                    else:
+                        arg = arg.eh(eenheid)
                 nieuwe_args.append(float(arg))
-            elif isinstance(arg, Vector):
+            elif isinstance(arg, Lijst):
                 arg_w = Waarde(1)[arg.eenheid]
                 if (check_type_eenheid is not None
                         and arg.eenheid is not None
@@ -264,8 +270,13 @@ def _wrap_functie(fn, check_type_eenheid=None, pre_verander_eenheid_fn=None, pos
                                      arg_w.eenheid, fn.__name__, check_type_eenheid))
                 eenheid = arg.eenheid if eenheid is None else eenheid
                 if pre_verander_eenheid_fn is not None:
-                    eenheid = pre_verander_eenheid_fn(eenheid)
-                    arg = arg.eh(eenheid)
+                    eenheid = pre_verander_eenheid_fn(eenheid, args)
+                    arg = arg.gebruik_eenheid(eenheid, check_type=False)
+                else:
+                    if iarg == 0:
+                        eenheid = arg.eenheid
+                    else:
+                        arg = arg.eh(eenheid)
                 nieuwe_args.append(arg.array)
             else:
                 nieuwe_args.append(arg)
@@ -275,16 +286,22 @@ def _wrap_functie(fn, check_type_eenheid=None, pre_verander_eenheid_fn=None, pos
         
         # post
         if post_verander_eenheid_fn is not None:
-            eenheid = post_verander_eenheid_fn(eenheid)
+            eenheid = post_verander_eenheid_fn(eenheid, args)
         if isinstance(value, type(np.array([]))):
-            v = Vector(np.array(value, dtype='float64'))
+            l = Lijst(np.array(value, dtype='float64'))
             if eenheid is not None:
-                v.eenheid = eenheid
-            return v
+                if post_verander_eenheid_fn:
+                    l = l.gebruik_eenheid(eenheid, check_type=False)
+                else:
+                    l = l.gebruik_eenheid(eenheid)
+            return l
         elif waarde or eenheid:
             w = Waarde(value)
             if eenheid is not None:
-                w.eenheid = eenheid
+                if post_verander_eenheid_fn:
+                    w = w.gebruik_eenheid(eenheid, check_type=False)
+                else:
+                    w = w.gebruik_eenheid(eenheid)
             return w
         return value
     return return_fn

@@ -1,4 +1,4 @@
-# pyco API
+# pyco handleiding
 
 Begin alle documenten met onderstaande import.
 
@@ -7,17 +7,17 @@ Begin alle documenten met onderstaande import.
 import pyco as pc
 ```
 
-De pyco model is afhankelijk van drie externe bibliotheken:
+De pyco bibliotheek is afhankelijk van drie externe bibliotheken:
 
 * numpy (https://numpy.org) beschikbaar via `pc.np`
 * pandas (https://pandas.pydata.org/) beschikbaar via `pc.pd`
 * matplotlib (https://matplotlib.org/) pyplot module beschikbaar via `pc.plt`
 
 ## Inhoud
-Alle pyco objecten beginnen met een hoofdletter. Alle functies en eigenschappen beginnen met een kleine letter.
+Alle pyco klasses beginnen met een hoofdletter. Alle functies en eigenschappen beginnen met een kleine letter.
 
 * [Waarde](#Waarde)
-* [Vector](#Vector)
+* [Lijst](#Lijst)
 * [Knoop](#Knoop)
 * [Lijn](#Lijn)
 * [Vorm](#Vorm)
@@ -27,7 +27,8 @@ Alle pyco objecten beginnen met een hoofdletter. Alle functies en eigenschappen 
 * [pyco functies en eigenschappen](#Functies)
 
 ## Waarde
-<a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
+
+[terug naar inhoudsopgave](#Inhoud)
 
 
 ```python
@@ -89,9 +90,27 @@ pc.Waarde.print_help()
         w1 >= w2                is groter dan of gelijk aan
         w1 <= w2                is kleiner dan of gelijk aan
         w1 &  w2                eenheden zijn zelfde type
+        
+    WISKUNDIGE FUNCTIES         (geïmporteerd uit Numpy module)
+        w.sin()                 sinus (alleen getallen en hoeken)
+        w.cos()                 cosinus (alleen getallen en hoeken)
+        w.tan()                 tangens (alleen getallen en hoeken)
+        w.asin()                arcsinus (omgekeerde sin, alleen getallen)
+        w.acos()                arccosinus (omgekeerde cos, alleen getallen)
+        w.atan()                arctangens (omgekeerde tan, alleen getallen)
+        w.sinh()                hyperbolische sinus (getallen en hoeken)
+        w.cosh()                hyperbolische cosinus (getallen en hoeken)
+        w.tanh()                hyperbolische tangens (getallen en hoeken)
+        w.asinh()               arcsinus hyperb. (omgekeerde asinh, getallen)
+        w.acosh()               arccosinus hyperb. (omgekeerde acosh, getallen)
+        w.atanh()               arctangens hyperb. (omgekeerde atanh, getallen)
+        w.afronden(n)           rond af op n decimalen (standaard 0)
+        w.plafond()             rond af naar boven (geheel getal)
+        w.vloer()               rond af naar beneden (geheel getal)
+        w.plafond_0_vloer()     rond af richting 0 (geheel getal)
     
     EENHEID TEKST
-        gebruik een getal achter standaard eenheid voor 'tot de macht' (bijv. mm3)
+        gebruik getal achter standaard eenheid voor 'tot de macht' (bijv. mm3)
         gebruik / (maximaal één keer) om teller en noemer te introduceren
         gebruik * om eenheden te combineren (zowel in teller als noemer)
         bijvoorbeeld: "m3*kPa/s4*m"
@@ -144,68 +163,90 @@ print(f"1 meter per 10 graden Celsius komt overen met: { W(1/10, 'm/C')['cm/F'] 
     1 meter per 10 graden Celsius komt overen met: 5.5555555555555545 cm/F
     
 
-## Vector
-<a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
+## Lijst
+
+[terug naar inhoudsopgave](#Inhoud)
 
 
 ```python
-pc.Vector.print_help()
+pc.Lijst.print_help()
 ```
 
     
-    +----------+
-    |  Vector  |
-    +----------+
+    +---------+
+    |  Lijst  |
+    +---------+
     
-    Bevat een lijst van getallen of Waarde objecten met allen dezelfde eenheid.
+    Bevat een aantal getallen of Waarde objecten met allen dezelfde eenheid.
     
-    AANMAKEN VECTOR             eenheid van 1e component, geldt voor geheel
-        v = Vector(waarde1, waarde2, ...)          waarde: float, int of Waarde
-        v = Vector([waarde1, waarde2, ...])              
-        v = Vector(numpy_array)             array wordt indien nodig 1D gemaakt
+    AANMAKEN LIJST              eenheid van 1e component, geldt voor geheel
+        l = Lijst(waarde1, waarde2, ...)          waarde: float, int of Waarde
+        l = Lijst([waarde1, waarde2, ...])              
+        l = Lijst(numpy_array)             array wordt indien nodig 1D gemaakt
     
     AANPASSEN EENHEID           omzetten van eenheid naar andere eenheid
-        v.eenheid               huidige eenheid opvragen (tekst of None)
-        v.eenheid = 'N/mm2'     eenheid aanpassen
-        v.gebruik_eenheid('m')  eenheid aanpassen, retourneert object
-        v.eh('m')               eenheid aanpassen, retourneert object
-        v = v.N_mm2             kan voor een aantal standaard gevallen (zie lijst onderaan)
+        l.eenheid               huidige eenheid opvragen (tekst of None)
+        l.eenheid = 'N/mm2'     eenheid aanpassen
+        l.gebruik_eenheid('m')  eenheid aanpassen, retourneert object
+        l.eh('m')               eenheid aanpassen, retourneert object
+        l = l.N_mm2             kan voor een aantal standaard gevallen (zie lijst onderaan)
     
-    OMZETTEN VECTOR NAAR TEKST  resulteert in nieuw string object
-        tekst = str(v)          of automatisch met bijvoorbeeld print(w)
-        tekst = format(v,'.2f') format configuratie meegeven voor getal
+    OMZETTEN LIJST NAAR TEKST   resulteert in nieuw string object
+        tekst = str(l)          of automatisch met bijvoorbeeld print(l)
+        tekst = format(l, '.2f') format configuratie meegeven voor getal
     
-    MOGELIJKE BEWERKINGEN       resulteert in nieuw Vector object
-        v3 = v1 + v2            vector optellen bij vector
-        v3 = v1 - v2            vector aftrekken van vector
-        getal = v1 * v2         vector vermenigvuldigen met vector (inproduct)
-        getal = v1 / v2         vector delen door vector (inverse inproduct)
-        v2 = n * v1             getal vermenigvuldigen met vector
-        v2 = v1 * n             vector vermenigvuldigen met getal
-        v2 = n / v1             getal delen door vector
-        v2 = v1 / n             vector delen door getal
-        waarde = v1 ** n        vector tot de macht een geheel getal
-        waarde = abs(v1)        berekent lengte van vector -> Waarde object
-        getal = float(v1)       berekent lengte van vector -> float object
-        v2 = +v1                behoud teken
-        v2 = -v1                verander teken (positief vs. negatief)
-        for w in v1:            itereert en geeft float/Waarde object terug
-        getal = len(v1)         geeft aantal elementen (dimensies) van vector
+    MOGELIJKE BEWERKINGEN       resulteert in nieuw Lijst object
+        v3 = l1 + l2            lijst optellen bij lijst
+        v3 = l1 - l2            lijst aftrekken van lijst
+        getal = l1 * l2         lijst vermenigvuldigen met lijst (inproduct)
+        getal = l1 / l2         lijst delen door lijst (inverse inproduct)
+        l2 = n * l1             getal vermenigvuldigen met lijst
+        l2 = l1 * n             lijst vermenigvuldigen met getal
+        l2 = n / l1             getal delen door lijst
+        l2 = l1 / n             lijst delen door getal
+        waarde = l1 ** n        lijst tot de macht een geheel getal
+        waarde = abs(l1)        berekent lengte van lijst -> Waarde object
+        getal = float(l1)       berekent lengte van lijst -> float object
+        l2 = +l1                behoud teken
+        l2 = -l1                verander teken (positief vs. negatief)
+        for w in l1:            itereert en geeft float/Waarde object terug
+        getal = len(l1)         geeft aantal elementen (dimensies) van lijst
     
     NUMPY BEWERKINGEN           gebruikt array object
-        numpy_array = v1.array  retourneert Numpy array object
+        numpy_array = l1.array  retourneert Numpy array object
                                     (bevat allen getallen, zonder eenheid)
-        getal = v1[2]           retourneert getal (zonder eenheid) op index
-        numpy_array = v1[1:3]   retourneert Numpy array object vanuit slice
+        getal = l1[2]           retourneert getal (zonder eenheid) op index
+        numpy_array = l1[1:3]   retourneert Numpy array object vanuit slice
     
     WAARDEN VERGELIJKEN         resulteert in een boolean (True/False)
-        v1 == v2                is gelijk aan
-        v1 != v2                is niet gelijk aan
-        v1 >  v2                de lengte van vector is groter dan
-        v1 <  v2                de lengte van vector is kleiner dan
-        v1 >= v2                de lengte van vector is groter dan of gelijk aan
-        v1 <= v2                de lengte van vector is kleiner dan of gelijk aan
-        v1 &  v2                eenheden zijn zelfde type
+        l1 == l2                is gelijk aan
+        l1 != l2                is niet gelijk aan
+        l1 >  l2                de lengte van lijst is groter dan
+        l1 <  l2                de lengte van lijst is kleiner dan
+        l1 >= l2                de lengte van lijst is groter dan of gelijk aan
+        l1 <= l2                de lengte van lijst is kleiner dan of gelijk aan
+        l1 &  l2                eenheden zijn zelfde type
+        
+    WISKUNDIGE FUNCTIES         (geïmporteerd uit Numpy module)
+        l.sin()                 sinus (alleen getallen en hoeken)
+        l.cos()                 cosinus (alleen getallen en hoeken)
+        l.tan()                 tangens (alleen getallen en hoeken)
+        l.asin()                arcsinus (omgekeerde sin, alleen getallen)
+        l.acos()                arccosinus (omgekeerde cos, alleen getallen)
+        l.atan()                arctangens (omgekeerde tan, alleen getallen)
+        l.sinh()                hyperbolische sinus (getallen en hoeken)
+        l.cosh()                hyperbolische cosinus (getallen en hoeken)
+        l.tanh()                hyperbolische tangens (getallen en hoeken)
+        l.asinh()               arcsinus hyperb. (omgekeerde asinh, getallen)
+        l.acosh()               arccosinus hyperb. (omgekeerde acosh, getallen)
+        l.atanh()               arctangens hyperb. (omgekeerde atanh, getallen)
+        l.afronden(n)           rond af op n decimalen (standaard 0)
+        l.plafond()             rond af naar boven (geheel getal)
+        l.vloer()               rond af naar beneden (geheel getal)
+        l.plafond_0_vloer()     rond af richting 0 (geheel getal)
+        l.som()                 de som van de elementen
+        l.product()             het product van de elementen
+        l.verschil()            lijst met verschillen tussen elementen
         
     BESCHIKBARE EIGENSCHAPPEN   voor snel toekennen van eenheid aan waarde
     <object>.<eigenschap>       bijvoorbeeld toekennen inhoud: v.dm3
@@ -226,18 +267,19 @@ pc.Vector.print_help()
 
 
 ```python
-pc.Vector(0, 200, 1).eh('cm')
+pc.Lijst(0, 200, 1).eh('cm')
 ```
 
 
 
 
-    Vector(Waarde(0.0, 'cm'), Waarde(200.0, 'cm'), Waarde(1.0, 'cm'))
+    Lijst(Waarde(0.0, 'cm'), Waarde(200.0, 'cm'), Waarde(1.0, 'cm'))
 
 
 
 ## Knoop
-<a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
+
+[terug naar inhoudsopgave](#Inhoud)
 
 
 ```python
@@ -304,7 +346,8 @@ print(f'k2 heeft een x-waarde [{k2.x}], een y-waarde [{k2.y}] en een z-waarde [{
     
 
 ## Lijn
-<a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
+
+[terug naar inhoudsopgave](#Inhoud)
 
 
 ```python
@@ -353,7 +396,7 @@ pc.Lijn.print_help()
             rotatiepunt=[0,0], # xy Knoop/list; als None dan zwaartepunt vorm
             rotatiehoek=20,    # in graden, positief is tegen de klok in
             schaalfactor=2,  # Waarde/getal: vergrootfactor t.o.v. rotatiepunt
-            schaalfactor=[2,3],# of Vector/list met x-schaalfactor en y-factor
+            schaalfactor=[2,3],# of Lijst/list met x-schaalfactor en y-factor
             schaalfactor=[1,-1],# verticaal spiegelen
             schaalfactor=[-1,1],# horizontaal spiegelen
             schaalfactor=[-5,3],# bovenstaande combineren
@@ -393,11 +436,14 @@ pc.Lijn(k1, k2, k3).plot3D()
 ```
 
 
+    
 ![png](output_15_0.png)
+    
 
 
 ## Vorm
-<a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
+
+[terug naar inhoudsopgave](#Inhoud)
 
 
 ```python
@@ -470,7 +516,9 @@ print(f'het grootste hoofdtraagheidsmoment is: {v1.I1:.2e} mm4')
 ```
 
 
+    
 ![png](output_18_0.png)
+    
 
 
     
@@ -501,7 +549,8 @@ print(f'het grootste hoofdtraagheidsmoment is: {v1.I1:.2e} mm4')
     
 
 ## Rechthoek
-<a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
+
+[terug naar inhoudsopgave](#Inhoud)
 
 
 ```python
@@ -528,11 +577,14 @@ pc.Rechthoek(breedte=30, hoogte=50).plot()
 ```
 
 
+    
 ![png](output_21_0.png)
+    
 
 
 ## Cirkel
-<a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
+
+[terug naar inhoudsopgave](#Inhoud)
 
 
 ```python
@@ -563,11 +615,14 @@ pc.Cirkel(straal=pc.Waarde(1).dm).gebruik_eenheid('m').plot()
 ```
 
 
+    
 ![png](output_24_0.png)
+    
 
 
 ## Materiaal
-<a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
+
+[terug naar inhoudsopgave](#Inhoud)
 
 
 ```python
@@ -615,7 +670,9 @@ print(f'dwarscontractiecoëfficiënt is: {S235.v}')
     
 
 ## Functies
-<a href='#Inhoud' style='font-size:1em;float:right;position:relative;top:-40px;height:0px;'>naar inhoud</a>
+
+[terug naar inhoudsopgave](#Inhoud)
+
 Naast bovenstaande pyco objecten, zijn er ook algemene pyco functies en eigenschappen beschikbaar. Deze beginnen altijd met een kleine letter.
 
 
@@ -633,10 +690,8 @@ pc.functies_print_help()
     ALGEMEEN GEBRUIK VAN EIGENSCHAPPEN
         pc.pi == 3.141592653589793        direct aan te roepen vanuit pc object
     
-    WISKUNDIGE FUNCTIES                   (gebaseerd op Numpy module)
+    WISKUNDIGE FUNCTIES                   (geïmporteerd uit Numpy module)
         invoerwaarden:  int, float, np.array, Waarde of Vector
-        uitvoerwaarden: indien invoer Waarde/Vector, uitvoer ook Waarde/Vector met
-                        ALTIJD zelfde eenheid als invoer; ook als niet correct is!!
         sin(x)                            sinus
         cos(x)                            cosinus
         tan(x)                            tangens
@@ -665,7 +720,7 @@ pc.functies_print_help()
         delen(a, b)                       a / b
         delen_aantal(a, b)                a // b -> afgerond naar beneden
         delen_rest(a, b)                  a % b -> restant na afronden naar beneden
-        macht(a, b)                       a ** b 
+        macht(a, n)                       a ** n
         reciproke(x)                      1 / x
         negatief(x)                       -x
         kruisproduct(a, b)                a x b: staat loodrecht op vector a en b
@@ -723,9 +778,9 @@ pc.functies_print_help()
 
 
 ```python
-v = pc.Vector(3, 4, 7).mm
-print(f"het gemiddelde van vector v is: {pc.gemiddelde(v)}")
+l = pc.Lijst(3, 4, 7).mm
+print(f"het gemiddelde van lijst l is: {pc.gemiddelde(l)}")
 ```
 
-    het gemiddelde van vector v is: 4.666666666666667 mm
+    het gemiddelde van lijst l is: 4.666666666666667 mm
     

@@ -9,8 +9,107 @@ class pc:
     BasisObject = pyco.basis.BasisObject
     Waarde = pyco.waarde.Waarde
 
-class Vector(pc.BasisObject):
+class Lijst(pc.BasisObject):
+    """
+    Bevat een aantal getallen of Waarde objecten met allen dezelfde eenheid.
+
+    AANMAKEN LIJST              eenheid van 1e component, geldt voor geheel
+        l = Lijst(waarde1, waarde2, ...)          waarde: float, int of Waarde
+        l = Lijst([waarde1, waarde2, ...])              
+        l = Lijst(numpy_array)             array wordt indien nodig 1D gemaakt
+
+    AANPASSEN EENHEID           omzetten van eenheid naar andere eenheid
+        l.eenheid               huidige eenheid opvragen (tekst of None)
+        l.eenheid = 'N/mm2'     eenheid aanpassen
+        l.gebruik_eenheid('m')  eenheid aanpassen, retourneert object
+        l.eh('m')               eenheid aanpassen, retourneert object
+        l = l.N_mm2             kan voor een aantal standaard gevallen (zie lijst onderaan)
+
+    OMZETTEN LIJST NAAR TEKST   resulteert in nieuw string object
+        tekst = str(l)          of automatisch met bijvoorbeeld print(l)
+        tekst = format(l, '.2f') format configuratie meegeven voor getal
+
+    MOGELIJKE BEWERKINGEN       resulteert in nieuw Lijst object
+        v3 = l1 + l2            lijst optellen bij lijst
+        v3 = l1 - l2            lijst aftrekken van lijst
+        getal = l1 * l2         lijst vermenigvuldigen met lijst (inproduct)
+        getal = l1 / l2         lijst delen door lijst (inverse inproduct)
+        l2 = n * l1             getal vermenigvuldigen met lijst
+        l2 = l1 * n             lijst vermenigvuldigen met getal
+        l2 = n / l1             getal delen door lijst
+        l2 = l1 / n             lijst delen door getal
+        waarde = l1 ** n        lijst tot de macht een geheel getal
+        waarde = abs(l1)        berekent lengte van lijst -> Waarde object
+        getal = float(l1)       berekent lengte van lijst -> float object
+        l2 = +l1                behoud teken
+        l2 = -l1                verander teken (positief vs. negatief)
+        for w in l1:            itereert en geeft float/Waarde object terug
+        getal = len(l1)         geeft aantal elementen (dimensies) van lijst
+
+    NUMPY BEWERKINGEN           gebruikt array object
+        numpy_array = l1.array  retourneert Numpy array object
+                                    (bevat allen getallen, zonder eenheid)
+        getal = l1[2]           retourneert getal (zonder eenheid) op index
+        numpy_array = l1[1:3]   retourneert Numpy array object vanuit slice
+
+    WAARDEN VERGELIJKEN         resulteert in een boolean (True/False)
+        l1 == l2                is gelijk aan
+        l1 != l2                is niet gelijk aan
+        l1 >  l2                de lengte van lijst is groter dan
+        l1 <  l2                de lengte van lijst is kleiner dan
+        l1 >= l2                de lengte van lijst is groter dan of gelijk aan
+        l1 <= l2                de lengte van lijst is kleiner dan of gelijk aan
+        l1 &  l2                eenheden zijn zelfde type
+        
+    WISKUNDIGE FUNCTIES         
+        l.sin()                 sinus (alleen getallen en hoeken)
+        l.cos()                 cosinus (alleen getallen en hoeken)
+        l.tan()                 tangens (alleen getallen en hoeken)
+        l.asin()                arcsinus (omgekeerde sin, alleen getallen)
+        l.acos()                arccosinus (omgekeerde cos, alleen getallen)
+        l.atan()                arctangens (omgekeerde tan, alleen getallen)
+        l.sinh()                hyperbolische sinus (getallen en hoeken)
+        l.cosh()                hyperbolische cosinus (getallen en hoeken)
+        l.tanh()                hyperbolische tangens (getallen en hoeken)
+        l.asinh()               arcsinus hyperb. (omgekeerde asinh, getallen)
+        l.acosh()               arccosinus hyperb. (omgekeerde acosh, getallen)
+        l.atanh()               arctangens hyperb. (omgekeerde atanh, getallen)
+        l.afronden(n)           rond af op n decimalen (standaard 0)
+        l.plafond()             rond af naar boven (geheel getal)
+        l.vloer()               rond af naar beneden (geheel getal)
+        l.plafond_0_vloer()     rond af richting 0 (geheel getal)
+        l.som()                 de som van de elementen
+        l.product()             het product van de elementen
+        l.verschil()            lijst met verschillen tussen elementen
+        l1.optellen(l2)         l1 + l2
+        l1.aftrekken(l2)        l1 - l2
+        l1.vermenigvuldigen(l2) l1 * l2
+        l1.delen(l2)            l1 / l2
+        l1.delen_aantal(l2)     afgerond naar beneden
+        l1.delen_rest(l2)       restant na afronden naar beneden
+        l.macht(n)              l ** n
+        l.reciproke()           1 / l
+        l.negatief()            -l
+        
+    BESCHIKBARE EIGENSCHAPPEN   voor snel toekennen van eenheid aan waarde
+    <object>.<eigenschap>       bijvoorbeeld toekennen inhoud: v.dm3
+    a ag am attos bbl C ca cg cl cl_d cl_h cl_j cl_min cl_s cm cm2 cm3 cm3_d
+    cm3_h cm3_j cm3_min cm3_s cm4 cm_d cm_h cm_j cm_min cm_s cs cup d dal dam
+    das deg dg dl dl_d dl_h dl_j dl_min dl_s dm dm2 dm3 dm3_d dm3_h dm3_j
+    dm3_min dm3_s dm4 dm_d dm_h dm_j dm_min dm_s ds Eg Em Es F fg floz fm fs ft
+    g gallon Gg Gm GN gon GPa grain Gs h ha hg hl hm hm2 hm3 hs inch K kg kip
+    kl km km2 km3 km3_d km3_h km3_j km3_min km3_s km4 km_d km_h km_j km_min
+    km_s kN kNm kNmm kN_m kN_mm kN_m2 kN_mm2 kPa ks kton l l_d l_h l_j l_min
+    l_s m m2 m3 m3_d m3_h m3_j m3_min m3_s m4 Mg mg mijl minuut ml ml_d ml_h
+    ml_j ml_min ml_s Mm mm mm2 mm3 mm3_d mm3_h mm3_j mm3_min mm3_s mm4 mm_d
+    mm_h mm_j mm_min mm_s MN MNm MNmm MN_m2 MN_mm2 MPa Ms ms Mton mug mum mus
+    m_d m_h m_j m_min m_s N ng Nm nm Nmm ns N_m N_mm N_m2 N_mm2 ounce Pa Pg pg
+    pint Pm pm pound Ps ps rad s stone tbs Tg Tm TN ton TPa Ts tsp yard zeemijl
+    """
     
+       
+        
+        
     def sin(self):
         """Sinus"""
         from pyco import sin
@@ -76,94 +175,55 @@ class Vector(pc.BasisObject):
         from pyco import verschil
         return verschil(self)
     
+    def optellen(self, l):
+        """Tel andere lijst op bij deze lijst (per element)"""
+        from pyco import optellen
+        return optellen(self, l)
     
-    """
-    Bevat een lijst van getallen of Waarde objecten met allen dezelfde eenheid.
-
-    AANMAKEN VECTOR             eenheid van 1e component, geldt voor geheel
-        v = Vector(waarde1, waarde2, ...)          waarde: float, int of Waarde
-        v = Vector([waarde1, waarde2, ...])              
-        v = Vector(numpy_array)             array wordt indien nodig 1D gemaakt
-
-    AANPASSEN EENHEID           omzetten van eenheid naar andere eenheid
-        v.eenheid               huidige eenheid opvragen (tekst of None)
-        v.eenheid = 'N/mm2'     eenheid aanpassen
-        v.gebruik_eenheid('m')  eenheid aanpassen, retourneert object
-        v.eh('m')               eenheid aanpassen, retourneert object
-        v = v.N_mm2             kan voor een aantal standaard gevallen (zie lijst onderaan)
-
-    OMZETTEN VECTOR NAAR TEKST  resulteert in nieuw string object
-        tekst = str(v)          of automatisch met bijvoorbeeld print(w)
-        tekst = format(v,'.2f') format configuratie meegeven voor getal
-
-    MOGELIJKE BEWERKINGEN       resulteert in nieuw Vector object
-        v3 = v1 + v2            vector optellen bij vector
-        v3 = v1 - v2            vector aftrekken van vector
-        getal = v1 * v2         vector vermenigvuldigen met vector (inproduct)
-        getal = v1 / v2         vector delen door vector (inverse inproduct)
-        v2 = n * v1             getal vermenigvuldigen met vector
-        v2 = v1 * n             vector vermenigvuldigen met getal
-        v2 = n / v1             getal delen door vector
-        v2 = v1 / n             vector delen door getal
-        waarde = v1 ** n        vector tot de macht een geheel getal
-        waarde = abs(v1)        berekent lengte van vector -> Waarde object
-        getal = float(v1)       berekent lengte van vector -> float object
-        v2 = +v1                behoud teken
-        v2 = -v1                verander teken (positief vs. negatief)
-        for w in v1:            itereert en geeft float/Waarde object terug
-        getal = len(v1)         geeft aantal elementen (dimensies) van vector
-
-    NUMPY BEWERKINGEN           gebruikt array object
-        numpy_array = v1.array  retourneert Numpy array object
-                                    (bevat allen getallen, zonder eenheid)
-        getal = v1[2]           retourneert getal (zonder eenheid) op index
-        numpy_array = v1[1:3]   retourneert Numpy array object vanuit slice
-
-    WAARDEN VERGELIJKEN         resulteert in een boolean (True/False)
-        v1 == v2                is gelijk aan
-        v1 != v2                is niet gelijk aan
-        v1 >  v2                de lengte van vector is groter dan
-        v1 <  v2                de lengte van vector is kleiner dan
-        v1 >= v2                de lengte van vector is groter dan of gelijk aan
-        v1 <= v2                de lengte van vector is kleiner dan of gelijk aan
-        v1 &  v2                eenheden zijn zelfde type
-        
-    WISKUNDIGE FUNCTIES         (geïmporteerd uit Numpy module)
-        v.sin()                 sinus (alleen getallen en hoeken)
-        v.cos()                 cosinus (alleen getallen en hoeken)
-        v.tan()                 tangens (alleen getallen en hoeken)
-        v.asin()                arcsinus (omgekeerde sin, alleen getallen)
-        v.acos()                arccosinus (omgekeerde cos, alleen getallen)
-        v.atan()                arctangens (omgekeerde tan, alleen getallen)
-        v.sinh()                hyperbolische sinus (getallen en hoeken)
-        v.cosh()                hyperbolische cosinus (getallen en hoeken)
-        v.tanh()                hyperbolische tangens (getallen en hoeken)
-        v.asinh()               arcsinus hyperb. (omgekeerde asinh, getallen)
-        v.acosh()               arccosinus hyperb. (omgekeerde acosh, getallen)
-        v.atanh()               arctangens hyperb. (omgekeerde atanh, getallen)
-        v.afronden(n)           rond af op n decimalen (standaard 0)
-        v.plafond()             rond af naar boven (geheel getal)
-        v.vloer()               rond af naar beneden (geheel getal)
-        v.plafond_0_vloer()     rond af richting 0 (geheel getal)
-        v.som()                 de som van de elementen
-        v.product()             het product van de elementen
-        v.verschil()            lijst met verschillen tussen elementen
-        
-    BESCHIKBARE EIGENSCHAPPEN   voor snel toekennen van eenheid aan waarde
-    <object>.<eigenschap>       bijvoorbeeld toekennen inhoud: v.dm3
-    a ag am attos bbl C ca cg cl cl_d cl_h cl_j cl_min cl_s cm cm2 cm3 cm3_d
-    cm3_h cm3_j cm3_min cm3_s cm4 cm_d cm_h cm_j cm_min cm_s cs cup d dal dam
-    das deg dg dl dl_d dl_h dl_j dl_min dl_s dm dm2 dm3 dm3_d dm3_h dm3_j
-    dm3_min dm3_s dm4 dm_d dm_h dm_j dm_min dm_s ds Eg Em Es F fg floz fm fs ft
-    g gallon Gg Gm GN gon GPa grain Gs h ha hg hl hm hm2 hm3 hs inch K kg kip
-    kl km km2 km3 km3_d km3_h km3_j km3_min km3_s km4 km_d km_h km_j km_min
-    km_s kN kNm kNmm kN_m kN_mm kN_m2 kN_mm2 kPa ks kton l l_d l_h l_j l_min
-    l_s m m2 m3 m3_d m3_h m3_j m3_min m3_s m4 Mg mg mijl minuut ml ml_d ml_h
-    ml_j ml_min ml_s Mm mm mm2 mm3 mm3_d mm3_h mm3_j mm3_min mm3_s mm4 mm_d
-    mm_h mm_j mm_min mm_s MN MNm MNmm MN_m2 MN_mm2 MPa Ms ms Mton mug mum mus
-    m_d m_h m_j m_min m_s N ng Nm nm Nmm ns N_m N_mm N_m2 N_mm2 ounce Pa Pg pg
-    pint Pm pm pound Ps ps rad s stone tbs Tg Tm TN ton TPa Ts tsp yard zeemijl
-    """
+    def aftrekken(self, w):
+        """Haal andere lijst af van deze lijst (per element)"""
+        from pyco import aftrekken
+        return aftrekken(self, w)
+    
+    def vermenigvuldigen(self, w):
+        """Vermenigvuldig andere lijst met deze lijst (per element)"""
+        from pyco import vermenigvuldigen
+        return vermenigvuldigen(self, w)
+    
+    def delen(self, w):
+        """Deel lijst door een andere gegeven lijst (per element)"""
+        from pyco import delen
+        return delen(self, w)
+    
+    def delen_aantal(self, w):
+        """Deel lijst door een andere gegeven lijst en rond af naar beneden (per element)"""
+        from pyco import delen_aantal
+        return delen_aantal(self, w)
+    
+    def delen_rest(self, w):
+        """Deel lijst door een andere gegeven lijst, rond af naar beneden en retourneer het restant (per element)"""
+        from pyco import delen_rest
+        return delen_rest(self, w)
+    
+    def macht(self, n):
+        """Bereken deze lijst tot een bepaalde macht (geheel getal) (per element)"""
+        from pyco import macht
+        return macht(self, n)
+    
+    def reciproke(self):
+        """Bereken de reciproke (1/x) (per element)"""
+        from pyco import reciproke
+        return reciproke(self)
+    
+    def negatief(self):
+        """Maak van positieve waarde een negatieve en vice versa (per element)"""
+        from pyco import negatief
+        return negatief(self)
+    
+    
+    
+    
+    
 
     def __init__(self, *waardes:Union[pc.Waarde, int, float]):
         super().__init__()
@@ -219,15 +279,15 @@ class Vector(pc.BasisObject):
 
         self._array = np.array(tmp_waardes, dtype='float64')
         
-    def _verander_eenheid(self, eenheid:str):
-        """Zet Vector om naar nieuwe eenheid."""
+    def _verander_eenheid(self, eenheid:str, check_type:bool=True):
+        """Zet Lijst om naar nieuwe eenheid."""
         if self._eenheid is None:
             self._eenheid = eenheid
         else:
             tmp_waardes = []
             oude_eenheid = self._eenheid
             for w in self:
-                w = float(pc.Waarde(float(w), oude_eenheid)[eenheid])
+                w = float(pc.Waarde(float(w), oude_eenheid).gebruik_eenheid(eenheid, check_type=check_type))
                 tmp_waardes.append(w)
             self._array = np.array(tmp_waardes, dtype='float64')
             self._eenheid = eenheid
@@ -240,17 +300,17 @@ class Vector(pc.BasisObject):
 
     @eenheid.setter
     def eenheid(self, eenheid:str):
-        """Zet Vector om naar nieuwe eenheid."""
+        """Zet Lijst om naar nieuwe eenheid."""
         self._verander_eenheid(eenheid)
 
-    def gebruik_eenheid(self, eenheid:str):
+    def gebruik_eenheid(self, eenheid:str, check_type:bool=True):
         """Zet om naar nieuwe eenheid en retourneert object."""
-        self._verander_eenheid(eenheid)
+        self._verander_eenheid(eenheid, check_type)
         return self
     
-    def eh(self, eenheid:str):
+    def eh(self, eenheid:str, check_type:bool=True):
         """Zet om naar nieuwe eenheid en retourneert object."""
-        self._verander_eenheid(eenheid)
+        self._verander_eenheid(eenheid, check_type)
         return self
 
     @property
@@ -260,23 +320,23 @@ class Vector(pc.BasisObject):
 
     def __add__(self, andere):
         """Telt waarden bij elkaar op."""
-        if not isinstance(andere, Vector):
-            raise TypeError('tweede waarde is geen Vector object')
+        if not isinstance(andere, Lijst):
+            raise TypeError('tweede waarde is geen Lijst object')
         pairs = itertools.zip_longest(self, andere, fillvalue=0.0)
         cls = type(self)
         return cls([a + b for a, b in pairs])
 
     def __sub__(self, andere):
         """Trekt waarde van elkaar af"""
-        if not isinstance(andere, Vector):
-            raise TypeError('tweede waarde is geen Vector object')
+        if not isinstance(andere, Lijst):
+            raise TypeError('tweede waarde is geen Lijst object')
         pairs = itertools.zip_longest(self, andere, fillvalue=0.0)
         cls = type(self)
         return cls([a - b for a, b in pairs])
 
     def __mul__(self, andere):
-        """Vermenigvuldigd Vector met andere Vector (inproduct) of scalar getal."""
-        if isinstance(andere, Vector):
+        """Vermenigvuldigd Lijst met andere Lijst (inproduct) of scalar getal."""
+        if isinstance(andere, Lijst):
             pairs = itertools.zip_longest(self, andere, fillvalue=0.0)
             for i, (a, b) in enumerate(pairs):
                 if i == 0:
@@ -288,14 +348,14 @@ class Vector(pc.BasisObject):
             cls = type(self)
             return cls([w * andere for w in self])
         else:
-            raise TypeError('tweede waarde is geen Vector object of getal')
+            raise TypeError('tweede waarde is geen Lijst object of getal')
 
     #def __matmul__(self, andere):
     #    @ operator -> gebruiken voor kruisproduct? (en niet inproduct); vanaf python 3.5
 
     def __truediv__(self, andere):
-        """Deelt Vector met andere Vector (inproduct) of scalar getal."""
-        if isinstance(andere, Vector):
+        """Deelt Lijst met andere Lijst (inproduct) of scalar getal."""
+        if isinstance(andere, Lijst):
             pairs = itertools.zip_longest(self, andere, fillvalue=0.0)
             for i, (a, b) in enumerate(pairs):
                 if i == 0:
@@ -307,10 +367,10 @@ class Vector(pc.BasisObject):
             cls = type(self)
             return cls([w / andere for w in self])
         else:
-            raise TypeError('tweede waarde is geen Vector object of getal')
+            raise TypeError('tweede waarde is geen Lijst object of getal')
 
     def __pow__(self, macht):
-        """Doet Vector tot de macht een geheel getal > 1."""
+        """Doet Lijst tot de macht een geheel getal > 1."""
         if isinstance(macht, int) and macht > 1:
             resultaat = self
             for i in range(2, macht+1):
@@ -320,22 +380,22 @@ class Vector(pc.BasisObject):
             raise ValueError('macht moet geheel getal zijn groter dan 1')
 
     def __rmul__(self, andere):
-        """Vermenigvuldigd scalar getal met Vector."""
+        """Vermenigvuldigd scalar getal met Lijst."""
         return self * andere
 
     def __rtruediv__(self, andere):
-        """Deelt scalar met eenheidsloze Vector."""
+        """Deelt scalar met eenheidsloze Lijst."""
         if (isinstance(andere, int) or isinstance(andere, float)) and \
                 self.eenheid is None:
             cls = type(self)
             return cls([andere / w for w in self])
         else:
-            raise TypeError('kan alleen getal delen door eenheidsloze Vector')
+            raise TypeError('kan alleen getal delen door eenheidsloze Lijst')
 
     def __eq__(self, andere):
-        """Vergelijkt Vector met andere Vector."""
-        if not isinstance(andere, Vector):
-            raise TypeError('tweede waarde is geen Vector object')
+        """Vergelijkt Lijst met andere Lijst."""
+        if not isinstance(andere, Lijst):
+            raise TypeError('tweede waarde is geen Lijst object')
         if len(self) != len(andere):
             return False
         if self.eenheid is None and andere.eenheid is not None:
@@ -357,63 +417,63 @@ class Vector(pc.BasisObject):
         return True
 
     def __neq__(self, andere):
-        """Vergelijkt Vector negatief met andere Vector"""
+        """Vergelijkt Lijst negatief met andere Lijst"""
         return not self.__eq__(andere)
 
     def __lt__(self, andere):
-        """Kijkt of absolute waarde (lengte vector) kleiner is dan andere Vector."""
-        if not isinstance(andere, Vector):
-            raise TypeError('tweede waarde is geen Vector object')
+        """Kijkt of absolute waarde (lengte lijst) kleiner is dan andere Lijst."""
+        if not isinstance(andere, Lijst):
+            raise TypeError('tweede waarde is geen Lijst object')
         if len(self) != len(andere):
-            raise TypeError('tweede vector heeft niet zelfde dimensie')
+            raise TypeError('tweede lijst heeft niet zelfde dimensie')
         if self.eenheid is None and andere.eenheid is not None:
-            raise TypeError('tweede vector heeft niet zelfde eenheid')
+            raise TypeError('tweede lijst heeft niet zelfde eenheid')
         if self.eenheid is not None and andere.eenheid is None:
-            raise TypeError('tweede vector heeft niet zelfde eenheid')
+            raise TypeError('tweede lijst heeft niet zelfde eenheid')
         if not pc.Waarde(1, self.eenheid) & pc.Waarde(1, andere.eenheid):
-            raise TypeError('tweede vector heeft niet zelfde type eenheid')
+            raise TypeError('tweede lijst heeft niet zelfde type eenheid')
         return abs(self) < abs(andere)
 
     def __gt__(self, andere):
-        """Kijkt of absolute waarde (lengte vector) groter is dan andere Vector."""
-        if not isinstance(andere, Vector):
-            raise TypeError('tweede waarde is geen Vector object')
+        """Kijkt of absolute waarde (lengte lijst) groter is dan andere Lijst."""
+        if not isinstance(andere, Lijst):
+            raise TypeError('tweede waarde is geen Lijst object')
         if len(self) != len(andere):
-            raise TypeError('tweede vector heeft niet zelfde dimensie')
+            raise TypeError('tweede lijst heeft niet zelfde dimensie')
         if self.eenheid is None and andere.eenheid is not None:
-            raise TypeError('tweede vector heeft niet zelfde eenheid')
+            raise TypeError('tweede lijst heeft niet zelfde eenheid')
         if self.eenheid is not None and andere.eenheid is None:
-            raise TypeError('tweede vector heeft niet zelfde eenheid')
+            raise TypeError('tweede lijst heeft niet zelfde eenheid')
         if not pc.Waarde(1, self.eenheid) & pc.Waarde(1, andere.eenheid):
-            raise TypeError('tweede vector heeft niet zelfde type eenheid')
+            raise TypeError('tweede lijst heeft niet zelfde type eenheid')
         return abs(self) > abs(andere)
 
     def __le__(self, andere):
-        """Kijkt of absolute waarde (lengte vector) kleiner dan of gelijk is aan andere Vector."""
+        """Kijkt of absolute waarde (lengte lijst) kleiner dan of gelijk is aan andere Lijst."""
         if self.__lt__(andere):
             return True
         else:
             return abs(self) == abs(andere)
 
     def __ge__(self, andere):
-        """Kijkt of absolute waarde (lengte vector) groter dan of gelijk is aan andere Vector."""
+        """Kijkt of absolute waarde (lengte lijst) groter dan of gelijk is aan andere Lijst."""
         if self.__gt__(andere):
             return True
         else:
             return abs(self) == abs(andere)
 
     def __and__(self, andere):
-        """Controleert of Vector zelfde type eenheid heeft als andere."""
-        if not isinstance(andere, Vector):
-            raise TypeError('tweede waarde is geen Vector object')
+        """Controleert of Lijst zelfde type eenheid heeft als andere."""
+        if not isinstance(andere, Lijst):
+            raise TypeError('tweede waarde is geen Lijst object')
         return pc.Waarde(1, self.eenheid) & pc.Waarde(1, andere.eenheid)
 
     def __float__(self):
-        """Berekent de lengte van de vector als float object."""
+        """Berekent de lengte van de lijst als float object."""
         return np.linalg.norm(self.array)
 
     def __abs__(self):
-        """Berekent de lengte van de vector als Waarde object."""
+        """Berekent de lengte van de lijst als Waarde object."""
         return pc.Waarde(float(self), self.eenheid)
 
     def __pos__(self):
@@ -427,7 +487,7 @@ class Vector(pc.BasisObject):
         return self
 
     def __bool__(self):
-        """Geeft False als lengte Vector == 0. Anders True."""
+        """Geeft False als lengte Lijst == 0. Anders True."""
         length = float(self)
         return not (length < 1/W._AFRONDEN_BIJ_VERGELIJKEN and length > -1/W._AFRONDEN_BIJ_VERGELIJKEN)
 
@@ -441,7 +501,7 @@ class Vector(pc.BasisObject):
                 yield pc.Waarde(w, eenheid)
 
     def __len__(self):
-        """Geeft aantal dimensies (waarden) van vector."""
+        """Geeft aantal dimensies (waarden) van lijst."""
         return len(self.array)
 
     def __format__(self, config:str=None):
@@ -463,7 +523,7 @@ class Vector(pc.BasisObject):
         return '{}({})'.format(cls_naam, waardes)
 
     def __str__(self):
-        """Geeft tekst met vector en eenheid"""
+        """Geeft tekst met lijst en eenheid"""
         waardes = ', '.join(str(float(w)) for w in self)
         eenheid = self.eenheid if self.eenheid is not None else ''
         return '({}) {}'.format(waardes, eenheid).strip()
@@ -473,7 +533,7 @@ class Vector(pc.BasisObject):
         return self.array[subset]
 
         # """Retourneer subset van waardes (floats of Waarde objecten).
-        # Als slice dan wordt er nieuw Vector object gegenereert"""
+        # Als slice dan wordt er nieuw Lijst object gegenereert"""
         # waardes = [w for w in self]
         # if isinstance(subset, int):
         #     return waardes[subset]

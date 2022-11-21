@@ -10,57 +10,6 @@ class pc:
     BasisObject = pyco.basis.BasisObject
 
 class Waarde(pc.BasisObject):
-    
-    def sin(self):
-        """Sinus"""
-        from pyco import sin
-        return sin(self)
-            
-    def cos(self):
-        """Cosinus"""
-        from pyco import cos
-        return cos(self)
-            
-    def tan(self):
-        """Tangens"""
-        from pyco import tan
-        return tan(self)
-            
-    def sinh(self):
-        """Hyperbolische sinus"""
-        from pyco import sinh
-        return sinh(self)
-            
-    def cosh(self):
-        """Hyperbolische cosinus"""
-        from pyco import cosh
-        return cosh(self)
-            
-    def tanh(self):
-        """Hyperbolische tangens"""
-        from pyco import tanh
-        return tanh(self)
-    
-    def afronden(self, n=0):
-        """Rond af op n decimalen (standaard 0)"""
-        from pyco import afronden
-        return afronden(self, n)
-    
-    def plafond(self):
-        """Rond af naar boven (geheel getal)"""
-        from pyco import plafond
-        return plafond(self)
-    
-    def vloer(self):
-        """Rond af naar beneden (geheel getal)"""
-        from pyco import vloer
-        return vloer(self)
-    
-    def plafond_0_vloer(self):
-        """Rond af richting 0 (geheel getal)"""
-        from pyco import plafond_0_vloer
-        return plafond_0_vloer(self)
-    
     """
     Bevat een getal en bijhorende eenheid.
 
@@ -113,7 +62,7 @@ class Waarde(pc.BasisObject):
         w1 <= w2                is kleiner dan of gelijk aan
         w1 &  w2                eenheden zijn zelfde type
         
-    WISKUNDIGE FUNCTIES         (geïmporteerd uit Numpy module)
+    WISKUNDIGE FUNCTIES         
         w.sin()                 sinus (alleen getallen en hoeken)
         w.cos()                 cosinus (alleen getallen en hoeken)
         w.tan()                 tangens (alleen getallen en hoeken)
@@ -130,6 +79,15 @@ class Waarde(pc.BasisObject):
         w.plafond()             rond af naar boven (geheel getal)
         w.vloer()               rond af naar beneden (geheel getal)
         w.plafond_0_vloer()     rond af richting 0 (geheel getal)
+        w1.optellen(w2)         w1 + w2
+        w1.aftrekken(w2)        w1 - w2
+        w1.vermenigvuldigen(w2) w1 * w2
+        w1.delen(w2)            w1 / w2
+        w1.delen_aantal(w2)     afgerond naar beneden
+        w1.delen_rest(w2)       restant na afronden naar beneden
+        w.macht(n)              w ** n
+        w.reciproke()           1 / w
+        w.negatief()            -w
 
     EENHEID TEKST
         gebruik getal achter standaard eenheid voor 'tot de macht' (bijv. mm3)
@@ -174,6 +132,104 @@ class Waarde(pc.BasisObject):
     # hulp functie om lijst hierboven te gegeneren; hierna nog bepaalde eigenschappen/methodes verwijderen
     # from pyco.model import Waarde
     # ' '.join(sorted([a for a in dir(Waarde) if a[0] != '_' and a not in ['print_help']], key=lambda x:x.upper()))
+    
+    
+    
+    
+    def sin(self):
+        """Sinus"""
+        from pyco import sin
+        return sin(self)
+            
+    def cos(self):
+        """Cosinus"""
+        from pyco import cos
+        return cos(self)
+            
+    def tan(self):
+        """Tangens"""
+        from pyco import tan
+        return tan(self)
+            
+    def sinh(self):
+        """Hyperbolische sinus"""
+        from pyco import sinh
+        return sinh(self)
+            
+    def cosh(self):
+        """Hyperbolische cosinus"""
+        from pyco import cosh
+        return cosh(self)
+            
+    def tanh(self):
+        """Hyperbolische tangens"""
+        from pyco import tanh
+        return tanh(self)
+    
+    def afronden(self, n=0):
+        """Rond af op n decimalen (standaard 0)"""
+        from pyco import afronden
+        return afronden(self, n)
+    
+    def plafond(self):
+        """Rond af naar boven (geheel getal)"""
+        from pyco import plafond
+        return plafond(self)
+    
+    def vloer(self):
+        """Rond af naar beneden (geheel getal)"""
+        from pyco import vloer
+        return vloer(self)
+    
+    def plafond_0_vloer(self):
+        """Rond af richting 0 (geheel getal)"""
+        from pyco import plafond_0_vloer
+        return plafond_0_vloer(self)
+    
+    def optellen(self, w):
+        """Tel andere waarde op bij deze waarde"""
+        from pyco import optellen
+        return optellen(self, w)
+    
+    def aftrekken(self, w):
+        """Haal andere waarde af van deze waarde"""
+        from pyco import aftrekken
+        return aftrekken(self, w)
+    
+    def vermenigvuldigen(self, w):
+        """Vermenigvuldig andere waarde met deze waarde"""
+        from pyco import vermenigvuldigen
+        return vermenigvuldigen(self, w)
+    
+    def delen(self, w):
+        """Deel waarde door een andere gegeven waarde"""
+        from pyco import delen
+        return delen(self, w)
+    
+    def delen_aantal(self, w):
+        """Deel waarde door een andere gegeven waarde en rond af naar beneden"""
+        from pyco import delen_aantal
+        return delen_aantal(self, w)
+    
+    def delen_rest(self, w):
+        """Deel waarde door een andere gegeven waarde, rond af naar beneden en retourneer het restant"""
+        from pyco import delen_rest
+        return delen_rest(self, w)
+    
+    def macht(self, n):
+        """Bereken deze waarde tot een bepaalde macht (geheel getal)"""
+        from pyco import macht
+        return macht(self, n)
+    
+    def reciproke(self):
+        """Bereken de reciproke (1/x)"""
+        from pyco import reciproke
+        return reciproke(self)
+    
+    def negatief(self):
+        """Maak van positieve waarde een negatieve en vice versa"""
+        from pyco import negatief
+        return negatief(self)
 
 
     # factoren horende bij basiseenheden, om eenheidsbreuk samen te stellen
@@ -623,7 +679,7 @@ class Waarde(pc.BasisObject):
                     eenheidbreuk = eenheidbreuk / subeenheidfactor
         return getal, eenheidbreuk
 
-    def _bereken_inverse_waarde(self, eenheid, oude_waarde, oude_eenheidbreuk):
+    def _bereken_inverse_waarde(self, eenheid, oude_waarde, oude_eenheidbreuk, check_type=True):
         """Genereert een waarde (getal) op basis van een eenheid."""
         waarde = oude_waarde
         if not isinstance(eenheid, str) or not eenheid:
@@ -682,16 +738,16 @@ class Waarde(pc.BasisObject):
                         raise ValueError('weging basiseenheid heeft verkeerde syntax')
                     subeenheidfactor = self._EENHEID[eenheid_naam][1]
                     eenheidbreuk = eenheidbreuk / subeenheidfactor
-        if eenheidbreuk != oude_eenheidbreuk:
+        if check_type and eenheidbreuk != oude_eenheidbreuk:
             raise ValueError('type eenheid \'{}\' komt niet overeen met type eenheid van waarde \'{}\''.format(eenheid, self._eenheidnaam))
         return waarde
 
-    def _export_waarde(self, eenheid=None):
+    def _export_waarde(self, eenheid=None, check_type=True):
         """Exporteert interne waarde (getal) gegeven een eenheid."""
         if eenheid is None or eenheid == '' or eenheid == '-':
             return self._getal
         else:
-            return self._bereken_inverse_waarde(eenheid, self._getal, self._eenheidbreuk)
+            return self._bereken_inverse_waarde(eenheid, self._getal, self._eenheidbreuk, check_type)
 
     def _verander_aantal_decimalen(self, decimalen:int):
         """Helper functie voor eigenschappen qua standaard eenheid."""
@@ -700,7 +756,7 @@ class Waarde(pc.BasisObject):
         self._config['aantal_decimalen'] = decimalen
         return self
 
-    def _verander_eenheid(self, eenheid:str):
+    def _verander_eenheid(self, eenheid:str, check_type:bool=True):
         """Helper functie voor eigenschappen qua afronding."""
         if not self._is_getal:
             raise ValueError('huide waarde is geen getal: {}'.format(self._getal))
@@ -710,9 +766,9 @@ class Waarde(pc.BasisObject):
         else:
             # waarde had een bepaalde eenheid; moet zelfde soort blijven
             tmp = Waarde(1.0, eenheid)
-            if tmp._eenheidbreuk != self._eenheidbreuk:
+            if check_type and tmp._eenheidbreuk != self._eenheidbreuk:
                 raise ValueError('huidig type eenheid ({}) komt niet overeen met nieuwe eenheid ({})'.format(self._eenheidbreuk, tmp._eenheidbreuk))
-            self.__init__(self._export_waarde(eenheid), eenheid)
+            self.__init__(self._export_waarde(eenheid, check_type), eenheid)
         return self
 
     @property
@@ -735,14 +791,14 @@ class Waarde(pc.BasisObject):
         """Zet Waarde om naar nieuwe eenheid."""
         self._verander_eenheid(nieuwe_eenheid)
     
-    def gebruik_eenheid(self, nieuwe_eenheid:str):
+    def gebruik_eenheid(self, nieuwe_eenheid:str, check_type:bool=True):
         """Zet om naar nieuwe eenheid en retourneert object."""
-        self._verander_eenheid(nieuwe_eenheid)
+        self._verander_eenheid(nieuwe_eenheid, check_type)
         return self
     
-    def eh(self, nieuwe_eenheid:str):
+    def eh(self, nieuwe_eenheid:str, check_type:bool=True):
         """Zet om naar nieuwe eenheid en retourneert object."""
-        self._verander_eenheid(nieuwe_eenheid)
+        self._verander_eenheid(nieuwe_eenheid, check_type)
         return self
 
     def __add__(self, andere_waarde):
@@ -1041,7 +1097,7 @@ class Waarde(pc.BasisObject):
     
     
 ###############################################################################
-#  ALLES HIERONDER MOET ZELFDE ZIJN ALS BIJ VECTOR OBJECT
+#  ALLES HIERONDER MOET ZELFDE ZIJN ALS BIJ LIJST OBJECT
 ############################################################################### 
 
     # MASSA

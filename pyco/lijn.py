@@ -6,12 +6,12 @@ import matplotlib.pyplot as plt
 import pyco.basis
 import pyco.waarde
 import pyco.knoop
-import pyco.vector
+import pyco.lijst
 
 class pc:
     BasisObject = pyco.basis.BasisObject
     Waarde = pyco.waarde.Waarde
-    Vector = pyco.vector.Vector
+    Lijst = pyco.lijst.Lijst
     Knoop = pyco.knoop.Knoop
 
 
@@ -53,7 +53,7 @@ class Lijn(pc.BasisObject):
             rotatiepunt=[0,0], # xy Knoop/list; als None dan zwaartepunt vorm
             rotatiehoek=20,    # in graden, positief is tegen de klok in
             schaalfactor=2,  # Waarde/getal: vergrootfactor t.o.v. rotatiepunt
-            schaalfactor=[2,3],# of Vector/list met x-schaalfactor en y-factor
+            schaalfactor=[2,3],# of Lijst/list met x-schaalfactor en y-factor
             schaalfactor=[1,-1],# verticaal spiegelen
             schaalfactor=[-1,1],# horizontaal spiegelen
             schaalfactor=[-5,3],# bovenstaande combineren
@@ -250,8 +250,8 @@ class Lijn(pc.BasisObject):
                       rotatiepunt:pc.Knoop=None,
                       rotatiehoek:Union[pc.Waarde, float, int]=None,
                       schaalfactor:Union[pc.Waarde, float, int,
-                                         pc.Vector, list, tuple]=None,
-                      translatie:Union[pc.Vector, list, tuple]=None):
+                                         pc.Lijst, list, tuple]=None,
+                      translatie:Union[pc.Lijst, list, tuple]=None):
         """Verplaatst, roteert en/of verschaalt de lijn."""
 
         if rotatiepunt is not None and isinstance(rotatiepunt, pc.Knoop):
@@ -291,7 +291,7 @@ class Lijn(pc.BasisObject):
 
             if ((isinstance(schaalfactor, list)
                     or isinstance(schaalfactor, tuple)
-                    or isinstance(schaalfactor, pc.Vector))
+                    or isinstance(schaalfactor, pc.Lijst))
                     and len(schaalfactor) >= 2):
                 sf1 = float(schaalfactor[0])
                 sf2 = float(schaalfactor[1])

@@ -1,11 +1,11 @@
 import pyco.waarde
-import pyco.vector
+import pyco.lijst
 
 class pc:
     Waarde = pyco.waarde.Waarde
-    Vector = pyco.vector.Vector
+    Lijst = pyco.lijst.Lijst
 
-class Knoop(pc.Vector):
+class Knoop(pc.Lijst):
     """
     Bevat een lijst van getallen of Waarde (x, y, en/of z) met lengte eenheid.
 

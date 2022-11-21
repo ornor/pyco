@@ -14,4 +14,4 @@ Je kan de bibliotheek installeren vanuit PyPi met `pip`.
 
 ## Documenten
 
-[pyco handleiding](https://github.com/ornor/pyco/blob/master/docs/api/pyco_handleiding.md).
+[pyco handleiding](https://github.com/ornor/pyco/blob/master/docs/handleiding/pyco_handleiding.md).
