@@ -18,6 +18,7 @@ Alle pyco klasses beginnen met een hoofdletter. Alle functies en eigenschappen b
 
 * [Waarde](#Waarde)
 * [Lijst](#Lijst)
+* [Tabel](#Tabel)
 * [Knoop](#Knoop)
 * [Lijn](#Lijn)
 * [Vorm](#Vorm)
@@ -45,6 +46,7 @@ pc.Waarde.print_help()
     AANMAKEN WAARDE
         w = Waarde(getal)
         w = Waarde(getal, eenheid_tekst)
+        w2 = w.kopie()          maak een kopie (nieuw object) met zelfde eigenschappen    
     
     AANPASSEN EENHEID           omzetten van eenheid naar andere eenheid
         w.eenheid               huidige eenheid opvragen (tekst of None)
@@ -62,6 +64,7 @@ pc.Waarde.print_help()
                                     -> gebruikt afronding indien opgegeven
         tekst = str(w)          of automatisch met bijvoorbeeld print(w)
         tekst = format(w,'.2f') format configuratie meegeven voor getal
+              = w.format('.2f')
     
     OMZETTEN WAARDE NAAR GETAL  resulteert in nieuw float object
         getal = float(w)        omzetten met standaard eenheid
@@ -91,7 +94,7 @@ pc.Waarde.print_help()
         w1 <= w2                is kleiner dan of gelijk aan
         w1 &  w2                eenheden zijn zelfde type
         
-    WISKUNDIGE FUNCTIES         (geïmporteerd uit Numpy module)
+    WISKUNDIGE FUNCTIES         
         w.sin()                 sinus (alleen getallen en hoeken)
         w.cos()                 cosinus (alleen getallen en hoeken)
         w.tan()                 tangens (alleen getallen en hoeken)
@@ -108,6 +111,26 @@ pc.Waarde.print_help()
         w.plafond()             rond af naar boven (geheel getal)
         w.vloer()               rond af naar beneden (geheel getal)
         w.plafond_0_vloer()     rond af richting 0 (geheel getal)
+        w1.optellen(w2)         w1 + w2
+        w1.aftrekken(w2)        w1 - w2
+        w1.vermenigvuldigen(w2) w1 * w2
+        w1.delen(w2)            w1 / w2
+        w1.delen_aantal(w2)     afgerond naar beneden
+        w1.delen_rest(w2)       restant na afronden naar beneden
+        w.macht(n)              w ** n
+        w.reciproke()           1 / w
+        w.negatief()            -w
+        w.exp()                 exponentieel: berekent e^w
+        w.ln()                  natuurlijke logaritme (grondgetal e)
+        w.log()                 logaritme met grondgetal 10
+        w.wortel()              vierkantswortel
+        w.wortel3()             kubieke wortel
+        w.absoluut()            absolute waarde (altijd positief)
+        w.teken()               positief getal: 1.0, nul: 0.0, negatief: -1.0 
+        w.kopieer_teken(w2)     neem huidige, met het teken (+-) van w2
+        w.is_positief(a)        stap functie: w<0 -> 0, w=0 -> a, w>0 -> 1 
+        w.is_nan()              bepaalt of waarde een niet-getal is
+        w.is_inf()              bepaalt of waarde oneindig is
     
     EENHEID TEKST
         gebruik getal achter standaard eenheid voor 'tot de macht' (bijv. mm3)
@@ -183,6 +206,7 @@ pc.Lijst.print_help()
         l = Lijst(waarde1, waarde2, ...)          waarde: float, int of Waarde
         l = Lijst([waarde1, waarde2, ...])              
         l = Lijst(numpy_array)             array wordt indien nodig 1D gemaakt
+        l2 = l.kopie()          maak een kopie (nieuw object) met zelfde eigenschappen 
     
     AANPASSEN EENHEID           omzetten van eenheid naar andere eenheid
         l.eenheid               huidige eenheid opvragen (tekst of None)
@@ -194,6 +218,7 @@ pc.Lijst.print_help()
     OMZETTEN LIJST NAAR TEKST   resulteert in nieuw string object
         tekst = str(l)          of automatisch met bijvoorbeeld print(l)
         tekst = format(l, '.2f') format configuratie meegeven voor getal
+              = l.format('.2f')
     
     MOGELIJKE BEWERKINGEN       resulteert in nieuw Lijst object
         v3 = l1 + l2            lijst optellen bij lijst
@@ -204,7 +229,7 @@ pc.Lijst.print_help()
         l2 = l1 * n             lijst vermenigvuldigen met getal
         l2 = n / l1             getal delen door lijst
         l2 = l1 / n             lijst delen door getal
-        waarde = l1 ** n        lijst tot de macht een geheel getal
+        l2 = l1 ** n            lijst tot de macht een geheel getal
         waarde = abs(l1)        berekent lengte van lijst -> Waarde object
         getal = float(l1)       berekent lengte van lijst -> float object
         l2 = +l1                behoud teken
@@ -219,15 +244,15 @@ pc.Lijst.print_help()
         numpy_array = l1[1:3]   retourneert Numpy array object vanuit slice
     
     WAARDEN VERGELIJKEN         resulteert in een boolean (True/False)
-        l1 == l2                is gelijk aan
-        l1 != l2                is niet gelijk aan
-        l1 >  l2                de lengte van lijst is groter dan
-        l1 <  l2                de lengte van lijst is kleiner dan
-        l1 >= l2                de lengte van lijst is groter dan of gelijk aan
-        l1 <= l2                de lengte van lijst is kleiner dan of gelijk aan
+        l1 == l2                de totale lijst is gelijk aan
+        l1 != l2                de totale lijst is niet gelijk aan
+        l1 >  l2                de absolute waarde van lijst is groter dan
+        l1 <  l2                de absolute waarde van lijst is kleiner dan
+        l1 >= l2                de absolute waarde van lijst is groter dan of gelijk aan
+        l1 <= l2                de absolute waarde van lijst is kleiner dan of gelijk aan
         l1 &  l2                eenheden zijn zelfde type
         
-    WISKUNDIGE FUNCTIES         (geïmporteerd uit Numpy module)
+    WISKUNDIGE FUNCTIES         
         l.sin()                 sinus (alleen getallen en hoeken)
         l.cos()                 cosinus (alleen getallen en hoeken)
         l.tan()                 tangens (alleen getallen en hoeken)
@@ -247,6 +272,50 @@ pc.Lijst.print_help()
         l.som()                 de som van de elementen
         l.product()             het product van de elementen
         l.verschil()            lijst met verschillen tussen elementen
+        l1.optellen(l2)         l1 + l2
+        l1.aftrekken(l2)        l1 - l2
+        l1.vermenigvuldigen(l2) l1 * l2
+        l1.delen(l2)            l1 / l2
+        l1.delen_aantal(l2)     afgerond naar beneden
+        l1.delen_rest(l2)       restant na afronden naar beneden
+        l.macht(n)              l ** n
+        l.reciproke()           1 / l
+        l.negatief()            -l
+        l1.kruisproduct(l2)     l1 x l2: staat loodrecht op vector l1 en l2
+        l1.inwendigproduct(l2)  l1 . l2: is |l1| * |l2| * cos(theta)
+        l.exp()                 exponentieel: berekent e^l
+        l.ln()                  natuurlijke logaritme (grondgetal e)
+        l.log()                 logaritme met grondgetal 10
+        l.bijsnijden(min, max)  snij alle elementen af tot minmax bereik
+        l.wortel()              vierkantswortel
+        l.wortel3()             kubieke wortel
+        l.absoluut()            absolute waarde (altijd positief)
+        l.teken()               positief getal: 1.0   negatief: -1.0 
+        l.kopieer_teken(l2)     neem huidige, met het teken (+-) van l2
+        l.is_positief(a)        stap functie: l<0 -> 0, l=0 -> a, l>0 -> 1 
+        l.verwijder_nan()       verwijder niet-getallen (not a number)
+        l.getal_nan_inf()       vervang: nan=0, inf=1.7e+308 (heel groot)
+        l.gemiddelde()          bepaalt het gemiddelde
+        l.stdafw_pop()          bepaalt standaardafwijking voor populatie
+        l.stdafw_n()            bepaalt standaardafwijking steekproef
+        l.mediaan()             bepaalt de mediaan
+        l.percentiel(perc)      percentage: getal tussen 0 en 100
+        l.correlatie(l2)        bepaalt correlatie matrix
+        l.sorteer()             sorteert een lijst van klein naar groot
+        l.omdraaien()           draai de volgorde van de lijst om
+        l.is_nan()              bepaalt per element of een niet-getal is
+        l.is_inf()              bepaalt per element of oneindig is
+        l1.gelijk(l2)           per element: w1 == w2
+        l1.niet_gelijk(l2)      per element: w1 != w2
+        l1.groter(l2)           per element: w1 > w2
+        l1.groter_gelijk(l2)    per element: w1 >= w2
+        l1.kleiner(l2)          per element: w1 < w2
+        l1.kleiner_gelijk(l2)   per element: w1 <= w2
+        l.alle()                kijkt of alle elementen True zijn
+        l.sommige()             kijkt of er minimaal 1 element True is
+        l.niet_alle()           kijkt of er minimaal 1 element False is
+        l.geen()                kijkt of alle elementen False zijn
+        l.waar()                zet lijst om in list met True/False
         
     BESCHIKBARE EIGENSCHAPPEN   voor snel toekennen van eenheid aan waarde
     <object>.<eigenschap>       bijvoorbeeld toekennen inhoud: v.dm3
@@ -276,6 +345,27 @@ pc.Lijst(0, 200, 1).eh('cm')
     Lijst(Waarde(0.0, 'cm'), Waarde(200.0, 'cm'), Waarde(1.0, 'cm'))
 
 
+
+## Tabel
+
+[terug naar inhoudsopgave](#Inhoud)
+
+
+```python
+pc.Tabel.print_help()
+```
+
+    
+    +---------+
+    |  Tabel  |
+    +---------+
+    
+    Een Pandas DataFrame waarbij kolommen gelijk zijn aan Lijst objecten.
+    
+    AANMAKEN TABEL               
+        t = Tabel({'col1': lijst1, 'col2': lijst2})
+    
+    
 
 ## Knoop
 
@@ -437,7 +527,7 @@ pc.Lijn(k1, k2, k3).plot3D()
 
 
     
-![png](output_15_0.png)
+![png](output_17_0.png)
     
 
 
@@ -517,7 +607,7 @@ print(f'het grootste hoofdtraagheidsmoment is: {v1.I1:.2e} mm4')
 
 
     
-![png](output_18_0.png)
+![png](output_20_0.png)
     
 
 
@@ -578,7 +668,7 @@ pc.Rechthoek(breedte=30, hoogte=50).plot()
 
 
     
-![png](output_21_0.png)
+![png](output_23_0.png)
     
 
 
@@ -616,7 +706,7 @@ pc.Cirkel(straal=pc.Waarde(1).dm).gebruik_eenheid('m').plot()
 
 
     
-![png](output_24_0.png)
+![png](output_26_0.png)
     
 
 
@@ -691,7 +781,7 @@ pc.functies_print_help()
         pc.pi == 3.141592653589793        direct aan te roepen vanuit pc object
     
     WISKUNDIGE FUNCTIES                   (geïmporteerd uit Numpy module)
-        invoerwaarden:  int, float, np.array, Waarde of Vector
+        invoerwaarden:  int, float, np.array, Waarde of Lijst
         sin(x)                            sinus
         cos(x)                            cosinus
         tan(x)                            tangens
@@ -718,44 +808,44 @@ pc.functies_print_help()
         aftrekken(a, b)                   a - b
         vermenigvuldigen(a, b)            a * b
         delen(a, b)                       a / b
-        delen_aantal(a, b)                a // b -> afgerond naar beneden
-        delen_rest(a, b)                  a % b -> restant na afronden naar beneden
+        delen_aantal(a, b)                delen afgerond naar beneden
+        delen_rest(a, b)                  restant na afronden naar beneden
         macht(a, n)                       a ** n
         reciproke(x)                      1 / x
         negatief(x)                       -x
-        kruisproduct(a, b)                a x b: staat loodrecht op vector a en b
-        inwendigproduct(a, b)             a . b: is |a| * |b| * cos(theta)
+        kruisproduct(lijst_a, lijst_b)    a x b: staat loodrecht op vector a en b
+        inwendigproduct(lijst_a, lijst_b) a . b: is |a| * |b| * cos(theta)
         exp(x)                            exponentieel: berekent e^x
         ln(x)                             natuurlijke logaritme (grondgetal e)
         log(x)                            logaritme met grondgetal 10
-        kgv(a, b)                         kleinste gemene veelvoud: a=12 b=20: 60
-        ggd(a, b)                         grootste gemene deler: a=12 b=20: 4
+        kleinste_gemene_veelvoud(a, b)    kleinste gemene veelvoud: a=12 b=20: 60
+        grootste_gemene_deler(a, b)       grootste gemene deler: a=12 b=20: 4
         min(lijst)                        bepaalt minimum waarde lijst
         max(lijst)                        bepaalt maximum waarde lijst
         bijsnijden(lijst, min, max)       snij alle elementen af tot minmax bereik
         wortel(x)                         vierkantswortel
         wortel3(x)                        kubieke wortel
-        abs(x)                            absolute waarde (altijd positief)
+        absoluut(x)                       absolute waarde (altijd positief)
         teken(x)                          positief getal: 1.0   negatief: -1.0 
         kopieer_teken(a, b)               neem getal a, met het teken (+-) van b
         is_positief(a, b)                 stap functie:a<0 -> 0, a=0 -> b, a>0 -> 1 
         verwijder_nan(lijst)              verwijder niet-getallen (not a number)
-        vervang_nan(lijst)                vervang: nan=0, inf=1.7e+308 (heel groot)
-        interp(x, lijst_x, lijst_y)       interpoleer x in y; lijst_x MOET oplopen
-        van_totmet_n(van, tot_met, n)     genereert vast aantal getallen (incl. tot)
+        getal_nan_inf(lijst)              vervang: nan=0, inf=1.7e+308 (heel groot)
+        interpoleer(x, array_x, array_y)  interpoleer x in y; array_x MOET oplopen
+        van_totmet_n(van, tot_met, n)     genereert vast aantal getallen (incl. t/m)
         van_tot_stap(van, tot, stap)      genereert vaste stappen (excl. tot)
         gemiddelde(lijst)                 bepaalt het gemiddelde
         stdafw_pop(lijst)                 bepaalt standaardafwijking voor populatie
-        stdafw_n(lijst)                   bepaalt standaardafwijking voor steekproef
+        stdafw_n(lijst)                   bepaalt standaardafwijking steekproef
         mediaan(lijst)                    bepaalt de mediaan
         percentiel(lijst, percentage)     percentage getal tussen 0 en 100
         correlatie(lijst_a, lijst_b)      bepaalt correlatie matrix
         sorteer(lijst)                    sorteert een lijst van klein naar groot
         omdraaien(lijst)                  draai de volgorde van de lijst om
-        alsdan(voorwaarde, als, dan)      bewerk lijst met voorwaarde per item
         is_nan(x)                         bepaalt of waarde een niet-getal is
         is_inf(x)                         bepaalt of waarde oneindig is
         gelijk(lijst_a, lijst_b)          per element kijken of waarden gelijk zijn
+        niet_gelijk(lijst_a, lijst_b)     per element kijken of waarden gelijk verschillen
         groter(lijst_a, lijst_b)          per element kijken of waarde groter dan
         groter_gelijk(lijst_a, lijst_b)   idem, maar dan ook gelijk
         kleiner(lijst_a, lijst_b)         per element kijken of waarde kleiner dan
@@ -784,3 +874,8 @@ print(f"het gemiddelde van lijst l is: {pc.gemiddelde(l)}")
 
     het gemiddelde van lijst l is: 4.666666666666667 mm
     
+
+
+```python
+
+```

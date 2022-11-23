@@ -16,6 +16,7 @@ class Waarde(pc.BasisObject):
     AANMAKEN WAARDE
         w = Waarde(getal)
         w = Waarde(getal, eenheid_tekst)
+        w2 = w.kopie()          maak een kopie (nieuw object) met zelfde eigenschappen    
 
     AANPASSEN EENHEID           omzetten van eenheid naar andere eenheid
         w.eenheid               huidige eenheid opvragen (tekst of None)
@@ -33,6 +34,7 @@ class Waarde(pc.BasisObject):
                                     -> gebruikt afronding indien opgegeven
         tekst = str(w)          of automatisch met bijvoorbeeld print(w)
         tekst = format(w,'.2f') format configuratie meegeven voor getal
+              = w.format('.2f')
 
     OMZETTEN WAARDE NAAR GETAL  resulteert in nieuw float object
         getal = float(w)        omzetten met standaard eenheid
@@ -88,6 +90,17 @@ class Waarde(pc.BasisObject):
         w.macht(n)              w ** n
         w.reciproke()           1 / w
         w.negatief()            -w
+        w.exp()                 exponentieel: berekent e^w
+        w.ln()                  natuurlijke logaritme (grondgetal e)
+        w.log()                 logaritme met grondgetal 10
+        w.wortel()              vierkantswortel
+        w.wortel3()             kubieke wortel
+        w.absoluut()            absolute waarde (altijd positief)
+        w.teken()               positief getal: 1.0, nul: 0.0, negatief: -1.0 
+        w.kopieer_teken(w2)     neem huidige, met het teken (+-) van w2
+        w.is_positief(a)        stap functie: w<0 -> 0, w=0 -> a, w>0 -> 1 
+        w.is_nan()              bepaalt of waarde een niet-getal is
+        w.is_inf()              bepaalt of waarde oneindig is
 
     EENHEID TEKST
         gebruik getal achter standaard eenheid voor 'tot de macht' (bijv. mm3)
@@ -132,105 +145,6 @@ class Waarde(pc.BasisObject):
     # hulp functie om lijst hierboven te gegeneren; hierna nog bepaalde eigenschappen/methodes verwijderen
     # from pyco.model import Waarde
     # ' '.join(sorted([a for a in dir(Waarde) if a[0] != '_' and a not in ['print_help']], key=lambda x:x.upper()))
-    
-    
-    
-    
-    def sin(self):
-        """Sinus"""
-        from pyco import sin
-        return sin(self)
-            
-    def cos(self):
-        """Cosinus"""
-        from pyco import cos
-        return cos(self)
-            
-    def tan(self):
-        """Tangens"""
-        from pyco import tan
-        return tan(self)
-            
-    def sinh(self):
-        """Hyperbolische sinus"""
-        from pyco import sinh
-        return sinh(self)
-            
-    def cosh(self):
-        """Hyperbolische cosinus"""
-        from pyco import cosh
-        return cosh(self)
-            
-    def tanh(self):
-        """Hyperbolische tangens"""
-        from pyco import tanh
-        return tanh(self)
-    
-    def afronden(self, n=0):
-        """Rond af op n decimalen (standaard 0)"""
-        from pyco import afronden
-        return afronden(self, n)
-    
-    def plafond(self):
-        """Rond af naar boven (geheel getal)"""
-        from pyco import plafond
-        return plafond(self)
-    
-    def vloer(self):
-        """Rond af naar beneden (geheel getal)"""
-        from pyco import vloer
-        return vloer(self)
-    
-    def plafond_0_vloer(self):
-        """Rond af richting 0 (geheel getal)"""
-        from pyco import plafond_0_vloer
-        return plafond_0_vloer(self)
-    
-    def optellen(self, w):
-        """Tel andere waarde op bij deze waarde"""
-        from pyco import optellen
-        return optellen(self, w)
-    
-    def aftrekken(self, w):
-        """Haal andere waarde af van deze waarde"""
-        from pyco import aftrekken
-        return aftrekken(self, w)
-    
-    def vermenigvuldigen(self, w):
-        """Vermenigvuldig andere waarde met deze waarde"""
-        from pyco import vermenigvuldigen
-        return vermenigvuldigen(self, w)
-    
-    def delen(self, w):
-        """Deel waarde door een andere gegeven waarde"""
-        from pyco import delen
-        return delen(self, w)
-    
-    def delen_aantal(self, w):
-        """Deel waarde door een andere gegeven waarde en rond af naar beneden"""
-        from pyco import delen_aantal
-        return delen_aantal(self, w)
-    
-    def delen_rest(self, w):
-        """Deel waarde door een andere gegeven waarde, rond af naar beneden en retourneer het restant"""
-        from pyco import delen_rest
-        return delen_rest(self, w)
-    
-    def macht(self, n):
-        """Bereken deze waarde tot een bepaalde macht (geheel getal)"""
-        from pyco import macht
-        return macht(self, n)
-    
-    def reciproke(self):
-        """Bereken de reciproke (1/x)"""
-        from pyco import reciproke
-        return reciproke(self)
-    
-    def negatief(self):
-        """Maak van positieve waarde een negatieve en vice versa"""
-        from pyco import negatief
-        return negatief(self)
-
 
     # factoren horende bij basiseenheden, om eenheidsbreuk samen te stellen
     # verschillende priemgetallen, zodat product een uniek resultaat geeft
@@ -555,7 +469,7 @@ class Waarde(pc.BasisObject):
             if n > 1:
                 _BASIS.append(n)
             return tuple(_BASIS)
-
+        
         def verbind_namen(namen):
             nieuwe_namen = []
             vorige_naam = None
@@ -635,7 +549,10 @@ class Waarde(pc.BasisObject):
         for telleronderdeel in telleronderdelen:
             result = re.search(self._RE_NAAM_EENHEID, telleronderdeel)
             if result is None:
-                raise ValueError('telleronderdeel van eenheid heeft ongeldige opmaak: \'{}\''.format(telleronderdeel))
+                if telleronderdeel == '1':
+                    pass
+                else:
+                    raise ValueError('telleronderdeel van eenheid heeft ongeldige opmaak: \'{}\''.format(telleronderdeel))
             else:
                 eenheid_naam = result.group(1)
                 eenheid_aantal = int(result.group(2)) if result.group(2) else 1
@@ -695,7 +612,10 @@ class Waarde(pc.BasisObject):
         for telleronderdeel in telleronderdelen:
             result = re.search(self._RE_NAAM_EENHEID, telleronderdeel)
             if result is None:
-                raise ValueError('telleronderdeel van eenheid heeft ongeldige opmaak: \'{}\''.format(telleronderdeel))
+                if telleronderdeel == '1':
+                    pass
+                else:
+                    raise ValueError('telleronderdeel van eenheid heeft ongeldige opmaak: \'{}\''.format(telleronderdeel))
             else:
                 eenheid_naam = result.group(1)
                 eenheid_aantal = int(result.group(2)) if result.group(2) else 1
@@ -769,6 +689,8 @@ class Waarde(pc.BasisObject):
             if check_type and tmp._eenheidbreuk != self._eenheidbreuk:
                 raise ValueError('huidig type eenheid ({}) komt niet overeen met nieuwe eenheid ({})'.format(self._eenheidbreuk, tmp._eenheidbreuk))
             self.__init__(self._export_waarde(eenheid, check_type), eenheid)
+        # # return een kopie van object (en niet verandering van object zelf)
+        # kopie = type(self)(*tuple(self), config=self._config)
         return self
 
     @property
@@ -800,97 +722,200 @@ class Waarde(pc.BasisObject):
         """Zet om naar nieuwe eenheid en retourneert object."""
         self._verander_eenheid(nieuwe_eenheid, check_type)
         return self
+    
+    def kopie(self):
+        """Retourneert een kopie van deze waarde (ander object)."""
+        return type(self)(*tuple(self), config=self._config)
+    
+    def format(self, format_str:str=''):
+        """Retourneert geformatteerde tekst."""
+        return format(self, format_str)
+    
+    #-----------------------------------------------------------------------------
+    
+    def sin(self):
+        """Sinus"""
+        from pyco import sin
+        return sin(self)
+            
+    def cos(self):
+        """Cosinus"""
+        from pyco import cos
+        return cos(self)
+            
+    def tan(self):
+        """Tangens"""
+        from pyco import tan
+        return tan(self)
+            
+    def sinh(self):
+        """Hyperbolische sinus"""
+        from pyco import sinh
+        return sinh(self)
+            
+    def cosh(self):
+        """Hyperbolische cosinus"""
+        from pyco import cosh
+        return cosh(self)
+            
+    def tanh(self):
+        """Hyperbolische tangens"""
+        from pyco import tanh
+        return tanh(self)
+    
+    def afronden(self, n=0):
+        """Rond af op n decimalen (standaard 0)"""
+        from pyco import afronden
+        return afronden(self, n)
+    
+    def plafond(self):
+        """Rond af naar boven (geheel getal)"""
+        from pyco import plafond
+        return plafond(self)
+    
+    def vloer(self):
+        """Rond af naar beneden (geheel getal)"""
+        from pyco import vloer
+        return vloer(self)
+    
+    def plafond_0_vloer(self):
+        """Rond af richting 0 (geheel getal)"""
+        from pyco import plafond_0_vloer
+        return plafond_0_vloer(self)
+    
+    def optellen(self, w):
+        """Tel andere waarde op bij deze waarde"""
+        from pyco import optellen
+        return optellen(self, w)
+    
+    def aftrekken(self, w):
+        """Haal andere waarde af van deze waarde"""
+        from pyco import aftrekken
+        return aftrekken(self, w)
+    
+    def vermenigvuldigen(self, w):
+        """Vermenigvuldig andere waarde met deze waarde"""
+        from pyco import vermenigvuldigen
+        return vermenigvuldigen(self, w)
+    
+    def delen(self, w):
+        """Deel waarde door een andere gegeven waarde"""
+        from pyco import delen
+        return delen(self, w)
+    
+    def delen_aantal(self, w):
+        """Deel waarde door een andere gegeven waarde en rond af naar beneden"""
+        from pyco import delen_aantal
+        return delen_aantal(self, w)
+    
+    def delen_rest(self, w):
+        """Deel waarde door een andere gegeven waarde, rond af naar beneden en retourneer het restant"""
+        from pyco import delen_rest
+        return delen_rest(self, w)
+    
+    def macht(self, n):
+        """Bereken deze waarde tot een bepaalde macht (geheel getal)"""
+        from pyco import macht
+        return macht(self, n)
+    
+    def reciproke(self):
+        """Bereken de reciproke (1/x)"""
+        from pyco import reciproke
+        return reciproke(self)
+    
+    def negatief(self):
+        """Maak van positieve waarde een negatieve en vice versa"""
+        from pyco import negatief
+        return negatief(self)
+    
+    def exp(self):
+        """Berekent e^x."""
+        from pyco import exp
+        return exp(self)
+        
+    def ln(self):
+        """Berekent ln(x)."""
+        from pyco import ln
+        return ln(self)
+        
+    def log(self):
+        """Berekent log10(x)."""
+        from pyco import log
+        return log(self)
+    
+    def wortel(self):
+        """Berekent vierkantswortel."""
+        if self._getal < 0:
+            raise ValueError('Negatieve waarde is bij wortel niet toegestaan')
+        from pyco import wortel
+        return wortel(self)
+    
+    def wortel3(self):
+        """Berekent kubieke wortel."""
+        from pyco import wortel3
+        return wortel3(self)
+    
+    def absoluut(self):
+        """Berekent absolute waarde (altijd positief)."""
+        from pyco import absoluut
+        return absoluut(self)
+    
+    def teken(self):
+        """Geeft 1 terug indien positief, -1 indien negatief en 0 indien nul"""
+        from pyco import teken
+        return teken(self)
+    
+    def kopieer_teken(self, andere_waarde):
+        """Behoudt grootte van huidige waarde, maar met teken (+-) van andere waarde."""
+        from pyco import kopieer_teken
+        return kopieer_teken(self, andere_waarde)
+    
+    def is_positief(self, nul_waarde):
+        """Stapfunctie: w<0 -> 0, w=0 -> nul_waarde, w>0 -> 1."""
+        from pyco import is_positief
+        return is_positief(self, nul_waarde)
+    
+    def is_nan(self):
+        """Bepaalt of waarde een niet-getal is (not a number: pc.nan)."""
+        from pyco import is_nan
+        return is_nan(self)
+    
+    def is_inf(self):
+        """Bepaalt of waarde oneindig groot is. (pc.inf)"""
+        from pyco import is_inf
+        return is_inf(self)
+    
+        
+    
+    #-----------------------------------------------------------------------------
 
     def __add__(self, andere_waarde):
         """Telt twee waarden bij elkaar op."""
-        if not isinstance(andere_waarde, Waarde):
-            raise TypeError('term is niet van type Waarde')
-        if not self._is_getal or not andere_waarde._is_getal:
-            raise TypeError('beide waardes moeten getallen zijn')
-        if self._eenheidbreuk != andere_waarde._eenheidbreuk:
-            raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
-                self._eenheidnaam, andere_waarde._eenheidnaam))
-        getal = self._getal + andere_waarde._getal
-        cls = type(self)
-        return cls(getal, self._eenheidbreuk, config = self._config)
+        return self.optellen(andere_waarde)
 
     def __sub__(self, andere_waarde):
         """Trekt waarde van andere waarde af."""
-        if not isinstance(andere_waarde, Waarde):
-            raise TypeError('term is niet van type Waarde')
-        if not self._is_getal or not andere_waarde._is_getal:
-            raise TypeError('beide waardes moeten getallen zijn')
-        if self._eenheidbreuk != andere_waarde._eenheidbreuk:
-            raise TypeError('eenheden zijn niet zelfde type: {}, {}'.format(
-                self._eenheidnaam, andere_waarde._eenheidnaam))
-        getal = self._getal - andere_waarde._getal
-        cls = type(self)
-        return cls(getal, self._eenheidbreuk, config = self._config)
+        return self.aftrekken(andere_waarde)
 
     def __mul__(self, andere_waarde):
         """Vermenigvuldigt waarde met andere waarde of getal."""
-        if (isinstance(andere_waarde, int) or isinstance(andere_waarde, float)):
-            getal = self._getal * andere_waarde
-            eenheidbreuk = self._eenheidbreuk
-            return Waarde(getal, eenheidbreuk, config=None)
-        elif not isinstance(andere_waarde, Waarde):
-            raise TypeError('term is niet van type Waarde')
-        if not self._is_getal or not andere_waarde._is_getal:
-            raise TypeError('beide waardes moeten getallen zijn')
-        getal = self._getal * andere_waarde._getal
-        eenheidbreuk = self._eenheidbreuk * andere_waarde._eenheidbreuk
-        cls = type(self)
-        return cls(getal, eenheidbreuk, config=None)
+        return self.vermenigvuldigen(andere_waarde)
 
     def __truediv__(self, andere_waarde):
         """Deelt waarde door andere waarde of getal."""
-        if (isinstance(andere_waarde, int) or isinstance(andere_waarde, float)):
-            getal = self._getal / andere_waarde
-            eenheidbreuk = self._eenheidbreuk
-            return Waarde(getal, eenheidbreuk, config=None)
-        elif not isinstance(andere_waarde, Waarde):
-            raise TypeError('term is niet van type Waarde')
-        if not self._is_getal or not andere_waarde._is_getal:
-            raise TypeError('beide waardes moeten getallen zijn')
-        if andere_waarde._getal == 0:
-            raise ZeroDivisionError('delen door 0 is niet mogelijk')
-        getal = self._getal / andere_waarde._getal
-        eenheidbreuk = self._eenheidbreuk / andere_waarde._eenheidbreuk
-        cls = type(self)
-        return cls(getal, eenheidbreuk, config=None)
+        return self.delen(andere_waarde)
 
     def __pow__(self, macht):
         """Doet waarde tot de macht een andere waarde (geheel getal)."""
-        if not isinstance(macht, int):
-            raise TypeError('term is geen geheel getal')
-        if not self._is_getal:
-            raise TypeError('waarde moeten getal zijn')
-        getal = self._getal ** macht
-        eenheidbreuk = self._eenheidbreuk ** macht
-        cls = type(self)
-        return cls(getal, eenheidbreuk, config=None)
+        return self.macht(macht)
 
     def __rmul__(self, scalar):
         """Vermenigvuldigt getal met waarde."""
-        if not (isinstance(scalar, int) or isinstance(scalar, float)):
-            raise TypeError('term is geen getal')
-        if not self._is_getal:
-            raise TypeError('waarde moeten getal zijn')
-        getal= scalar * self._getal
-        eenheidbreuk = self._eenheidbreuk
-        cls = type(self)
-        return cls(getal, eenheidbreuk, config = self._config)
+        return self.vermenigvuldigen(scalar)
 
     def __rtruediv__(self, scalar):
         """Deelt getal met waarde."""
-        if not (isinstance(scalar, int) or isinstance(scalar, float)):
-            raise TypeError('term is geen getal')
-        if not self._is_getal:
-            raise TypeError('waarde moeten getal zijn')
-        getal = scalar / self._getal
-        eenheidbreuk = 1 / self._eenheidbreuk
-        cls = type(self)
-        return cls(getal, eenheidbreuk, config = self._config)
+        return self.delen(scalar)
 
     def __eq__(self, andere_waarde):
         """Vergelijkt waarde met andere waarde: =="""
@@ -979,9 +1004,7 @@ class Waarde(pc.BasisObject):
 
     def __neg__(self):
         """Verander teken (positief = negatief, negatief = postief)."""
-        if self._is_getal:
-            self._getal = -1*self._getal
-        return self
+        return self.negatief()
 
     def __bool__(self):
         """Genereert een boolean. False wanneer getal 0 of lege tekst."""
