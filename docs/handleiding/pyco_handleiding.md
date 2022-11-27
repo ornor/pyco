@@ -18,7 +18,7 @@ Alle pyco klasses beginnen met een hoofdletter. Alle functies en eigenschappen b
 
 * [Waarde](#Waarde)
 * [Lijst](#Lijst)
-* [Tabel](#Tabel)
+* [Register](#Register)
 * [Knoop](#Knoop)
 * [Lijn](#Lijn)
 * [Vorm](#Vorm)
@@ -221,8 +221,8 @@ pc.Lijst.print_help()
               = l.format('.2f')
     
     MOGELIJKE BEWERKINGEN       resulteert in nieuw Lijst object
-        v3 = l1 + l2            lijst optellen bij lijst
-        v3 = l1 - l2            lijst aftrekken van lijst
+        l3 = l1 + l2            lijst optellen bij lijst
+        l3 = l1 - l2            lijst aftrekken van lijst
         getal = l1 * l2         lijst vermenigvuldigen met lijst (inproduct)
         getal = l1 / l2         lijst delen door lijst (inverse inproduct)
         l2 = n * l1             getal vermenigvuldigen met lijst
@@ -346,24 +346,23 @@ pc.Lijst(0, 200, 1).eh('cm')
 
 
 
-## Tabel
-
+## Register
 [terug naar inhoudsopgave](#Inhoud)
 
 
 ```python
-pc.Tabel.print_help()
+pc.Register.print_help()
 ```
 
     
-    +---------+
-    |  Tabel  |
-    +---------+
+    +------------+
+    |  Register  |
+    +------------+
     
-    Een Pandas DataFrame waarbij kolommen gelijk zijn aan Lijst objecten.
+    Een Pandas DataFrame waarbij kolommen een eenheid kunnen hebben.
     
-    AANMAKEN TABEL               
-        t = Tabel({'col1': lijst1, 'col2': lijst2})
+    AANMAKEN TABEL    
+        t = Register({'kolom1': 'eenheid1', 'kolom2': 'eenheid2'})   # '-', '' of None
     
     
 
@@ -874,8 +873,3 @@ print(f"het gemiddelde van lijst l is: {pc.gemiddelde(l)}")
 
     het gemiddelde van lijst l is: 4.666666666666667 mm
     
-
-
-```python
-
-```

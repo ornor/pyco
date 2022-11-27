@@ -32,8 +32,8 @@ class Lijst(pc.BasisObject):
               = l.format('.2f')
 
     MOGELIJKE BEWERKINGEN       resulteert in nieuw Lijst object
-        v3 = l1 + l2            lijst optellen bij lijst
-        v3 = l1 - l2            lijst aftrekken van lijst
+        l3 = l1 + l2            lijst optellen bij lijst
+        l3 = l1 - l2            lijst aftrekken van lijst
         getal = l1 * l2         lijst vermenigvuldigen met lijst (inproduct)
         getal = l1 / l2         lijst delen door lijst (inverse inproduct)
         l2 = n * l1             getal vermenigvuldigen met lijst
