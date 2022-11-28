@@ -58,12 +58,33 @@ class Register(pc.BasisObject):
         return self._dataframe
     
     
-    def __getitem__(self, eigenschap):
-        if eigenschap not in self.eigenschappen:
-            raise ValueError("eigenschap '{}' niet aanwezig in de beschikbare eigenschappen: "
-                             "{}".format(eigenschap, ', '.join(["'{}'".format(e) for e in self.eigenschappen])))
+    def __getitem__(self, eigenschap_bereik):
+        """
+        Retourneert een eigenschap als Lijst (tekst invoer) of een aantal rijen van DataFrame (getal/bereik invoer).
         
-        eenheid = self.eenheden[self.eigenschappen.index(eigenschap)]
-        return pc.Lijst(self._dataframe[eigenschap][eenheid].values.tolist()).gebruik_eenheid(eenheid)
+        register_obj['eigenschap(kolom)naam']
+        register_obj[0]     # Python list met waardes van 1e invoer (rij)
+        register_obj[3:8]   # Python list met waardes (ook Python list) van 4e t/m 8e invoer (rijen)
+        register_obj[::2]   # Python list met alle oneven rijnummers
+        """
+        if isinstance(eigenschap_bereik, str):
+            eigenschap = eigenschap_bereik
+            if eigenschap not in self.eigenschappen:
+                raise ValueError("eigenschap '{}' niet aanwezig in de beschikbare eigenschappen: "
+                                 "{}".format(eigenschap, ', '.join(["'{}'".format(e) for e in self.eigenschappen])))
+
+            eenheid = self.eenheden[self.eigenschappen.index(eigenschap)]
+            return pc.Lijst(self.df[eigenschap][eenheid].values.tolist()).gebruik_eenheid(eenheid)
+        else:
+            bereik = eigenschap_bereik
+            rijen_lijst = self.df.iloc[bereik].values.tolist()
+            return rijen_lijst
+    
+    def __repr__(self):
+        object_str = self.__str__()
+        return 'pyco.Register object:\n' + len(object_str.split('\n')[0])*'-' + '\n' + object_str
+    
+    def __str__(self):
+        return str(self.df)
 
 
