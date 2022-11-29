@@ -9,12 +9,12 @@ class pc:
     Waarde = pyco.waarde.Waarde
     Lijst = pyco.lijst.Lijst
 
-class Register(pc.BasisObject):
+class Tabel(pc.BasisObject):
     """
     Een Pandas DataFrame waarbij kolommen een eenheid kunnen hebben.
 
-    AANMAKEN REGISTER    
-        t = Register({'kolom1': 'eenheid1', 'kolom2': 'eenheid2'})   # '-', '' of None
+    AANMAKEN Tabel   
+        t = Tabel({'kolom1': 'eenheid1', 'kolom2': 'eenheid2'})   # '-', '' of None
 
  
     """
@@ -24,19 +24,25 @@ class Register(pc.BasisObject):
         
         if not isinstance(lijst_dict, dict):
             raise TypeError("type argument 1 is GEEN dict: {}".format(type(lijst_dict)))
+            
+        lijst_dict = {k:(v if isinstance(v, str) and len(v) > 0 else '-') for k, v in lijst_dict.items()}
 
         self.eigenschappen = list(lijst_dict.keys())
-        self.eenheden = list(lijst_dict.values())
         self._kolomindex = pd.MultiIndex.from_tuples([(gh, eh) for gh, eh in lijst_dict.items()])
         self._dataframe = pd.DataFrame([], columns=self._kolomindex)
         
+    def eenheid(self, eigenschap):
+        if eigenschap not in self.eigenschappen:
+            raise ValueError("eigenschap '{}' niet aanwezig in de beschikbare eigenschappen: "
+                "{}".format(eigenschap, ', '.join(["'{}'".format(e) for e in self.eigenschappen])))
+        return self.df[eigenschap].columns[0]
         
     def toevoegen(self, *args):
         """
-        r1.toevoegen([7,5,3,1])
-        r1.toevoegen(4,5,6,7)
-        r1.toevoegen(pc.Lijst(4,9,6,70))
-        r1.toevoegen((14,15,16,17))
+        t.toevoegen([7,5,3,1])
+        t.toevoegen(4,5,6,7)
+        t.toevoegen(pc.Lijst(4,9,6,70))
+        t.toevoegen((14,15,16,17))
         """
         if len(args) == 1:
             if isinstance(args[0], list) or isinstance(args[0], tuple):
@@ -62,18 +68,15 @@ class Register(pc.BasisObject):
         """
         Retourneert een eigenschap als Lijst (tekst invoer) of een aantal rijen van DataFrame (getal/bereik invoer).
         
-        register_obj['eigenschap(kolom)naam']
-        register_obj[0]     # Python list met waardes van 1e invoer (rij)
-        register_obj[3:8]   # Python list met waardes (ook Python list) van 4e t/m 8e invoer (rijen)
-        register_obj[::2]   # Python list met alle oneven rijnummers
+        tabel_obj['eigenschap(kolom)naam']  # Een Lijst object
+        tabel_obj[0]     # Python list met waardes van 1e invoer (rij)
+        tabel_obj[3:8]   # Python list met waardes (ook Python list) van 4e t/m 8e invoer (rijen)
+        tabel_obj[::2]   # Python list met alle oneven rijnummers
+        tabel_obj[:, 1:3]# Python list met 2e en 3e kolom (alleen waarden, geen eenheid)
         """
         if isinstance(eigenschap_bereik, str):
             eigenschap = eigenschap_bereik
-            if eigenschap not in self.eigenschappen:
-                raise ValueError("eigenschap '{}' niet aanwezig in de beschikbare eigenschappen: "
-                                 "{}".format(eigenschap, ', '.join(["'{}'".format(e) for e in self.eigenschappen])))
-
-            eenheid = self.eenheden[self.eigenschappen.index(eigenschap)]
+            eenheid = self.eenheid(eigenschap)
             return pc.Lijst(self.df[eigenschap][eenheid].values.tolist()).gebruik_eenheid(eenheid)
         else:
             bereik = eigenschap_bereik
@@ -82,7 +85,7 @@ class Register(pc.BasisObject):
     
     def __repr__(self):
         object_str = self.__str__()
-        return 'pyco.Register object:\n' + len(object_str.split('\n')[0])*'-' + '\n' + object_str
+        return 'pyco.Tabel object:\n' + len(object_str.split('\n')[0])*'-' + '\n' + object_str
     
     def __str__(self):
         return str(self.df)
