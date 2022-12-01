@@ -16,8 +16,8 @@ Waarde = pyco.waarde.Waarde
 import pyco.lijst
 Lijst = pyco.lijst.Lijst
 
-import pyco.tabel
-Tabel = pyco.tabel.Tabel
+import pyco.data
+Data = pyco.data.Data
 
 import pyco.knoop
 Knoop = pyco.knoop.Knoop

@@ -9,12 +9,12 @@ class pc:
     Waarde = pyco.waarde.Waarde
     Lijst = pyco.lijst.Lijst
 
-class Tabel(pc.BasisObject):
+class Data(pc.BasisObject):
     """
     Een Pandas DataFrame waarbij kolommen een eenheid kunnen hebben.
 
-    AANMAKEN Tabel   
-        t = Tabel({'kolom1': 'eenheid1', 'kolom2': 'eenheid2'})   # '-', '' of None
+    AANMAKEN Data   
+        t = Data({'kolom1': 'eenheid1', 'kolom2': 'eenheid2'})   # '-', '' of None
 
  
     """
@@ -31,6 +31,13 @@ class Tabel(pc.BasisObject):
         self._kolomindex = pd.MultiIndex.from_tuples([(gh, eh) for gh, eh in lijst_dict.items()])
         self._dataframe = pd.DataFrame([], columns=self._kolomindex)
         
+    @classmethod
+    def van_bestand(cls, pad):
+        pass
+    
+    def naar_bestand(self):
+        pass
+        
     def eenheid(self, eigenschap):
         if eigenschap not in self.eigenschappen:
             raise ValueError("eigenschap '{}' niet aanwezig in de beschikbare eigenschappen: "
@@ -39,10 +46,10 @@ class Tabel(pc.BasisObject):
         
     def toevoegen(self, *args):
         """
-        t.toevoegen([7,5,3,1])
-        t.toevoegen(4,5,6,7)
-        t.toevoegen(pc.Lijst(4,9,6,70))
-        t.toevoegen((14,15,16,17))
+        d.toevoegen([7,5,3,1])
+        d.toevoegen(4,5,6,7)
+        d.toevoegen(pc.Lijst(4,9,6,70))
+        d.toevoegen((14,15,16,17))
         """
         if len(args) == 1:
             if isinstance(args[0], list) or isinstance(args[0], tuple):
@@ -68,11 +75,11 @@ class Tabel(pc.BasisObject):
         """
         Retourneert een eigenschap als Lijst (tekst invoer) of een aantal rijen van DataFrame (getal/bereik invoer).
         
-        tabel_obj['eigenschap(kolom)naam']  # Een Lijst object
-        tabel_obj[0]     # Python list met waardes van 1e invoer (rij)
-        tabel_obj[3:8]   # Python list met waardes (ook Python list) van 4e t/m 8e invoer (rijen)
-        tabel_obj[::2]   # Python list met alle oneven rijnummers
-        tabel_obj[:, 1:3]# Python list met 2e en 3e kolom (alleen waarden, geen eenheid)
+        data_obj['eigenschap(kolom)naam']  # Een Lijst object
+        data_obj[0]     # Python list met waardes van 1e invoer (rij)
+        data_obj[3:8]   # Python list met waardes (ook Python list) van 4e t/m 8e invoer (rijen)
+        data_obj[::2]   # Python list met alle oneven rijnummers
+        data_obj[:, 1:3]# Python list met 2e en 3e kolom (alleen waarden, geen eenheid)
         """
         if isinstance(eigenschap_bereik, str):
             eigenschap = eigenschap_bereik
@@ -85,7 +92,7 @@ class Tabel(pc.BasisObject):
     
     def __repr__(self):
         object_str = self.__str__()
-        return 'pyco.Tabel object:\n' + len(object_str.split('\n')[0])*'-' + '\n' + object_str
+        return 'pyco.Data object:\n' + len(object_str.split('\n')[0])*'-' + '\n' + object_str
     
     def __str__(self):
         return str(self.df)

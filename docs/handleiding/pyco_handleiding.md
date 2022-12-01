@@ -18,7 +18,7 @@ Alle pyco klasses beginnen met een hoofdletter. Alle functies en eigenschappen b
 
 * [Waarde](#Waarde)
 * [Lijst](#Lijst)
-* [Register](#Register)
+* [Data](#Data)
 * [Knoop](#Knoop)
 * [Lijn](#Lijn)
 * [Vorm](#Vorm)
@@ -346,23 +346,23 @@ pc.Lijst(0, 200, 1).eh('cm')
 
 
 
-## Register
+## Data
 [terug naar inhoudsopgave](#Inhoud)
 
 
 ```python
-pc.Register.print_help()
+pc.Data.print_help()
 ```
 
     
-    +------------+
-    |  Register  |
-    +------------+
+    +--------+
+    |  Data  |
+    +--------+
     
     Een Pandas DataFrame waarbij kolommen een eenheid kunnen hebben.
     
-    AANMAKEN TABEL    
-        t = Register({'kolom1': 'eenheid1', 'kolom2': 'eenheid2'})   # '-', '' of None
+    AANMAKEN Data   
+        t = Data({'kolom1': 'eenheid1', 'kolom2': 'eenheid2'})   # '-', '' of None
     
     
 
