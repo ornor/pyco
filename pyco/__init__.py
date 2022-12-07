@@ -34,6 +34,14 @@ if True:
 
     import pyco.cirkel
     Cirkel = pyco.cirkel.Cirkel
+    
+import pyco.venster
+TekstVenster = pyco.venster.TekstVenster
+FiguurVenster = pyco.venster.FiguurVenster
+BestandsnaamVenster = pyco.venster.BestandsnaamVenster
+
+import pyco.figuur
+Figuur = pyco.figuur.Figuur
 
 import pyco.materiaal
 Materiaal = pyco.materiaal.Materiaal

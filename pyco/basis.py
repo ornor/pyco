@@ -1,3 +1,5 @@
+import pickle
+
 class Singleton(type):
     """
     Metaclass om een normale klasse te tronsformeren naar een singleton.
@@ -49,6 +51,20 @@ class BasisObject(object):
         # eerder was aangemaakt.
         teller = ObjectTeller()
         self._object_nummer = teller.object_nummer
+        
+    @classmethod
+    def van_bestand(cls, pad):
+        """Object laden vanuit bestand."""
+        bestand = open(pad, 'rb')
+        self = pickle.load(bestand)
+        bestand.close()
+        return self
+    
+    def naar_bestand(self, pad):
+        """Object opslaan als bestand."""
+        bestand = open(pad, 'wb')
+        pickle.dump(self, bestand)
+        bestand.close()
 
     def __rshift__(self, other:str):
         """Documentatie toevoegen.

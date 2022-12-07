@@ -24,6 +24,7 @@ Alle pyco klasses beginnen met een hoofdletter. Alle functies en eigenschappen b
 * [Vorm](#Vorm)
     - [Rechthoek](#Rechthoek)
     - [Cirkel](#Cirkel)
+* [Figuur](#Figuur)
 * [Materiaal](#Materiaal)
 * [pyco functies en eigenschappen](#Functies)
 
@@ -359,11 +360,60 @@ pc.Data.print_help()
     |  Data  |
     +--------+
     
-    Een Pandas DataFrame waarbij kolommen een eenheid kunnen hebben.
+    Een Pandas DataFrame waarbij eigenschappen een eenheid kunnen hebben.
     
-    AANMAKEN Data   
-        t = Data({'kolom1': 'eenheid1', 'kolom2': 'eenheid2'})   # '-', '' of None
+    AANMAKEN DATA  
+        d = Data({'eigenschap1': 'eenheid1',           als eenheid dimensieloos:
+                  'eigenschap2': 'eenheid2'})                  '-', '' of None
+                  
+    EIGENSCHAPPEN
+        d.eigenschappen           lijst met aanwezige kolomnamen
+        d.eenheden                lijst met eenheden die bij kolommen horen
+        d.df                      Pandas DataFrame object     
+        
+    TOEVOEGEN DATA REGEL    in onderstaande gevallen: 4 eigenschappen (kolommen)
+        d.toevoegen([7,5,3,1])             een Python list object
+        d.toevoegen(4,5,6,7)               losse argumenten
+        d.toevoegen(pc.Lijst(4,9,6,70))    een Lijst object
+        d.toevoegen((14,15,16,17))         een Python tuple object
     
+    OPHALEN DATA EIGENSCHAP       
+        d['eigenschap1']          een Lijst object
+        d.eigenschap1             indien naam eigenschap ook valide Python name
+        d[0]                      Python list met waardes van 1e invoer (rij)
+        d[3:8]                    Python list met waardes (ook Python list)
+                                                    van 4e t/m 8e invoer (rijen)
+        d[::2]                    Python list met alle oneven rijnummers
+        d[:, 1:3]                 Python list met 2e en 3e kolom
+                                                  (alleen waarden, geen eenheid)
+    
+    
+
+
+```python
+d = pc.Data({
+    'x': 'mm',
+    'N': 'kN',
+    'V': 'kN',
+    'M': 'kNm',
+})
+d.toevoegen([7,5,3,1])
+d.toevoegen(4,5,6, 1)
+d.toevoegen(pc.Lijst(4,9,6,70))
+d.toevoegen((14,15,16,17))
+print(d)
+print()
+print('M is:', d.M)
+```
+
+         x    N    V     M
+        mm   kN   kN   kNm
+    0    7    5    3     1
+    1    4    5    6     1
+    2  4.0  9.0  6.0  70.0
+    3   14   15   16    17
+    
+    M is: (1.0, 1.0, 70.0, 17.0) kNm
     
 
 ## Knoop
@@ -526,7 +576,7 @@ pc.Lijn(k1, k2, k3).plot3D()
 
 
     
-![png](output_17_0.png)
+![png](output_18_0.png)
     
 
 
@@ -606,7 +656,7 @@ print(f'het grootste hoofdtraagheidsmoment is: {v1.I1:.2e} mm4')
 
 
     
-![png](output_20_0.png)
+![png](output_21_0.png)
     
 
 
@@ -667,7 +717,7 @@ pc.Rechthoek(breedte=30, hoogte=50).plot()
 
 
     
-![png](output_23_0.png)
+![png](output_24_0.png)
     
 
 
@@ -705,7 +755,181 @@ pc.Cirkel(straal=pc.Waarde(1).dm).gebruik_eenheid('m').plot()
 
 
     
-![png](output_26_0.png)
+![png](output_27_0.png)
+    
+
+
+## Figuur
+[terug naar inhoudsopgave](#Inhoud)
+
+
+```python
+pc.Figuur.print_help()
+```
+
+    
+    +----------+
+    |  Figuur  |
+    +----------+
+    
+    Tekent een figuur met behulp van matplotlib bibliotheek.
+    
+    WERKWIJZE                   plaats functies achter elkaar
+    f = Figuur(                 # configuratie
+            breedte=7,
+            hoogte=7,
+        ).lijn(                 # onderdeel 1
+            coordinaten=((2, 0), (3, 7)),
+        ).fx(                   # onderdeel 2  etc.
+            functie = lambda x: x**2,
+            x = (-2, 3),
+        )                       
+    
+    LIJN OBJECT             in plaats van tuple/list met coordinaten,
+                            mag ook Lijn object invoeren
+        Figuur().punt(
+            coordinaten=Lijn([1,2],[3,4],[5,6])
+        )
+    
+    CONFIGURATIE
+        Figuur(
+            breedte=7,
+            hoogte=7,
+            raster=True,
+            legenda=True,
+            titel='Kunst',
+            x_as_titel='variabele $x$',
+            y_as_titel='resultaat $y$',
+            gelijke_assen=True,
+            verberg_assen=False,
+            x_as_log=False,
+            y_as_log=False,
+        )
+    
+    ONDERDELEN
+        .lijn(
+            coordinaten=((2, 0), (3, 7), (-2, 4), (2, 0)),
+            breedte=3,
+            kleur='red',   # None is auto kleur
+            vullen=False,
+            arcering='/',
+            naam='dit is een lijn',
+        )
+    
+        .punt(
+            coordinaten=((2, 0), (3, 7), (-2, 4)),
+            breedte=10,
+            kleur='gold',   # None is auto kleur
+            stijl='>',
+            naam='dit zijn punten',
+        )
+    
+        .tekst(
+            coordinaten=((2, 0), (3, 7), (-2, 4)),
+            teksten=('punt 1', 'punt 2', 'punt 3'),
+            kleur='brown',   # None is auto kleur
+            tekst_grootte='large', # {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}
+            tekst_font='sans-serif', # {FONTNAME, 'serif', 'sans-serif', 'cursive', 'fantasy', 'monospace'}
+            tekst_stijl='normal', # {'normal', 'italic', 'oblique'}
+            tekst_gewicht='bold', # {'ultralight', 'light', 'normal', 'regular', 'book', 'medium', 'roman', 'semibold', 'demibold', 'demi', 'bold', 'heavy', 'extra bold', 'black'}
+            hor_uitlijnen='center', # {'center', 'right', 'left'}
+            vert_uitlijnen='center', # {'center', 'top', 'bottom', 'baseline', 'center_baseline'}
+            roteren=30, # in graden
+        )
+    
+        .kolom(
+            coordinaten=((3, 8), (6, 4), (8, 1)),
+            kleur='pink',   # None is auto kleur
+            breedte=0.4,
+            lijn_kleur='peru',
+            lijn_breedte=2,
+            naam='bar plot',
+        )
+    
+        .fx(
+            functie = lambda x: x**2 + 3*pc.sin(x),
+            x = (-2, 3),
+            breedte = 2,
+            kleur = 'green',   # None is auto kleur
+            naam = 'sinus parabool',
+        )
+        
+    WEERGAVE FIGUUR
+        f.plot()                # plot direct in notebook/console
+        f.plot_venster()        # plot in een popup venster
+    
+    OVERIG
+        f.volgende_kleur        # gebruik deze eigenschap om verschillende automatische kleuren te gebruiken
+        f.png_url               # data url encoded
+        f.png_html              # HTML IMG code van PNG afbeelding (data url encoded)
+        f.svg_html              # SVG code voor inline HTML gebruik
+        f.bewaar_als_png()      # vraag bestandsnaam om op te slaan als PNG
+        f.bewaar_als_svg()      # vraag bestandsnaam om op te slaan als SVG
+    
+    
+
+
+```python
+lijn1 = pc.Lijn((2, 2), (3, 7), (-2, 4), (1, 0)).transformeren(
+            rotatiehoek=45,
+            schaalfactor=1.8,
+       )
+
+f1 = pc.Figuur(
+        breedte=7,
+        hoogte=7,
+        raster=True,
+        legenda=True,
+        titel='Kunst',
+        x_as_titel='variabele $x$',
+        y_as_titel='resultaat $y$',
+        gelijke_assen=True,
+        verberg_assen=False,
+        x_as_log=False,
+        y_as_log=False,
+    ).lijn(
+        coordinaten=lijn1,
+        breedte=3,
+        kleur=None,  # auto kleur
+        vullen=False,
+        arcering='/',
+        naam='dit is een lijn',
+    ).punt(
+        coordinaten=lijn1,
+        breedte=10,
+        kleur=None,  # auto kleur
+        stijl='>',
+        naam='dit zijn punten',
+    ).tekst(
+        coordinaten=lijn1,
+        teksten=('punt 1', 'punt 2', 'punt 3'),
+        kleur=None,  # auto kleur
+        tekst_grootte='large', # {'xx-small', 'x-small', 'small', 'medium', 'large', 'x-large', 'xx-large'}
+        tekst_font='sans-serif', # {FONTNAME, 'serif', 'sans-serif', 'cursive', 'fantasy', 'monospace'}
+        tekst_stijl='normal', # {'normal', 'italic', 'oblique'}
+        tekst_gewicht='bold', # {'ultralight', 'light', 'normal', 'regular', 'book', 'medium', 'roman', 'semibold', 'demibold', 'demi', 'bold', 'heavy', 'extra bold', 'black'}
+        hor_uitlijnen='center', # {'center', 'right', 'left'}
+        vert_uitlijnen='center', # {'center', 'top', 'bottom', 'baseline', 'center_baseline'}
+        roteren=30, # in graden
+    ).kolom(
+        coordinaten=((3, 8), (6, 4), (8, 1)),
+        kleur=None,  # auto kleur
+        breedte=0.4,
+        lijn_kleur='peru',
+        lijn_breedte=2,
+        naam='bar plot',
+    ).fx(
+        functie=lambda x: x**2 + 3*pc.sin(x),
+        x=(-2, 3),
+        breedte=2,
+        kleur=None,  # auto kleur
+        naam='sinus parabool',
+    )
+```
+
+
+    
+![png](output_30_0.png)
     
 
 
