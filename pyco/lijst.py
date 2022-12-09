@@ -689,11 +689,11 @@ class Lijst(pc.BasisObject):
     def __repr__(self):
         """Geeft representatie object."""
         cls_naam = type(self).__name__
+        waardes = ', '.join(str(float(w)) for w in self)
         if self.eenheid is None:
-            waardes = ', '.join(str(float(w)) for w in self)
+            return '{}({})'.format(cls_naam, waardes)
         else:
-            waardes = ', '.join(repr(pc.Waarde(float(w), self.eenheid)) for w in self)
-        return '{}({})'.format(cls_naam, waardes)
+            return '{}({}).eh(\'{}\')'.format(cls_naam, waardes, self.eenheid)        
 
     def __str__(self):
         """Geeft tekst met lijst en eenheid"""

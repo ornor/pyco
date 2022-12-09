@@ -343,7 +343,7 @@ pc.Lijst(0, 200, 1).eh('cm')
 
 
 
-    Lijst(Waarde(0.0, 'cm'), Waarde(200.0, 'cm'), Waarde(1.0, 'cm'))
+    Lijst(0.0, 200.0, 1.0).eh('cm')
 
 
 
@@ -363,26 +363,37 @@ pc.Data.print_help()
     Een Pandas DataFrame waarbij eigenschappen een eenheid kunnen hebben.
     
     AANMAKEN DATA  
-        d = Data({'eigenschap1': 'eenheid1',           als eenheid dimensieloos:
-                  'eigenschap2': 'eenheid2'})                  '-', '' of None
+        d = Data(eigenschap1='eenheid1',           als eenheid dimensieloos:
+                 eigenschap2='eenheid2')             dan gebruik '-', '' of None
                   
-    EIGENSCHAPPEN
+    DATA EIGENSCHAPPEN
         d.eigenschappen           lijst met aanwezige kolomnamen
         d.eenheden                lijst met eenheden die bij kolommen horen
-        d.df                      Pandas DataFrame object     
+        d.df                      Pandas DataFrame object 
+        d.DataRij                 klasse die een rij met eigenschappen beschrijft
+    
+    DATARIJ
+        DR = d.DataRij
+        dr1 = DR(eigenschap1=waarde1, eigenschap2=waarde2)
+        dr2 = DR(eigenschap2=waarde3, eigenschap1=waarde4)
+        dr2.waardes()             retourneert een Python dict met Waarde objecten
         
     TOEVOEGEN DATA REGEL    in onderstaande gevallen: 4 eigenschappen (kolommen)
+        d.toevoegen(d.DataRij( ... ))      een DataRij object
         d.toevoegen([7,5,3,1])             een Python list object
         d.toevoegen(4,5,6,7)               losse argumenten
         d.toevoegen(pc.Lijst(4,9,6,70))    een Lijst object
         d.toevoegen((14,15,16,17))         een Python tuple object
+        d.toevoegen(1,2)                   2 laatste kolommen worden met
+                                                   standaard waarde ingevuld (0)
+        d.toevoegen(1,2,standaard=pc.nan)  andere standaard waarde
     
     OPHALEN DATA EIGENSCHAP       
-        d['eigenschap1']          een Lijst object
-        d.eigenschap1             indien naam eigenschap ook valide Python name
-        d[0]                      Python list met waardes van 1e invoer (rij)
-        d[3:8]                    Python list met waardes (ook Python list)
-                                                    van 4e t/m 8e invoer (rijen)
+        d['eigenschap1']          een Lijst object (kolom uit dataframe)
+        d.eigenschap1             ook beschikbaar als attribuut van object
+        d[0]                      Python list met waardes van 1e invoer (DataRij)
+        d[3:8]                    Python list met waardes (in Datarij)
+                                                            van 4e t/m 8e invoer
         d[::2]                    Python list met alle oneven rijnummers
         d[:, 1:3]                 Python list met 2e en 3e kolom
                                                   (alleen waarden, geen eenheid)
@@ -391,19 +402,16 @@ pc.Data.print_help()
 
 
 ```python
-d = pc.Data({
-    'x': 'mm',
-    'N': 'kN',
-    'V': 'kN',
-    'M': 'kNm',
-})
+d = pc.Data(x='mm', N='kN', V='kN', M='kNm')
 d.toevoegen([7,5,3,1])
 d.toevoegen(4,5,6, 1)
 d.toevoegen(pc.Lijst(4,9,6,70))
-d.toevoegen((14,15,16,17))
+d.toevoegen(d.DataRij(V=14, N=15, x=16, M=17))
 print(d)
 print()
 print('M is:', d.M)
+print('eerste rij is:', d[0])
+print('tweede rij heeft Waardes:', d[1].waardes())
 ```
 
          x    N    V     M
@@ -411,9 +419,11 @@ print('M is:', d.M)
     0    7    5    3     1
     1    4    5    6     1
     2  4.0  9.0  6.0  70.0
-    3   14   15   16    17
+    3   16   15   14    17
     
     M is: (1.0, 1.0, 70.0, 17.0) kNm
+    eerste rij is: DataRij(x=7, N=5, V=3, M=1)
+    tweede rij heeft Waardes: {'x': Waarde(4.0, 'mm'), 'N': Waarde(5.0, 'kN'), 'V': Waarde(6.0, 'kN'), 'M': Waarde(1.0, 'kNm')}
     
 
 ## Knoop
@@ -561,7 +571,7 @@ pc.Lijn.print_help()
     
     EXTRA OPTIES
         l.plot()                plot simpele 2D weergave van lijn
-        l.plot3D()              plot simpele 3D weergave van lijn
+        l.plot3d()              plot simpele 3D weergave van lijn
     
         Lijn((4, -5), (-10, 10)).lijn_cirkelboog(middelpunt=(0,0),
             gradenhoek=+220, stappen=50).lijn_recht(naar=(4, 10)).lijn_bezier(
@@ -571,7 +581,7 @@ pc.Lijn.print_help()
 
 
 ```python
-pc.Lijn(k1, k2, k3).plot3D()
+pc.Lijn(k1, k2, k3).plot3d()
 ```
 
 
@@ -1001,7 +1011,7 @@ pc.functies_print_help()
         pc.wortel(9) == 3.0               direct aan te roepen vanuit pc object
         
     ALGEMEEN GEBRUIK VAN EIGENSCHAPPEN
-        pc.pi == 3.141592653589793        direct aan te roepen vanuit pc object
+        pi == 3.141592653589793        direct aan te roepen vanuit pc object
     
     WISKUNDIGE FUNCTIES                   (geïmporteerd uit Numpy module)
         invoerwaarden:  int, float, np.array, Waarde of Lijst
@@ -1091,9 +1101,9 @@ pc.functies_print_help()
 
 
 ```python
-l = pc.Lijst(3, 4, 7).mm
+l = pc.Lijst(3, 4, pc.pi).mm
 print(f"het gemiddelde van lijst l is: {pc.gemiddelde(l)}")
 ```
 
-    het gemiddelde van lijst l is: 4.666666666666667 mm
+    het gemiddelde van lijst l is: 3.380530884529931 mm
     

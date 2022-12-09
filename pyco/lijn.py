@@ -79,7 +79,7 @@ class Lijn(pc.BasisObject):
 
     EXTRA OPTIES
         l.plot()                plot simpele 2D weergave van lijn
-        l.plot3D()              plot simpele 3D weergave van lijn
+        l.plot3d()              plot simpele 3D weergave van lijn
 
         Lijn((4, -5), (-10, 10)).lijn_cirkelboog(middelpunt=(0,0),
             gradenhoek=+220, stappen=50).lijn_recht(naar=(4, 10)).lijn_bezier(
@@ -317,11 +317,10 @@ class Lijn(pc.BasisObject):
         plt.axis('equal')
         plt.show()
         
-    def plot3D(self):
+    def plot3d(self):
         """Teken simpele plot van lijn (met 3 dimensies)."""
-        from mpl_toolkits.mplot3d import Axes3D
         fig = plt.figure()
-        ax = Axes3D(fig)
+        ax = fig.add_subplot(111, projection='3d')
         plt.plot(self.array[:,0], self.array[:,1], self.array[:,2])
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
