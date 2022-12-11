@@ -1,10 +1,12 @@
+from typing import Union
+import base64
+from io import BytesIO, StringIO
+
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
 import matplotlib.patches as mpatches
 
-from typing import Union
-import base64
-from io import BytesIO, StringIO
+import IPython.display
 
 import numpy as np
 
@@ -40,7 +42,7 @@ class Figuur(pc.BasisObject):
         ).fx(                   # onderdeel 2  etc.
             functie = lambda x: x**2,
             x = (-2, 3),
-        )                       
+        ).plot()                # gebruik .plot() om weer te geven                   
 
     LIJN OBJECT             in plaats van tuple/list met coordinaten,
                             mag ook Lijn object invoeren
@@ -112,11 +114,11 @@ class Figuur(pc.BasisObject):
         )
         
     WEERGAVE FIGUUR
-        f.plot()                # plot direct in notebook/console
+        f.plot()                # plot direct in notebook als pixel afbeelding
+        f.plot_svg()            # plot direct in notebook als vector afbeelding
         f.plot_venster()        # plot in een popup venster
 
     OVERIG
-        f.volgende_kleur        # gebruik deze eigenschap om verschillende automatische kleuren te gebruiken
         f.png_url               # data url encoded
         f.png_html              # HTML IMG code van PNG afbeelding (data url encoded)
         f.svg_html              # SVG code voor inline HTML gebruik
@@ -139,8 +141,11 @@ class Figuur(pc.BasisObject):
                  y_as_log:bool=False):
 
         super().__init__()
-
-        self.fig, self.ax = plt.subplots(1, 1, figsize=(breedte, hoogte))
+        
+        self.fig, self.ax = None, None
+        
+        self.breedte = breedte
+        self.hoogte = hoogte
 
         self.min_x = None
         self.max_x = None
@@ -153,29 +158,13 @@ class Figuur(pc.BasisObject):
         self.maak_raster=raster
         self.maak_legenda=legenda
 
-        if self.maak_raster:
-           self.ax.axhline(y=0, color='darkgrey', linewidth=1.2)
-           self.ax.axvline(x=0, color='darkgrey', linewidth=1.2)
-
         self.titel = titel
-        if self.titel != '':
-            self.ax.set_title(self.titel)
-        if x_as_titel != '':
-            self.ax.set_xlabel(x_as_titel)
-        if y_as_titel != '':
-            self.ax.set_ylabel(y_as_titel)
-
-        if gelijke_assen:
-            self.ax.axis('equal')
-
-        if verberg_assen:
-            self.ax.set_axis_off()
-
-        if x_as_log:
-            self.ax.set_xscale('log')
-
-        if y_as_log:
-            self.ax.set_yscale('log')
+        self.x_as_titel = x_as_titel
+        self.y_as_titel = y_as_titel
+        self.gelijke_assen = gelijke_assen
+        self.verberg_assen = verberg_assen
+        self.x_as_log = x_as_log
+        self.y_as_log = y_as_log
 
         # if True:
         #     self.ax.spines['top'].set_visible(False)
@@ -183,6 +172,8 @@ class Figuur(pc.BasisObject):
         self._kleuren = plt.rcParams["axes.prop_cycle"]()
 
         self.alleen_lezen = False
+        
+        self._ax_plot_items = []
 
     def _check_coordinaten(self, coordinaten:Union[list, tuple, pc.Lijn]):
         """Controleert coordinaten en bepaalt globaal minimum en maximum."""
@@ -244,7 +235,7 @@ class Figuur(pc.BasisObject):
                                    fill=vullen,
                                    color=kleur,
                                    label=naam)
-        self.ax.add_patch(patch)
+        self._ax_plot_items.append(('add_patch', (patch,), dict()))
         return self
 
     def punt(self,
@@ -260,11 +251,11 @@ class Figuur(pc.BasisObject):
         coordinaten = self._check_coordinaten(coordinaten)
         X = [x for x, _ in coordinaten]
         Y = [y for _, y in coordinaten]
-        self.ax.scatter(X, Y,
-                        color=kleur,
-                        marker=stijl,
-                        s=breedte*30,
-                        label=naam)
+        self._ax_plot_items.append(('scatter', (X, Y), dict(
+            color=kleur,
+            marker=stijl,
+            s=breedte*30,
+            label=naam)))
         return self
 
     def tekst(self,
@@ -290,16 +281,16 @@ class Figuur(pc.BasisObject):
         for i, tekst in enumerate(teksten):
             x = X[i]
             y = Y[i]
-            self.ax.text(x, y,
-                            s=tekst,
-                            color=kleur,
-                            fontsize=tekst_grootte,
-                            fontfamily=tekst_font,
-                            fontstyle=tekst_stijl,
-                            fontweight=tekst_gewicht,
-                            horizontalalignment=hor_uitlijnen,
-                            verticalalignment=vert_uitlijnen,
-                            rotation=roteren)
+            self._ax_plot_items.append(('text', (x, y), dict(
+                    s=tekst,
+                    color=kleur,
+                    fontsize=tekst_grootte,
+                    fontfamily=tekst_font,
+                    fontstyle=tekst_stijl,
+                    fontweight=tekst_gewicht,
+                    horizontalalignment=hor_uitlijnen,
+                    verticalalignment=vert_uitlijnen,
+                    rotation=roteren)))
         return self
 
     def kolom(self,
@@ -318,13 +309,13 @@ class Figuur(pc.BasisObject):
         waardes = self._check_coordinaten(coordinaten)
         X = [x for x, _ in waardes]
         hoogtes = [h for _, h in waardes]
-        self.ax.bar(X,
+        self._ax_plot_items.append(('bar', (X,), dict(
                     height=hoogtes,
                     color=kleur,
                     width=breedte,
                     linewidth=lijn_breedte,
                     edgecolor=lijn_kleur,
-                    label=naam)
+                    label=naam)))
         return self
 
     def fx(self,
@@ -352,12 +343,45 @@ class Figuur(pc.BasisObject):
         self.min_y = min(self.min_y, min(Y)) if self.min_y is not None else min(Y)
         self.max_y = max(self.max_y, max(Y)) if self.max_y is not None else max(Y)
 
-        self.ax.plot(X, Y, label=naam, color=kleur, linewidth=breedte)
+        self._ax_plot_items.append(('plot', (X, Y), dict(label=naam, color=kleur, linewidth=breedte)))
         return self
 
     def _afronden_figuur(self):
         """Rond figuur af."""
         if not self.alleen_lezen:
+                
+            self.fig, self.ax = plt.subplots(1, 1, figsize=(self.breedte, self.hoogte))
+
+            if self.maak_raster:
+                self.ax.axhline(y=0, color='darkgrey', linewidth=1.2)
+                self.ax.axvline(x=0, color='darkgrey', linewidth=1.2)
+
+            if self.titel != '':
+                self.ax.set_title(self.titel)
+
+            if self.x_as_titel != '':
+                self.ax.set_xlabel(self.x_as_titel)
+
+            if self.y_as_titel != '':
+                self.ax.set_ylabel(self.y_as_titel)
+
+            if self.gelijke_assen:
+                self.ax.axis('equal')
+
+            if self.verberg_assen:
+                self.ax.set_axis_off()
+
+            if self.x_as_log:
+                self.ax.set_xscale('log')
+
+            if self.y_as_log:
+                self.ax.set_yscale('log')
+
+            # plot alle data
+            for plot_item in self._ax_plot_items:
+                method_name, args, kwargs, = plot_item[0], plot_item[1], plot_item[2]
+                getattr(self.ax, method_name)(*args, **kwargs)
+
             min_x = self.min_x if self.min_x is not None else 0
             max_x = self.max_x if self.max_x is not None else 1
             min_y = self.min_y if self.min_y is not None else 0
@@ -369,21 +393,23 @@ class Figuur(pc.BasisObject):
             self.ax.axis([min_x - marge_x, max_x + marge_x, min_y - marge_y, max_y + marge_y])
 
             if self.maak_raster:
-               self.ax.grid(color='grey', linestyle='-', linewidth=0.2)
+                self.ax.grid(color='grey', linestyle='-', linewidth=0.2)
 
             if self.maak_legenda:
                 self.ax.legend()
-
+                
         self.alleen_lezen = True
 
     def plot(self):
-        """Rond figuur af en laat deze inline zien."""
-        self._afronden_figuur()
-        self.fig.show()
-        return self
+        """Rond figuur af en laat deze in IPython (notebook) als PNG afbeelding zien."""
+        IPython.display.display(IPython.display.HTML(self.png_html))
+        
+    def plot_svg(self):
+        """Rond figuur af en laat deze in IPython (notebook) als SVG afbeelding zien."""
+        IPython.display.display(IPython.display.HTML(self.svg_html))
 
     def plot_venster(self):
-        """Rond figuur af en laat deze in venster zien."""
+        """Rond figuur af en laat deze in popup venster zien."""
         self._afronden_figuur()
 
         pyco.FiguurVenster(
@@ -394,25 +420,29 @@ class Figuur(pc.BasisObject):
         )
 
         plt.close(fig=self.fig)
-        return self
     
     @property
     def png_url(self):
         """Genereer PNG data encoded url."""
+        self._afronden_figuur()
+        
         buf = BytesIO()
         self.fig.savefig(buf, format='png')
         data = base64.b64encode(buf.getbuffer()).decode('ascii')
         url = (f"data:image/png;base64,{data}")
+        
+        plt.close(fig=self.fig)
         return url
 
     @property
     def png_html(self):
         """Genereer PNG code voor inline gebruik IMG HTML."""
-        url = self.png_url
-        return f"<img src='{url}'/>"
+        return f"<img src='{self.png_url}'/>"
 
     def bewaar_als_png(self):
         """Vraag om bestandsnaam en bewaar afbeelding als PNG bestand."""
+        self._afronden_figuur()
+        
         bestandsnaam = pyco.BestandsnaamVenster(
             extensie='png',
             titel='Bewaren als PNG',
@@ -420,19 +450,27 @@ class Figuur(pc.BasisObject):
 
         if bestandsnaam is not None:
             self.fig.savefig(bestandsnaam, format='png')
+            
+        plt.close(fig=self.fig)
 
     @property
     def svg_html(self):
         """Genereer SVG code voor inline gebruik HTML."""
+        self._afronden_figuur()
+        
         buf = StringIO()
         self.fig.savefig(buf, format='svg')
         data = buf.getvalue()
         # data heeft XML en DOCTYPE header; deze er afhalen (alleen SVG tags)
         data = '<svg ' + data.split('<svg ', 1)[1]
+        
+        plt.close(fig=self.fig)
         return data
 
     def bewaar_als_svg(self):
         """Vraag om bestandsnaam en bewaar afbeelding als SVG bestand."""
+        self._afronden_figuur()
+        
         bestandsnaam = pyco.BestandsnaamVenster(
             extensie='svg',
             titel='Bewaren als SVG',
@@ -440,3 +478,5 @@ class Figuur(pc.BasisObject):
 
         if bestandsnaam is not None:
             self.fig.savefig(bestandsnaam, format='svg')
+            
+        plt.close(fig=self.fig)

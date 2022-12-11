@@ -6,7 +6,7 @@ class Singleton(type):
     Ieder nieuwe instantie van klasse wordt genegeerd en er wordt altijd
     de eerste instantie (object) gebruikt.
 
-    class MyClass(BaseClass, metaclass = Singleton):
+    class MyClass(BaseClass, metaclass=Singleton):
         pass
     """
     _instances = {}
@@ -17,15 +17,13 @@ class Singleton(type):
         return cls._instances[cls]
 
 
-class ObjectTeller(metaclass = Singleton):
+class ObjectTeller(metaclass=Singleton):
     """
     ObjectTeller zorgt ervoor dat over hele applicatie objecten een nieuw
     oplopend nummer krijgen. Hierdoor kan achteraf gekeken worden welk object
     eerder was aangemaakt.
 
-    import pyco.basis as pycob
-
-    teller = pycob.ObjectTeller()
+    teller = ObjectTeller()
     self.object_nummer = teller.object_nummer
     """
 

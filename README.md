@@ -8,7 +8,14 @@ Jara van Veldhoven 2020-2023.
 
 ## Installatie
 
-Je kan de bibliotheek installeren vanuit PyPi met `pip`.
+De pyco bibliotheek is afhankelijk van onderstaande externe bibliotheken:
+
+* numpy (https://numpy.org)
+* pandas (https://pandas.pydata.org/) 
+* matplotlib (https://matplotlib.org/) 
+* IPython (https://ipython.org/)
+
+Je kan de pyco bibliotheek installeren vanuit PyPi met `pip`.
 
     pip install pyconl
 

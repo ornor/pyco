@@ -18,27 +18,12 @@ class Document(pc.BasisObject):
     
     doc = pc.Document
 
-    doc.titel('Dit is HTML header 1')
-
-    @doc
-    class eerste_sectie:
-
-        a = pc.Waarde(120).cm   >>\
-        "eerste parameter"
-
-        b = pc.Waarde(4).m   >>\
-        "volgende parameter"
-        
-        c = a + b   >>\
-        "totale lengte"
-
-    doc.print_rapport()
     """
     
-    def __init__(self):
+    def __init__(self, titel=None):
         super().__init__()
 
-        self._titel = 'Pyco document'
+        self._titel = 'Pyco document' if titel is None else titel
 
         self._klasses = []
 
@@ -51,7 +36,7 @@ class Document(pc.BasisObject):
             obj = tmp
         elif isinstance(obj, pc.Figuur):
             class tmp:
-                tmp = obj
+                tmp = pc.Waarde(obj.png_html)
             obj = tmp
         if inspect.isclass(obj):
             self._klasses.append((obj.__name__, obj))
@@ -128,6 +113,8 @@ class Document(pc.BasisObject):
                         html += html_rij(str_obj, None, '&nbsp;')
             elif isinstance(obj, pc.Figuur):
                 html += obj.png_html
+            else:
+                pass # all other types of objects
         html += '</tbody></table>'
             
         self._print(html)
