@@ -10,6 +10,193 @@ class pc:
     BasisObject = pyco.basis.BasisObject
     Waarde = pyco.waarde.Waarde
     Figuur = pyco.figuur.Figuur
+    
+    
+class html_lib: 
+    CEL_ACHTERGROND_KLEUR = '#fff'
+    CEL_ACHTERGROND_KLEUR_KOP1 = '#fff'
+    CEL_ACHTERGROND_KLEUR_KOP2 = '#eee'
+    
+    LIJN_STIJL = '1px solid #888'
+    LIJN_LINKS_STIJL = '2px solid #888' # met 1px is lijn niet zichtbaar
+    LIJN_RECHTS_STIJL = '1px solid #888'
+    
+    CEL1_STIJL = f'text-align:left;vertical-align:top;background-color:{CEL_ACHTERGROND_KLEUR};'
+    CEL1_BREEDTE = 100
+    
+    CEL2_STIJL = f'text-align:right;vertical-align:top;background-color:{CEL_ACHTERGROND_KLEUR};'
+    CEL2_BREEDTE = 80
+    
+    CEL3_STIJL = f'text-align:left;vertical-align:top;background-color:{CEL_ACHTERGROND_KLEUR};'
+    CEL3_BREEDTE = 60
+    
+    CEL4_STIJL = f'text-align:right;vertical-align:top;background-color:{CEL_ACHTERGROND_KLEUR};'
+    CEL4_BREEDTE = 530
+    
+    CEL_FIGUUR_STIJL = f'text-align:center;vertical-align:top;background-color:{CEL_ACHTERGROND_KLEUR};'
+
+    KOP1_CEL_STIJL = f'text-align:left;vertical-align:top;background-color:{CEL_ACHTERGROND_KLEUR_KOP1};'
+    KOP1_TEKST_STIJL = 'font-weight:bold;font-size:1.9em;'
+    
+    KOP2_CEL_STIJL = f'text-align:left;vertical-align:top;background-color:{CEL_ACHTERGROND_KLEUR_KOP2};border-top:{LIJN_STIJL};border-bottom:{LIJN_STIJL};'
+    KOP2_TEKST_STIJL = 'font-weight:normal;font-size:1.5em;'
+    
+    
+    @staticmethod
+    def spacer(breedte, hoogte):
+        return f'<img href="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEAAAEALAAAAAABAAEAAAICTAEAOw==" width="{breedte}" height="{hoogte}" border="0" style="width:{breedte}px;height:{hoogte}px;border:0px;"/>'
+
+    @staticmethod
+    def lege_regel():
+        return f"""
+<tr>
+    <td style="{html_lib.CEL1_STIJL}width:{html_lib.CEL1_BREEDTE}px;">
+        {html_lib.spacer(html_lib.CEL1_BREEDTE, 1)}
+    </td>
+    <td style="{html_lib.CEL2_STIJL}width:{html_lib.CEL2_BREEDTE}px;">
+        {html_lib.spacer(html_lib.CEL2_BREEDTE, 1)}
+    </td>
+    <td style="{html_lib.CEL3_STIJL}width:{html_lib.CEL3_BREEDTE}px;">
+        {html_lib.spacer(html_lib.CEL3_BREEDTE, 1)}
+    </td>
+    <td style="{html_lib.CEL4_STIJL}width:{html_lib.CEL4_BREEDTE}px;">
+        {html_lib.spacer(html_lib.CEL4_BREEDTE, 1)}
+    </td>
+</tr>"""
+    
+    @staticmethod
+    def tabel_start():
+        return '<table><tbody>' + html_lib.lege_regel()
+    
+    @staticmethod
+    def tabel_einde():
+        return '</tbody></table>'
+    
+    @staticmethod
+    def lijn(boven=True):
+        positie = 'top' if boven else 'bottom'
+        return f"""
+<tr>
+    <td style="{html_lib.CEL1_STIJL}border-{positie}:{html_lib.LIJN_STIJL};">
+        {html_lib.spacer(1, 1)}
+    </td>
+    <td style="{html_lib.CEL2_STIJL}border-{positie}:{html_lib.LIJN_STIJL};">
+        {html_lib.spacer(1, 1)}
+    </td>
+    <td style="{html_lib.CEL3_STIJL}border-{positie}:{html_lib.LIJN_STIJL};">
+        {html_lib.spacer(1, 1)}
+    </td>
+    <td style="{html_lib.CEL4_STIJL}border-{positie}:{html_lib.LIJN_STIJL};">
+        {html_lib.spacer(1, 1)}
+    </td>
+</tr>"""
+    
+    @staticmethod
+    def kop1(tekst):
+        return f"""
+<tr>
+    <td colspan="4" style="{html_lib.KOP1_CEL_STIJL}">
+        <span style="{html_lib.KOP1_TEKST_STIJL}">{tekst}</span>
+    </td>
+</tr>"""
+    
+    @staticmethod
+    def kop2(tekst):
+        return f"""
+<tr>
+    <td colspan="4" style="{html_lib.KOP2_CEL_STIJL}">
+        <span style="{html_lib.KOP2_TEKST_STIJL}">{tekst}</span>
+    </td>
+</tr>"""
+    
+    @staticmethod
+    def tekst(naam, tekst, docu):
+        if naam == '' and docu == '':
+            return f"""
+<tr>
+    <td colspan="4" style="{html_lib.CEL1_STIJL}">
+        <span style="">{tekst}</span>
+    </td>
+</tr>"""
+        elif naam == '':
+            return f"""
+<tr>
+    <td colspan="3" style="{html_lib.CEL1_STIJL}">
+        <span style="">{tekst}</span>
+    </td>
+    <td style="{html_lib.CEL4_STIJL}">
+        <span style="">{docu}</span>
+    </td>
+</tr>"""
+        elif docu == '':
+            return f"""
+<tr>
+    <td style="{html_lib.CEL1_STIJL}">
+        <span style="">${naam}$</span>
+    </td>
+    <td style="{html_lib.CEL2_STIJL}">
+        <span style="">{html_lib.spacer(1, 1)}</span>
+    </td>
+    <td colspan="2" style="{html_lib.CEL3_STIJL}">
+        <span style="">{tekst}</span>
+    </td>
+</tr>"""
+        else:
+            return f"""
+<tr>
+    <td style="{html_lib.CEL1_STIJL}">
+        <span style="">${naam}$</span>
+    </td>
+    <td style="{html_lib.CEL2_STIJL}">
+        <span style="">{html_lib.spacer(1, 1)}</span>
+    </td>
+    <td style="{html_lib.CEL3_STIJL}">
+        <span style="">{tekst}</span>
+    </td>
+    <td style="{html_lib.CEL4_STIJL}">
+        <span style="">{docu}</span>
+    </td>
+</tr>"""
+    
+    @staticmethod
+    def figuur(naam, obj):
+        naam = '$' + naam + '$' if naam != '' else '&nbsp;'
+        
+        return f"""
+<tr>
+    <td style="{html_lib.CEL1_STIJL}">{naam}</td>
+    <td colspan="3" style="{html_lib.CEL_FIGUUR_STIJL};">{obj.png_html}</td>
+</tr>"""
+        
+    @staticmethod
+    def waarde(naam, obj, docu):
+        naam = '$' + naam + '$' if naam != '' else '&nbsp;'
+        
+        _1 = naam
+        waarde_str = str(obj)
+        _2 = waarde_str
+        _3 = ''
+        if ' ' in waarde_str:
+            _2 = waarde_str.split(' ', 2)[0]
+            _3 = waarde_str.split(' ', 2)[1]
+        _4 = docu
+        
+        return f"""
+<tr>
+    <td style="{html_lib.CEL1_STIJL}">
+        <span>{_1}</span>
+    </td>
+    <td style="{html_lib.CEL2_STIJL}">
+        <span>{_2}</span>
+    </td>
+    <td style="{html_lib.CEL3_STIJL}">
+        <span>{_3}</span>
+    </td>
+    <td style="{html_lib.CEL4_STIJL}">
+        <span>{_4}</span>
+    </td>
+</tr>"""
+
 
 class Document(pc.BasisObject):
     """
@@ -132,184 +319,32 @@ class Document(pc.BasisObject):
         else:
             return klasse_naam, delen[0] + '_{' + ','.join(delen[1:]) + '}'
         
-    #---------------------------------------------------------------------------
-    
-    def _html_spacer(self, breedte, hoogte):
-        return f'<img href="data:image/gif;base64,R0lGODlhAQABAIAAAP///////yH5BAEAAAEALAAAAAABAAEAAAICTAEAOw==" width="{breedte}" height="{hoogte}"/>'
-        
-    def _html_tabel_lege_regel(self):
-        return f"""
-<tr>
-    <td style="text-align:left;vertical-align:top;background-color:#fff;width:100px;">
-        {self._html_spacer(100, 1)}
-    </td>
-    <td style="text-align:right;vertical-align:top;background-color:#fff;width:80px;">
-        {self._html_spacer(80, 1)}
-    </td>
-    <td style="text-align:left;vertical-align:top;background-color:#fff;width:60px;">
-        {self._html_spacer(60, 1)}
-    </td>
-    <td style="text-align:right;vertical-align:top;background-color:#fff;width:530px;">
-        {self._html_spacer(530, 1)}
-    </td>
-</tr>"""
-    
-    def _html_tabel_lijn(self, boven=True):
-        positie = 'top' if boven else 'bottom'
-        lijn_stijl = '1px solid #888'
-        return f"""
-<tr>
-    <td style="text-align:left;vertical-align:top;background-color:#fff;border-{positie}:{lijn_stijl};">
-        {self._html_spacer(1, 1)}
-    </td>
-    <td style="text-align:right;vertical-align:top;background-color:#fff;border-{positie}:{lijn_stijl};">
-        {self._html_spacer(1, 1)}
-    </td>
-    <td style="text-align:left;vertical-align:top;background-color:#fff;border-{positie}:{lijn_stijl};">
-        {self._html_spacer(1, 1)}
-    </td>
-    <td style="text-align:right;vertical-align:top;background-color:#fff;border-{positie}:{lijn_stijl};">
-        {self._html_spacer(1, 1)}
-    </td>
-</tr>"""
-    
-    def _html_tabel_start(self):
-        return '<table><tbody>' + self._html_tabel_lege_regel()
-        
-    def _html_tabel_einde(self):
-        return '</tbody></table>'
-    
-    def _html_tabel_kop1(self, tekst):
-        return f"""
-<tr>
-    <td colspan="4" style="text-align:left;vertical-align:top;background-color:#fff;">
-        <span style="font-weight:bold;font-size:1.9em;">{tekst}</span>
-    </td>
-</tr>"""
-    
-    def _html_tabel_kop2(self, tekst):
-        return f"""
-<tr>
-    <td colspan="4" style="text-align:left;vertical-align:top;background-color:#eee;border-top:1px solid #888;border-bottom:1px solid #888;">
-        <span style="font-weight:normal;font-size:1.5em;">{tekst}</span>
-    </td>
-</tr>"""
-    
-    def _html_tabel_tekst(self, naam, tekst, docu):
-        klasse_naam, naam = self._vervang_naam(naam)
-        
-        if naam == '' and docu == '':
-            return f"""
-<tr>
-    <td colspan="4" style="text-align:left;vertical-align:top;background-color:#fff;">
-        <span style="">{tekst}</span>
-    </td>
-</tr>"""
-        elif naam == '':
-            return f"""
-<tr>
-    <td colspan="3" style="text-align:left;vertical-align:top;background-color:#fff;">
-        <span style="">{tekst}</span>
-    </td>
-    <td style="text-align:right;vertical-align:top;background-color:#fff;">
-        <span style="">{docu}</span>
-    </td>
-</tr>"""
-        elif docu == '':
-            return f"""
-<tr>
-    <td style="text-align:left;vertical-align:top;background-color:#fff;">
-        <span style="">${naam}$</span>
-    </td>
-    <td style="text-align:left;vertical-align:top;background-color:#fff;">
-        <span style="">{self._html_spacer(1, 1)}</span>
-    </td>
-    <td colspan="2" style="text-align:left;vertical-align:top;background-color:#fff;">
-        <span style="">{tekst}</span>
-    </td>
-</tr>"""
-        else:
-            return f"""
-<tr>
-    <td style="text-align:left;vertical-align:top;background-color:#fff;">
-        <span style="">${naam}$</span>
-    </td>
-    <td style="text-align:left;vertical-align:top;background-color:#fff;">
-        <span style="">{self._html_spacer(1, 1)}</span>
-    </td>
-    <td style="text-align:left;vertical-align:top;background-color:#fff;">
-        <span style="">{tekst}</span>
-    </td>
-    <td style="text-align:right;vertical-align:top;background-color:#fff;">
-        <span style="">{docu}</span>
-    </td>
-</tr>"""
-    
-    def _html_tabel_figuur(self, naam, obj):
-        klasse_naam, naam = self._vervang_naam(naam)
-        naam = '$' + naam + '$' if naam != '' else '&nbsp;'
-        
-        return f"""
-<tr>
-    <td style="text-align:left;vertical-align:top;background-color:#fff;">{naam}</td>
-    <td colspan="3" style="text-align:center;vertical-align:top;background-color:#fff;">{obj.png_html}</td>
-</tr>"""
-        
-    def _html_tabel_waarde(self, naam, obj, docu):
-        klasse_naam, naam = self._vervang_naam(naam)
-        naam = '$' + naam + '$' if naam != '' else '&nbsp;'
-        
-        _1 = naam
-        waarde_str = str(obj)
-        _2 = waarde_str
-        _3 = ''
-        if ' ' in waarde_str:
-            _2 = waarde_str.split(' ', 2)[0]
-            _3 = waarde_str.split(' ', 2)[1]
-        _4 = docu
-        
-        return f"""
-<tr>
-    <td style="text-align:left;vertical-align:top;background-color:#fff;">
-        <span>{_1}</span>
-    </td>
-    <td style="text-align:right;vertical-align:top;background-color:#fff;">
-        <span>{_2}</span>
-    </td>
-    <td style="text-align:left;vertical-align:top;background-color:#fff;">
-        <span>{_3}</span>
-    </td>
-    <td style="text-align:right;vertical-align:top;background-color:#fff;">
-        <span>{_4}</span>
-    </td>
-</tr>"""
-        
     @property
     def html(self):
         html = ''
         
-        html += self._html_tabel_start()
+        html += html_lib.tabel_start()
         
         if self._titel is not None:
-            html += self._html_tabel_kop1(self._titel)
+            html += html_lib.kop1(self._titel)
         
         for typ, naam, obj, docu in self._onderdelen:
             if typ == self.TYPE_TEKST:
-                html += self._html_tabel_tekst(naam, obj, docu)
+                html += html_lib.tekst(self._vervang_naam(naam)[1], obj, docu)
             elif typ == self.TYPE_KLASSE_START:
-                html +=  self._html_tabel_lege_regel()
-                html +=  self._html_tabel_kop2(naam)
+                html += html_lib.lege_regel()
+                html += html_lib.kop2(naam)
             elif typ == self.TYPE_KLASSE_EINDE:
-                html += self._html_tabel_lijn()
+                html += html_lib.lijn(boven=True)
             elif typ == self.TYPE_FUNCTIE:
                 pass
             elif typ == self.TYPE_WAARDE:
-                html += self._html_tabel_waarde(naam, obj, docu)
+                html += html_lib.waarde(self._vervang_naam(naam)[1], obj, docu)
             elif typ == self.TYPE_FIGUUR:
-                html += self._html_tabel_figuur(naam, obj)
+                html += html_lib.figuur(self._vervang_naam(naam)[1], obj)
             elif typ == self.TYPE_PYCO_OVERIG:
                 pass
         
-        html += self._html_tabel_einde()
+        html += html_lib.tabel_einde()
         
         return html

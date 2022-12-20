@@ -30,6 +30,8 @@ class Data(pc.BasisObject):
         dr1 = DR(eigenschap1=waarde1, eigenschap2=waarde2)
         dr2 = DR(eigenschap2=waarde3, eigenschap1=waarde4)
         dr2.waardes()             retourneert een Python dict met Waarde objecten
+        dr2.coordinaten(eigenschap1, eigenschap2)
+                                  retourneert een tuple met tuples (es1, es2)
         
     TOEVOEGEN DATA REGEL    in onderstaande gevallen: 4 eigenschappen (kolommen)
         d.toevoegen(d.DataRij( ... ))      een DataRij object
@@ -118,6 +120,10 @@ class Data(pc.BasisObject):
     def df(self):
         """Een Pandas DataFrame object retourneren."""
         return self._dataframe
+    
+    def coordinaten(self, eigenschap1, eigenschap2):
+        """Retourneert een tuple met tuples (eigenschap1, eigenschap2)"""
+        return tuple(zip(self[eigenschap1].array, self[eigenschap2].array))
     
     def __getitem__(self, eigenschap_bereik):
         """Retourneert een eigenschap als Lijst (tekst invoer) of een aantal rijen van DataFrame (getal/bereik invoer)."""
