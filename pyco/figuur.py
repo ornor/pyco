@@ -16,14 +16,14 @@ warnings.filterwarnings('ignore')
 
 import pyco.basis
 # import pyco.waarde
-# import pyco.lijst
+import pyco.lijst
 import pyco.lijn
 import pyco.venster
 
 class pc:
     BasisObject = pyco.basis.BasisObject
     # Waarde = pyco.waarde.Waarde
-    # Lijst = pyco.lijst.Lijst
+    Lijst = pyco.lijst.Lijst
     Lijn = pyco.lijn.Lijn
     FiguurVenster = pyco.venster.FiguurVenster
     BestandsnaamVenster = pyco.venster.BestandsnaamVenster
@@ -49,6 +49,10 @@ class Figuur(pc.BasisObject):
         Figuur().punt(
             coordinaten=Lijn([1,2],[3,4],[5,6])
         )
+                            of twee pc.Lijst objecten
+        Figuur().punt(
+            coordinaten=(lijst1, lijst2)
+        )
 
     CONFIGURATIE
         Figuur(
@@ -63,6 +67,8 @@ class Figuur(pc.BasisObject):
             verberg_assen=False,
             x_as_log=False,
             y_as_log=False,
+            spiegel_x_as=False,
+            spiegel_y_as=False,
         )
 
     ONDERDELEN
@@ -138,7 +144,9 @@ class Figuur(pc.BasisObject):
                  gelijke_assen:bool=False,
                  verberg_assen:bool=False,
                  x_as_log:bool=False,
-                 y_as_log:bool=False):
+                 y_as_log:bool=False,
+                 spiegel_x_as:bool=False,
+                 spiegel_y_as:bool=False):
 
         super().__init__()
         
@@ -165,6 +173,8 @@ class Figuur(pc.BasisObject):
         self.verberg_assen = verberg_assen
         self.x_as_log = x_as_log
         self.y_as_log = y_as_log
+        self.spiegel_x_as = spiegel_x_as
+        self.spiegel_y_as = spiegel_y_as
 
         # if True:
         #     self.ax.spines['top'].set_visible(False)
@@ -177,6 +187,12 @@ class Figuur(pc.BasisObject):
 
     def _check_coordinaten(self, coordinaten:Union[list, tuple, pc.Lijn]):
         """Controleert coordinaten en bepaalt globaal minimum en maximum."""
+        if ((isinstance(coordinaten, list) or isinstance(coordinaten, tuple))
+                    and len(coordinaten) == 2
+                    and isinstance(coordinaten[0], pc.Lijst)
+                    and isinstance(coordinaten[1], pc.Lijst)):
+            coordinaten = tuple(zip(coordinaten[0].array, coordinaten[1].array))
+        
         if not isinstance(coordinaten, list) and not isinstance(coordinaten, tuple):
             if isinstance(coordinaten, pc.Lijn):
                 coordinaten.array.tolist()
@@ -397,6 +413,12 @@ class Figuur(pc.BasisObject):
 
             if self.maak_legenda:
                 self.ax.legend()
+                
+            if self.spiegel_x_as:
+                self.ax.invert_xaxis()
+                
+            if self.spiegel_y_as:
+                self.ax.invert_yaxis()
                 
         self.alleen_lezen = True
 

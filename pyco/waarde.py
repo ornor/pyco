@@ -98,7 +98,6 @@ class Waarde(pc.BasisObject):
         w.absoluut()            absolute waarde (altijd positief)
         w.teken()               positief getal: 1.0, nul: 0.0, negatief: -1.0 
         w.kopieer_teken(w2)     neem huidige, met het teken (+-) van w2
-        w.is_positief(a)        stap functie: w<0 -> 0, w=0 -> a, w>0 -> 1 
         w.is_nan()              bepaalt of waarde een niet-getal is
         w.is_inf()              bepaalt of waarde oneindig is
 
@@ -869,12 +868,7 @@ class Waarde(pc.BasisObject):
         """Behoudt grootte van huidige waarde, maar met teken (+-) van andere waarde."""
         from pyco import kopieer_teken
         return kopieer_teken(self, andere_waarde)
-    
-    def is_positief(self, nul_waarde):
-        """Stapfunctie: w<0 -> 0, w=0 -> nul_waarde, w>0 -> 1."""
-        from pyco import is_positief
-        return is_positief(self, nul_waarde)
-    
+
     def is_nan(self):
         """Bepaalt of waarde een niet-getal is (not a number: pc.nan)."""
         from pyco import is_nan

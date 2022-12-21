@@ -78,12 +78,13 @@ WISKUNDIGE FUNCTIES                   (geïmporteerd uit Numpy module)
     absoluut(x)                       absolute waarde (altijd positief)
     teken(x)                          positief getal: 1.0   negatief: -1.0 
     kopieer_teken(a, b)               neem getal a, met het teken (+-) van b
-    is_positief(a, b)                 stap functie:a<0 -> 0, a=0 -> b, a>0 -> 1 
+    stap(a, b=0)                      is positief functie:a<0 -> 0, a=0 -> b, a>0 -> 1 
     verwijder_nan(lijst)              verwijder niet-getallen (not a number)
     getal_nan_inf(lijst)              vervang: nan=0, inf=1.7e+308 (heel groot)
     interpoleer(x, array_x, array_y)  interpoleer x in y; array_x MOET oplopen
     van_totmet_n(van, tot_met, n)     genereert vast aantal getallen (incl. t/m)
     van_tot_stap(van, tot, stap)      genereert vaste stappen (excl. tot)
+    cumulatief(lijst)                 genereert cumulatieve som van lijst
     gemiddelde(lijst)                 bepaalt het gemiddelde
     stdafw_pop(lijst)                 bepaalt standaardafwijking voor populatie
     stdafw_n(lijst)                   bepaalt standaardafwijking steekproef
@@ -268,19 +269,20 @@ _numpy_functions = dict(
     absoluut = (1, np.absolute),
     teken = (1, np.sign, None, None, lambda eh, _: None),
     kopieer_teken = (2, np.copysign),
-    is_positief = (2, np.heaviside, None, None, lambda eh, _: None),
+    stap = (1, lambda a: np.heaviside(a, 0), None, None, lambda eh, _: None),
     getal_nan_inf = (1, np.nan_to_num),
     verwijder_nan = (1, lambda x: x[np.logical_not(np.isnan(x))]),
     interpoleer = (3, np.interp),
     van_totmet_n = (3, np.linspace),
     van_tot_stap = (3, np.arange),
+    cumulatief = (1, np.cumsum),
     gemiddelde = (1, np.mean),
     stdafw_pop = (1, lambda x: np.std(x, ddof=0)),
     stdafw_n = (1, lambda x: np.std(x, ddof=1)),
     mediaan = (1, np.median),
     percentiel = (2, np.percentile),
     correlatie = (2, lambda l1, l2: np.corrcoef(l1, l2)[0, 1], None, None, lambda eh, _: None),
-    sorteer = (1, np.sort),
+    sorteer = (1, np.sort), 
     omdraaien = (1, np.flip),
     is_nan = (1, np.isnan, None, None, lambda eh, _: None, True),
     is_inf = (1, np.isinf, None, None, lambda eh, _: None, True),
@@ -302,7 +304,6 @@ _numpy_functions = dict(
 _numpy_functions['min'] = np.amin # reserverd keywords
 _numpy_functions['max'] = np.amax
 _numpy_functions['abs'] = np.fabs
-
 
 def _wrap_functie(n_args, fn, check_type_eenheid=None, pre_verander_eenheid_fn=None,
                   post_verander_eenheid_fn=None, maak_bool=False):

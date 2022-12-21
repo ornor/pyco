@@ -47,6 +47,10 @@ class Lijst(pc.BasisObject):
         l2 = -l1                verander teken (positief vs. negatief)
         for w in l1:            itereert en geeft float/Waarde object terug
         getal = len(l1)         geeft aantal elementen (dimensies) van lijst
+        
+    ELEMENT UIT LIJST HALEN
+        waarde = l1.i(1)        retourneert het i-ste element als Waarde object
+                                                (1e element is element nummer 0)
 
     NUMPY BEWERKINGEN           gebruikt array object
         numpy_array = l1.array  retourneert Numpy array object
@@ -103,9 +107,9 @@ class Lijst(pc.BasisObject):
         l.absoluut()            absolute waarde (altijd positief)
         l.teken()               positief getal: 1.0   negatief: -1.0 
         l.kopieer_teken(l2)     neem huidige, met het teken (+-) van l2
-        l.is_positief(a)        stap functie: l<0 -> 0, l=0 -> a, l>0 -> 1 
         l.verwijder_nan()       verwijder niet-getallen (not a number)
         l.getal_nan_inf()       vervang: nan=0, inf=1.7e+308 (heel groot)
+        l.cumulatief()          lijst met cumulatieve som van lijst
         l.gemiddelde()          bepaalt het gemiddelde
         l.stdafw_pop()          bepaalt standaardafwijking voor populatie
         l.stdafw_n()            bepaalt standaardafwijking steekproef
@@ -237,6 +241,10 @@ class Lijst(pc.BasisObject):
     def array(self):
         """Retourneert Numpy array object met alle getallen (zonder eenheid)."""
         return self._array
+    
+    def i(self, i_element):
+        """Retourneert het i-ste element uit lijst als Waarde object."""
+        return pc.Waarde(self[i_element]).eh(self.eenheid)
     
     def kopie(self):
         """Retourneert kopie van zichzelf (nieuw object)."""
@@ -415,11 +423,6 @@ class Lijst(pc.BasisObject):
         from pyco import kopieer_teken
         return kopieer_teken(self, andere_waarde)
     
-    def is_positief(self, nul_waarde):
-        """Stapfunctie: w<0 -> 0, w=0 -> nul_waarde, w>0 -> 1."""
-        from pyco import is_positief
-        return is_positief(self, nul_waarde)
-    
     def verwijder_nan(self):
         """Verwijder niet-getallen (not a number)."""
         from pyco import verwijder_nan
@@ -429,6 +432,11 @@ class Lijst(pc.BasisObject):
         """Vervang: nan=0, inf=1.7e+308 (heel groot)."""
         from pyco import getal_nan_inf
         return getal_nan_inf(self)
+    
+    def cumulatief(self):
+        """Bepaalt cumulatieve som van lijst."""
+        from pyco import cumulatief
+        return cumulatief(self)
     
     def gemiddelde(self):
         """Bepaalt het gemiddelde."""
