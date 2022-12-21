@@ -134,10 +134,7 @@ class html_lib:
     <td style="{html_lib.CEL1_STIJL}">
         <span style="">${naam}$</span>
     </td>
-    <td style="{html_lib.CEL2_STIJL}">
-        <span style="">{html_lib.spacer(1, 1)}</span>
-    </td>
-    <td colspan="2" style="{html_lib.CEL3_STIJL}">
+    <td colspan="3" style="{html_lib.CEL3_STIJL}">
         <span style="">{tekst}</span>
     </td>
 </tr>"""
@@ -147,10 +144,7 @@ class html_lib:
     <td style="{html_lib.CEL1_STIJL}">
         <span style="">${naam}$</span>
     </td>
-    <td style="{html_lib.CEL2_STIJL}">
-        <span style="">{html_lib.spacer(1, 1)}</span>
-    </td>
-    <td style="{html_lib.CEL3_STIJL}">
+    <td colspan="2" style="{html_lib.CEL3_STIJL}">
         <span style="">{tekst}</span>
     </td>
     <td style="{html_lib.CEL4_STIJL}">
@@ -369,7 +363,9 @@ class Document(pc.BasisObject):
             elif typ == self.TYPE_FIGUUR:
                 html += html_lib.figuur(vervang_naam(naam), obj)
             elif typ == self.TYPE_PYCO_OVERIG:
-                pass
+                tekst = repr(obj)
+                tekst = tekst[:30] + '&nbsp;&nbsp; ... &nbsp;&nbsp; ... &nbsp;&nbsp;' + tekst[-30:] if len(tekst) > 62 else tekst
+                html += html_lib.tekst(vervang_naam(naam), tekst, docu)
             elif typ == self.TYPE_KLASSE_START:
                 html += html_lib.lege_regel()
                 html += html_lib.kop2(naam)
