@@ -170,6 +170,9 @@ class html_lib:
         
     @staticmethod
     def waarde(naam, obj, docu):
+        if not obj._is_getal:
+            return html_lib.tekst(naam, str(obj), docu)
+        
         naam = '$' + naam + '$' if naam != '' else '&nbsp;'
         
         _1 = naam
@@ -207,12 +210,15 @@ class Document(pc.BasisObject):
     """
     
     TYPE_TEKST = 0
-    TYPE_KLASSE_START = 1
-    TYPE_KLASSE_EINDE = 2
-    TYPE_FUNCTIE = 3
-    TYPE_WAARDE = 4
-    TYPE_FIGUUR = 5
-    TYPE_PYCO_OVERIG = 6
+    TYPE_WAARDE = 1
+    TYPE_FIGUUR = 2
+    TYPE_PYCO_OVERIG = 3
+    TYPE_KLASSE_START = 4
+    TYPE_KLASSE_EINDE = 5
+    TYPE_FUNCTIE_DECLARATIE = 6
+    TYPE_FUNCTIE_START = 7
+    TYPE_FUNCTIE_MIDDEN = 8
+    TYPE_FUNCTIE_EINDE = 9
     
     SPECIALE_LETTERS = sorted('alpha nu beta Xi xi Gamma gamma Delta delta Pi pi varpi epsilon varepsilon rho varrho zeta Sigma sigma varsigma eta tau Theta theta vartheta Upsilon upsilon iota Phi phi varphi kappa varkappa chi Lambda lambda Psi psi mu Omega omega partial infty'.split())
     
@@ -225,15 +231,15 @@ class Document(pc.BasisObject):
             
         self._onderdelen = []  # (type, naam, object, documentatie)
         
-    #---------------------------------------------------------------------------
-        
-    def _print(self, md_str):
-        IPython.display.display(IPython.display.HTML(md_str))
+    def _print(self, html_str):
+        IPython.display.display(IPython.display.HTML(html_str))
         
     def __call__(self, obj=None):
         if obj is None:
             self._print(self.html)
         return self._registreer(obj)
+    
+    #---------------------------------------------------------------------------  
         
     def _registreer(self, obj, naam=None):
         if isinstance(obj, str):
@@ -248,13 +254,39 @@ class Document(pc.BasisObject):
             return self._registreer_figuur(obj, naam)
         elif isinstance(obj, pc.BasisObject):
             return self._registreer_pyco_overig(obj, naam)
+        elif isinstance(obj, list) or isinstance(obj, tuple):
+            for item in obj:
+                self._registreer(item)
+        elif isinstance(obj, int) or isinstance(obj, float):
+            self._registreer_waarde(pc.Waarde(obj), naam)
+        elif isinstance(obj, dict):
+            for k, v in obj.items():
+                self._registreer(v, naam=k)
             
     def _registreer_tekst(self, obj, naam):
         naam = '' if naam is None else naam
         documentatie = ''
         self._onderdelen.append((self.TYPE_TEKST, naam, obj, documentatie))
         return None
-        
+    
+    def _registreer_waarde(self, obj, naam):
+        naam = '' if naam is None else naam
+        documentatie = obj._documentatie if hasattr(obj, '_documentatie') else ''
+        self._onderdelen.append((self.TYPE_WAARDE, naam, obj, documentatie))
+        return None
+    
+    def _registreer_figuur(self, obj, naam):
+        naam = obj.titel if naam is None else naam
+        documentatie = obj._documentatie if hasattr(obj, '_documentatie') else ''
+        self._onderdelen.append((self.TYPE_FIGUUR, naam, obj, documentatie))
+        return None
+    
+    def _registreer_pyco_overig(self, obj, naam):
+        naam = '' if naam is None else naam
+        documentatie = obj._documentatie if hasattr(obj, '_documentatie') else ''
+        self._onderdelen.append((self.TYPE_PYCO_OVERIG, naam, obj, documentatie))
+        return None
+    
     def _registreer_klasse(self, obj, naam):
         naam =  (obj.__name__[0].capitalize() + obj.__name__.replace('_', ' ')[1:]) if naam is None else naam
         documentatie = ''
@@ -278,46 +310,30 @@ class Document(pc.BasisObject):
         return obj
     
     def _registreer_functie(self, obj, naam):
-        naam = (obj.__name__[0].capitalize() + obj.__name__.replace('_', ' ')[1:]) if naam is None else naam
+        naam = obj.__name__ if naam is None else naam
         documentatie = ''
-        self._onderdelen.append((self.TYPE_FUNCTIE, naam, obj, documentatie))
-        return obj
-    
-    def _registreer_waarde(self, obj, naam):
-        naam = '' if naam is None else naam
-        documentatie = obj._documentatie if hasattr(obj, '_documentatie') else ''
-        self._onderdelen.append((self.TYPE_WAARDE, naam, obj, documentatie))
-        return None
-    
-    def _registreer_figuur(self, obj, naam):
-        naam = obj.titel if naam is None else naam
-        documentatie = obj._documentatie if hasattr(obj, '_documentatie') else ''
-        self._onderdelen.append((self.TYPE_FIGUUR, naam, obj, documentatie))
-        return None
-    
-    def _registreer_pyco_overig(self, obj, naam):
-        naam = '' if naam is None else naam
-        documentatie = obj._documentatie if hasattr(obj, '_documentatie') else ''
-        self._onderdelen.append((self.TYPE_PYCO_OVERIG, naam, obj, documentatie))
-        return None
-    
-    #---------------------------------------------------------------------------
+        self._onderdelen.append((self.TYPE_FUNCTIE_DECLARATIE, naam, obj, documentatie))
         
-    def _vervang_naam(self, naam):
-        klasse_naam = ''
-        if '.' in naam:
-            klasse_naam, naam = tuple(naam.split('.', 2))
-        
-        delen = naam.split('_')
-        for ideel, deel in enumerate(delen):
-            if deel in self.SPECIALE_LETTERS:
-                delen[ideel] = '\\' + deel
-        if len(delen) == 1:
-            return klasse_naam, delen[0]
-        elif len(delen) == 2:
-            return klasse_naam, delen[0] + '_{' + delen[1] + '}'
-        else:
-            return klasse_naam, delen[0] + '_{' + ','.join(delen[1:]) + '}'
+        def wrapper(*args, **kwargs):
+            self._onderdelen.append((self.TYPE_FUNCTIE_START, naam, obj, documentatie))
+            arg_names = str(inspect.signature(obj)).strip('()').split(',')
+            for iarg, arg in enumerate(args):
+                self._registreer(arg, naam=arg_names[iarg])
+            for k, v in kwargs.items():
+                self._registreer(v, naam=k)
+            self._onderdelen.append((self.TYPE_FUNCTIE_MIDDEN, naam, obj, documentatie))
+            antwoord = obj(*args, **kwargs)
+            if isinstance(antwoord, tuple):
+                for item in antwoord:
+                    self._registreer(item)
+            else:
+                self._registreer(antwoord)
+            self._onderdelen.append((self.TYPE_FUNCTIE_EINDE, naam, obj, documentatie))
+            return antwoord
+            
+        return wrapper
+    
+    #---------------------------------------------------------------------------      
         
     @property
     def html(self):
@@ -327,23 +343,48 @@ class Document(pc.BasisObject):
         
         if self._titel is not None:
             html += html_lib.kop1(self._titel)
+            
+        def vervang_naam(naam):
+            "Verwijder klasse naam en maak gereed voor Latex formule opmaak."
+            klasse_naam = ''
+            if '.' in naam:
+                klasse_naam, naam = tuple(naam.split('.', 2))
+
+            delen = naam.split('_')
+            for ideel, deel in enumerate(delen):
+                if deel in self.SPECIALE_LETTERS:
+                    delen[ideel] = '\\' + deel
+            if len(delen) == 1:
+                return delen[0]
+            elif len(delen) == 2:
+                return delen[0] + '_{' + delen[1] + '}'
+            else:
+                return delen[0] + '_{' + ','.join(delen[1:]) + '}'
         
         for typ, naam, obj, docu in self._onderdelen:
             if typ == self.TYPE_TEKST:
-                html += html_lib.tekst(self._vervang_naam(naam)[1], obj, docu)
+                html += html_lib.tekst(vervang_naam(naam), obj, docu)
+            elif typ == self.TYPE_WAARDE:
+                html += html_lib.waarde(vervang_naam(naam), obj, docu)
+            elif typ == self.TYPE_FIGUUR:
+                html += html_lib.figuur(vervang_naam(naam), obj)
+            elif typ == self.TYPE_PYCO_OVERIG:
+                pass
             elif typ == self.TYPE_KLASSE_START:
                 html += html_lib.lege_regel()
                 html += html_lib.kop2(naam)
             elif typ == self.TYPE_KLASSE_EINDE:
                 html += html_lib.lijn(boven=True)
-            elif typ == self.TYPE_FUNCTIE:
+            elif typ == self.TYPE_FUNCTIE_DECLARATIE:
                 pass
-            elif typ == self.TYPE_WAARDE:
-                html += html_lib.waarde(self._vervang_naam(naam)[1], obj, docu)
-            elif typ == self.TYPE_FIGUUR:
-                html += html_lib.figuur(self._vervang_naam(naam)[1], obj)
-            elif typ == self.TYPE_PYCO_OVERIG:
-                pass
+            elif typ == self.TYPE_FUNCTIE_START:
+                #html += html_lib.lege_regel()
+                html += html_lib.tekst('', f'<span style="font-weight:bold;font-style:italic;">{naam}</span>&nbsp;<span style="font-weight:bold;color:blue;">(</span>', '')
+            elif typ == self.TYPE_FUNCTIE_MIDDEN:
+                html += html_lib.tekst('', '<span style="font-weight:bold;color:blue;">)</span>&nbsp;<span style="">&rarr;</span>&nbsp;<span style="font-weight:bold;color:red;">(</span>', '')
+            elif typ == self.TYPE_FUNCTIE_EINDE:
+                html += html_lib.tekst('', '<span style="font-weight:bold;color:red;">)</span>', '')
+                #html += html_lib.lege_regel()
         
         html += html_lib.tabel_einde()
         

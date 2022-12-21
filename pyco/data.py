@@ -14,10 +14,12 @@ class pc:
 class Data(pc.BasisObject):
     """
     Een Pandas DataFrame waarbij eigenschappen een eenheid kunnen hebben.
+    Eigenschap moet een geldige Python naam opmaak hebben en mag niet 'data' zijn.
 
     AANMAKEN DATA  
         d = Data(eigenschap1='eenheid1',           als eenheid dimensieloos:
                  eigenschap2='eenheid2')             dan gebruik '-', '' of None
+        d = Data(eigenschap1='eh1', data=...)      direct toevoegen van data
                   
     DATA EIGENSCHAPPEN
         d.eigenschappen           lijst met aanwezige kolomnamen
@@ -30,8 +32,6 @@ class Data(pc.BasisObject):
         dr1 = DR(eigenschap1=waarde1, eigenschap2=waarde2)
         dr2 = DR(eigenschap2=waarde3, eigenschap1=waarde4)
         dr2.waardes()             retourneert een Python dict met Waarde objecten
-        dr2.coordinaten(eigenschap1, eigenschap2)
-                                  retourneert een tuple met tuples (es1, es2)
         
     TOEVOEGEN DATA REGEL    in onderstaande gevallen: 4 eigenschappen (kolommen)
         d.toevoegen(d.DataRij( ... ))      een DataRij object
@@ -42,6 +42,7 @@ class Data(pc.BasisObject):
         d.toevoegen(1,2)                   2 laatste kolommen worden met
                                                    standaard waarde ingevuld (0)
         d.toevoegen(1,2,standaard=pc.nan)  andere standaard waarde
+        d.toeveogen([(1,2,3,4), (3,4,5,6), (5,6,7,8)])  of 2D Python lijst/tuple
 
     OPHALEN DATA EIGENSCHAP       
         d['eigenschap1']          een Lijst object (kolom uit dataframe)
@@ -51,15 +52,27 @@ class Data(pc.BasisObject):
                                                             van 4e t/m 8e invoer
         d[::2]                    Python list met alle oneven rijnummers
         d[:, 1:3]                 Python list met 2e en 3e kolom
-                                                  (alleen waarden, geen eenheid)          
+                                                  (alleen waarden, geen eenheid) 
+                                                  
+    METHODES
+        d.coordinaten(eigenschap1, eigenschap2)
+                                  retourneert een tuple met tuples (es1, es2)
     """
 
     def __init__(self, **lijst_dict):
         super().__init__()
+        
+        toevoegen_data = None
+        if 'data' in lijst_dict:
+            toevoegen_data = lijst_dict['data']
+            del lijst_dict['data']
             
         lijst_dict = {k:(v if isinstance(v, str) and len(v) > 0 else '-') for k, v in lijst_dict.items()}
         self._dataframe = pd.DataFrame([], columns=pd.MultiIndex.from_tuples(
                 [(gh, eh) for gh, eh in lijst_dict.items()]))
+        
+        if toevoegen_data is not None:
+            self.toevoegen(toevoegen_data)
         
     @property
     def eigenschappen(self):
@@ -101,7 +114,15 @@ class Data(pc.BasisObject):
             if isinstance(args[0], self.DataRij):
                 args = list(args[0])
             if isinstance(args[0], list) or isinstance(args[0], tuple):
-                args = args[0]
+                if all([(
+                            (isinstance(a, list) or isinstance(a, tuple))
+                            and len(a) == len(eigenschappen)
+                        ) for a in args[0]]):
+                    for subargs in args[0]:
+                        self.toevoegen(subargs)
+                    return
+                else:
+                    args = args[0]
             elif isinstance(args[0], pc.Lijst):
                 args = args[0].array
             else:
@@ -115,6 +136,7 @@ class Data(pc.BasisObject):
         tmp_df = pd.DataFrame([args], columns=pd.MultiIndex.from_tuples(
                 [(es, eh) for es, eh in zip(eigenschappen, eenheden)]))
         self._dataframe = pd.concat([self._dataframe, tmp_df], ignore_index=True)
+
         
     @property    
     def df(self):
