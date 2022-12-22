@@ -236,6 +236,9 @@ class Document(pc.BasisObject):
     #---------------------------------------------------------------------------  
         
     def _registreer(self, obj, naam=None):
+        if naam is not None and (naam.startswith('_') or
+                ('.' in naam and naam.split('.', 2)[1].startswith('_'))):
+            return obj
         if isinstance(obj, str):
             return self._registreer_tekst(obj, naam)
         elif inspect.isclass(obj):

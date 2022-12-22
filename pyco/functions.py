@@ -166,6 +166,8 @@ _numpy_functions = dict(
             pc.Waarde(1, (pc.Waarde(1, args[0].eenheid)._eenheidbreuk)*(pc.Waarde(1, args[1].eenheid)._eenheidbreuk), config=None).eenheid 
             if (isinstance(args[0], pc.Waarde) and isinstance(args[1], pc.Waarde))
                   or (isinstance(args[0], pc.Lijst) and isinstance(args[1], pc.Lijst))
+                  or (isinstance(args[0], pc.Lijst) and isinstance(args[1], pc.Waarde))
+                  or (isinstance(args[0], pc.Waarde) and isinstance(args[1], pc.Lijst))
             else '@' + eh if eh is not None else None  # @: eenheid naar origineel terugzetten
         )
     ),
@@ -175,6 +177,8 @@ _numpy_functions = dict(
               pc.Waarde(1, (pc.Waarde(1, args[0].eenheid)._eenheidbreuk)/(pc.Waarde(1, args[1].eenheid)._eenheidbreuk), config=None).eenheid
               if (isinstance(args[0], pc.Waarde) and isinstance(args[1], pc.Waarde))
                   or (isinstance(args[0], pc.Lijst) and isinstance(args[1], pc.Lijst))
+                  or (isinstance(args[0], pc.Lijst) and isinstance(args[1], pc.Waarde))
+                  or (isinstance(args[0], pc.Waarde) and isinstance(args[1], pc.Lijst))
               else (
                   # pc.Waarde/pc.Lijst delen door getal
                   args[0].eenheid
