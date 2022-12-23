@@ -253,9 +253,12 @@ class Document(pc.BasisObject):
             return self._registreer_pyco_overig(obj, naam)
         elif isinstance(obj, list) or isinstance(obj, tuple):
             for item in obj:
-                self._registreer(item)
-        elif isinstance(obj, int) or isinstance(obj, float):
-            self._registreer_waarde(pc.Waarde(obj), naam)
+                self._registreer(item, naam)
+        elif isinstance(obj, float):
+            return self._registreer_waarde(pc.Waarde(obj), naam)
+        elif isinstance(obj, int):
+            print('ásdfasdfasdfasdf', obj)
+            return self._registreer_tekst(str(obj), naam)
         elif isinstance(obj, dict):
             for k, v in obj.items():
                 self._registreer(v, naam=k)

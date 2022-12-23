@@ -10,9 +10,11 @@ BasisObject = pyco.basis.BasisObject
 
 import pyco.waarde
 Waarde = pyco.waarde.Waarde
+W = pyco.waarde.Waarde
 
 import pyco.lijst
 Lijst = pyco.lijst.Lijst
+L = pyco.lijst.Lijst
 
 from pyco.functions import import_all
 for k, v in import_all.items():
@@ -49,3 +51,10 @@ Materiaal = pyco.materiaal.Materiaal
 
 import pyco.document
 Document = pyco.document.Document
+
+import pyco.macro
+Macro = pyco.macro.Macro
+
+class macro:
+    import pyco.macros.ligger_op_twee_steunpunten
+    Ligger_op_twee_steunpunten = pyco.macros.ligger_op_twee_steunpunten.Ligger_op_twee_steunpunten
