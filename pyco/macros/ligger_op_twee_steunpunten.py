@@ -26,7 +26,7 @@ class Ligger_op_twee_steunpunten(pc.Macro):
         voorbeeld.berekening.V_lijn.plot()
         voorbeeld.berekening.M_lijn.plot()
         
-    retourneert pc.Waarde object met maximaal moment:
+    voorbeeld: retourneer pc.Waarde object met maximaal moment:
         voorbeeld.berekening.M_max
     """
     

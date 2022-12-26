@@ -20,7 +20,7 @@ class Macro(pc.BasisObject, ABC):
             self.config2 = config2 if config2 is None else config2
             
         def extra_methode_om_data_in_te_voeren(self, param1, param2):
-            self.param1 = param1 + param2
+            self.param = param1 + param2
             return self   # altijd instantie retourneren
             
         def __call__(self):
@@ -51,6 +51,8 @@ class Macro(pc.BasisObject, ABC):
                         param1=..., param2=...
                     )()
                     
+        voorbeeld.config1         # rtourneert configuratie 1
+        voorbeeld.param           # retourneert parameter
         voorbeeld.eerste_deel.a   # retourneert waarde
         voorbeeld.tweede_deel.c   # retourneert waarde
         voorbeeld.document()      # weergeven document 

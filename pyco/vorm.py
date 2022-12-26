@@ -546,6 +546,7 @@ class Vorm(pc.BasisObject):
         v.eenheid       opvragen huidige eenheid; of None als alleen getal
         v.eenheid = 'm' alle waarden in alle knoopobjecten naar 'm'
         v.gebruik_eenheid('m')   zelfde als bovenstaande, retourneert object
+        v.eh('m')        zelfde als bovenstaande, retourneert object
 
     EIGENSCHAPPEN       naam + '_'  -->  Waarde object i.p.v. getal
         v.O             omtrek   (bijv. v.O_ geeft omtrek Waarde met eenheid)
@@ -767,8 +768,8 @@ class Vorm(pc.BasisObject):
 
         self.Wxmin = self._float(self.Ixx / abs(self.ncx - self.xmin))
         self.Wxmax = self._float(self.Ixx / abs(self.ncx - self.xmax))
-        self.Wymin = self._float(self.Iyy / abs(self.ncx - self.xmin))
-        self.Wymax = self._float(self.Iyy / abs(self.ncx - self.xmax))
+        self.Wymin = self._float(self.Iyy / abs(self.ncy - self.ymin))
+        self.Wymax = self._float(self.Iyy / abs(self.ncy - self.ymax))
         self.kxmin = self._float(-1 * self.Wxmax / self.A)
         self.kxmax = self._float(self.Wxmin / self.A)
         self.kymin = self._float(-1 * self.Wxmax / self.A)
@@ -936,6 +937,10 @@ class Vorm(pc.BasisObject):
         """Zet knopen om naar nieuwe eenheid en retourneert object."""
         self.eenheid = eenheid
         return self
+    
+    def eh(self, eenheid:str):
+        """Zet knopen om naar nieuwe eenheid en retourneert object."""
+        return self.gebruik_eenheid(eenheid)
 
     @property
     def array(self) -> np.array:
