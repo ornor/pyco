@@ -160,6 +160,11 @@ class Lijst(pc.BasisObject):
         if len(waardes) == 1 and \
                 (isinstance(waardes[0], list) or isinstance(waardes[0], tuple)):
             waardes = waardes[0]
+            
+        if all([isinstance(w, str) for w in waardes]):
+            self._array = np.array(waardes, dtype='str')
+            self._eenheid = None
+            return
 
         if len(waardes) == 1 and isinstance(waardes[0], type(np.array([]))):
             self._array = np.array(waardes[0].flatten(), dtype='float64') # flatten nD to 1D array
@@ -690,14 +695,20 @@ class Lijst(pc.BasisObject):
         if config is None:
             return str(self)
         format_str = '{:' + config + '}'
-        waardes = ', '.join(format_str.format(float(w)) for w in self)
+        if isinstance(self[0], str):
+            waardes = ', '.join('\'' + str(w) + '\'' for w in self)
+        else:
+            waardes = ', '.join(format_str.format(float(w)) for w in self)
         eenheid = self.eenheid if self.eenheid is not None else ''
         return '({}) {}'.format(waardes, eenheid).strip()
 
     def __repr__(self):
         """Geeft representatie object."""
         cls_naam = type(self).__name__
-        waardes = ', '.join(str(float(w)) for w in self)
+        if isinstance(self[0], str):
+            waardes = ', '.join('\'' + str(w) + '\'' for w in self)
+        else:
+            waardes = ', '.join(str(float(w)) for w in self)
         if self.eenheid is None:
             return '{}({})'.format(cls_naam, waardes)
         else:
@@ -705,7 +716,10 @@ class Lijst(pc.BasisObject):
 
     def __str__(self):
         """Geeft tekst met lijst en eenheid"""
-        waardes = ', '.join(str(float(w)) for w in self)
+        if isinstance(self[0], str):
+            waardes = ', '.join('\'' + str(w) + '\'' for w in self)
+        else:
+            waardes = ', '.join(str(float(w)) for w in self)
         eenheid = self.eenheid if self.eenheid is not None else ''
         return '({}) {}'.format(waardes, eenheid).strip()
 

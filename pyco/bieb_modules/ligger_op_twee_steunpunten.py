@@ -4,7 +4,7 @@ Wd = pc.Waarde
 Ls = pc.Lijst
 
 
-class Ligger_op_twee_steunpunten(pc.Macro):
+class LiggerOpTweeSteunpunten(pc.Macro, pc.BiebItem):
     """
     Berekent snedekrachten in een ligger op twee steunpunten.
     

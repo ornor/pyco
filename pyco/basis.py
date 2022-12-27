@@ -36,6 +36,13 @@ class ObjectTeller(metaclass=Singleton):
     def object_nummer(self):
         self._object_teller += 1
         return self._object_teller
+    
+
+class BiebItem(object):
+    """Alle objecten als instance van deze klasse in 'bieb' map, worden geimporteerd."""
+    
+    def __init__(self):
+        pass
 
     
 class BasisObject(object):
@@ -81,3 +88,5 @@ class BasisObject(object):
             line = line[4:] if line[:4] == '    ' else line
             docstr += line + '\n'
         print(f"\n{underline}\n|  {name}  |\n{underline}\n\n{docstr}")
+
+    

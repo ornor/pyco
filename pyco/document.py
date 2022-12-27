@@ -12,7 +12,9 @@ class pc:
     Figuur = pyco.figuur.Figuur
     
     
-class html_lib: 
+class html_lib:
+    """Hulpklasse om document op te maken in HTML."""
+    
     CEL_ACHTERGROND_KLEUR = '#fff'
     CEL_ACHTERGROND_KLEUR_KOP1 = '#fff'
     CEL_ACHTERGROND_KLEUR_KOP2 = '#eee'
@@ -199,8 +201,27 @@ class Document(pc.BasisObject):
     """
     Framework voor gestructureerde uitvoer.
     
-    doc = pc.Document
-
+    doc = pc.Document('Titel van document')
+    
+    doc('<b>Dit is HTML voor in document')    # (html) tekst direct opgeven
+    doc(pc.Waarde(3) >> "omschrijving")       # Waarde object met omschrijving
+    doc(pc.Figuur( ... ))                     # Figuur object als afbeelding
+    
+    @doc                                      # decorator van klasse
+    class naam_van_klasse:                    # scant alle atributen automatisch
+        a = pc.Waarde(4)
+        b = pc.Waarde(5)
+        c = pc.Figuur( ... )   >>\
+        "Met omschrijving van figuur."
+        
+    @doc                                      # decorator van functie
+    def dit_is_een_functie(arg1, arg2):       # alle invoerparameters en alle
+        print('Hello world!')                 #     uitvoerparameter worden
+        return param1, param2, param3         #     in document gezet per call
+        
+    doc.html                                  # retourneert document als html
+    
+    doc()                                     # print html document
     """
     
     TYPE_TEKST = 0
@@ -226,9 +247,11 @@ class Document(pc.BasisObject):
         self._onderdelen = []  # (type, naam, object, documentatie)
         
     def _print(self, html_str):
+        "Print html tekst naar IPython console."
         IPython.display.display(IPython.display.HTML(html_str))
         
     def __call__(self, obj=None):
+        "Hoofdmethode, wordt gebruikt als document wordt uitgevoerd als functie."
         if obj is None:
             self._print(self.html)
         return self._registreer(obj)
@@ -236,6 +259,7 @@ class Document(pc.BasisObject):
     #---------------------------------------------------------------------------  
         
     def _registreer(self, obj, naam=None):
+        "Kijkt welk type object wordt geregistreerd en dirigeert deze."
         if naam is not None and (naam.startswith('_') or
                 ('.' in naam and naam.split('.', 2)[1].startswith('_'))):
             return obj
@@ -257,37 +281,41 @@ class Document(pc.BasisObject):
         elif isinstance(obj, float):
             return self._registreer_waarde(pc.Waarde(obj), naam)
         elif isinstance(obj, int):
-            print('ásdfasdfasdfasdf', obj)
             return self._registreer_tekst(str(obj), naam)
         elif isinstance(obj, dict):
             for k, v in obj.items():
                 self._registreer(v, naam=k)
             
     def _registreer_tekst(self, obj, naam):
+        "Registreer tekst objecten."
         naam = '' if naam is None else naam
         documentatie = ''
         self._onderdelen.append((self.TYPE_TEKST, naam, obj, documentatie))
         return None
     
     def _registreer_waarde(self, obj, naam):
+        "Registreer pc.Waarde objecten."
         naam = '' if naam is None else naam
         documentatie = obj._documentatie if hasattr(obj, '_documentatie') else ''
         self._onderdelen.append((self.TYPE_WAARDE, naam, obj, documentatie))
         return None
     
     def _registreer_figuur(self, obj, naam):
+        "Registreer pc.Figuur objecten."
         naam = obj.titel if naam is None else naam
         documentatie = obj._documentatie if hasattr(obj, '_documentatie') else ''
         self._onderdelen.append((self.TYPE_FIGUUR, naam, obj, documentatie))
         return None
     
     def _registreer_pyco_overig(self, obj, naam):
+        "Registreer alle overige pc objecten."
         naam = '' if naam is None else naam
         documentatie = obj._documentatie if hasattr(obj, '_documentatie') else ''
         self._onderdelen.append((self.TYPE_PYCO_OVERIG, naam, obj, documentatie))
         return None
     
     def _registreer_klasse(self, obj, naam):
+        "Registreer klasse met @doc decorator."
         naam =  (obj.__name__[0].capitalize() + obj.__name__.replace('_', ' ')[1:]) if naam is None else naam
         documentatie = ''
         
@@ -310,6 +338,7 @@ class Document(pc.BasisObject):
         return obj
     
     def _registreer_functie(self, obj, naam):
+        "Registreer functies met @doc decorator."
         naam = obj.__name__ if naam is None else naam
         documentatie = ''
         self._onderdelen.append((self.TYPE_FUNCTIE_DECLARATIE, naam, obj, documentatie))
@@ -337,6 +366,7 @@ class Document(pc.BasisObject):
         
     @property
     def html(self):
+        "Retourneer document als HTML tekst."
         html = ''
         
         html += html_lib.tabel_start()
