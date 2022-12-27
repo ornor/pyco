@@ -15,7 +15,7 @@ De pyco bibliotheek is afhankelijk van onderstaande externe bibliotheken:
 * matplotlib (https://matplotlib.org/) 
 * IPython (https://ipython.org/)
 
-Je kan de pyco bibliotheek installeren vanuit PyPi met `pip`.
+Je kan de pyco.nl bibliotheek installeren vanuit PyPi met `pip`.
 
     pip install pyconl
 
