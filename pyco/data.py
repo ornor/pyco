@@ -28,9 +28,7 @@ class Data(pc.BasisObject):
         d.DataRij                 klasse die een rij met eigenschappen beschrijft
     
     DATARIJ
-        DR = d.DataRij
-        dr1 = DR(eigenschap1=waarde1, eigenschap2=waarde2)
-        dr2 = DR(eigenschap2=waarde3, eigenschap1=waarde4)
+        dr1 = d.DataRij(eigenschap1=waarde1, eigenschap2=waarde2)
         dr2.waardes()             retourneert een Python dict met Waarde objecten
         
     TOEVOEGEN DATA REGEL    in onderstaande gevallen: 4 eigenschappen (kolommen)
@@ -67,12 +65,23 @@ class Data(pc.BasisObject):
             toevoegen_data = lijst_dict['data']
             del lijst_dict['data']
             
+        toevoegen_bronnen = None
+        if 'bronnen' in lijst_dict:
+            toevoegen_bronnen = lijst_dict['bronnen']
+            del lijst_dict['bronnen']
+            
         lijst_dict = {k:(v if isinstance(v, str) and len(v) > 0 else '-') for k, v in lijst_dict.items()}
         self._dataframe = pd.DataFrame([], columns=pd.MultiIndex.from_tuples(
                 [(gh, eh) for gh, eh in lijst_dict.items()]))
         
         if toevoegen_data is not None:
             self.toevoegen(toevoegen_data)
+            
+        self._bronnen = []
+        if toevoegen_bronnen is not None:
+            if isinstance(toevoegen_bronnen, str):
+                toevoegen_bronnen = [toevoegen_bronnen]
+            self._bronnen = [b for b in toevoegen_bronnen]
         
     @property
     def eigenschappen(self):
@@ -81,8 +90,13 @@ class Data(pc.BasisObject):
     
     @property
     def eenheden(self):
-        """Lijst met eenheden die bij eigenschappen (kolommen) horen"""
+        """Lijst met eenheden die bij eigenschappen (kolommen) horen."""
         return [eh for _, eh in self.df.columns]
+    
+    @property
+    def bronnen(self):
+        """Lijst met bronvermeldingen."""
+        return self._bronnen
     
     @property
     def DataRij(self):
@@ -102,7 +116,6 @@ class Data(pc.BasisObject):
         
         return cls
 
-        
     def toevoegen(self, *args, standaard=0, **kwargs):
         """Een nieuwe rij toevoegen"""
         eigenschappen = self.eigenschappen
@@ -136,7 +149,13 @@ class Data(pc.BasisObject):
         tmp_df = pd.DataFrame([args], columns=pd.MultiIndex.from_tuples(
                 [(es, eh) for es, eh in zip(eigenschappen, eenheden)]))
         self._dataframe = pd.concat([self._dataframe, tmp_df], ignore_index=True)
-
+        
+    def toevoegen_bronnen(self, bronnen, *overige_bronnen):
+        if isinstance(bronnen, str):
+            bronnen = [bronnen]
+        if len(overige_bronnen) > 0:
+            bronnen += overige_bronnen
+        self._bronnen += list(bronnen)
         
     @property    
     def df(self):
@@ -177,7 +196,15 @@ class Data(pc.BasisObject):
     
     def __repr__(self):
         object_str = self.__str__()
-        return 'pyco.Data object:\n' + len(object_str.split('\n')[0])*'-' + '\n' + object_str
+        lijn = len(object_str.split('\n')[0])*'-'
+        bronnen = ''
+        if len(self.bronnen) > 0:
+            bronnen = 'Bronvermelding:\n' + '\n'.join(['* {}'.format(b) for b in self.bronnen])
+        return ('pyco.Data object:\n' 
+                    + lijn + '\n' 
+                    + object_str + '\n' 
+                    + lijn + '\n' 
+                    + bronnen)
     
     def __str__(self):
         return str(self.df)

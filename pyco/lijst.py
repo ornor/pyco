@@ -24,7 +24,7 @@ class Lijst(pc.BasisObject):
         l.eenheid = 'N/mm2'     eenheid aanpassen
         l.gebruik_eenheid('m')  eenheid aanpassen, retourneert object
         l.eh('m')               eenheid aanpassen, retourneert object
-        l = l.N_mm2             kan voor een aantal standaard gevallen (zie lijst onderaan)
+        l.N_mm2                 kan voor een aantal standaard gevallen (zie lijst onderaan)
 
     OMZETTEN LIJST NAAR TEKST   resulteert in nieuw string object
         tekst = str(l)          of automatisch met bijvoorbeeld print(l)
@@ -48,7 +48,7 @@ class Lijst(pc.BasisObject):
         for w in l1:            itereert en geeft float/Waarde object terug
         getal = len(l1)         geeft aantal elementen (dimensies) van lijst
         
-    ELEMENT UIT LIJST HALEN
+    WAARDE OBJECT UIT LIJST HALEN
         waarde = l1.i(1)        retourneert het i-ste element als Waarde object
                                                 (1e element is element nummer 0)
 
@@ -145,7 +145,8 @@ class Lijst(pc.BasisObject):
     ml_j ml_min ml_s Mm mm mm2 mm3 mm3_d mm3_h mm3_j mm3_min mm3_s mm4 mm_d
     mm_h mm_j mm_min mm_s MN MNm MNmm MN_m2 MN_mm2 MPa Ms ms Mton mug mum mus
     m_d m_h m_j m_min m_s N ng Nm nm Nmm ns N_m N_mm N_m2 N_mm2 ounce Pa Pg pg
-    pint Pm pm pound Ps ps rad s stone tbs Tg Tm TN ton TPa Ts tsp yard zeemijl
+    pint Pm pm pound proc prom Ps ps rad s stone tbs Tg Tm TN ton TPa Ts tsp
+    yard zeemijl
     """
 
 
@@ -743,6 +744,16 @@ class Lijst(pc.BasisObject):
 ###############################################################################
 #  ALLES HIERONDER MOET ZELFDE ZIJN ALS BIJ WAARDE OBJECT
 ###############################################################################
+
+    # DIMENSIELOOS
+
+    @property
+    def proc(self):
+        return self._verander_eenheid('proc')
+
+    @property
+    def prom(self):
+        return self._verander_eenheid('prom')
 
     # MASSA
 

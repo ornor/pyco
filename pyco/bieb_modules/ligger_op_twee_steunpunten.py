@@ -1,8 +1,5 @@
 import pyco as pc
 
-Wd = pc.Waarde
-Ls = pc.Lijst
-
 
 class LiggerOpTweeSteunpunten(pc.Macro, pc.BiebItem):
     """
@@ -10,10 +7,10 @@ class LiggerOpTweeSteunpunten(pc.Macro, pc.BiebItem):
     
     voorbeeld = Ligger_op_twee_steunpunten(
             titel='Dit is een voorbeeld',
-            lengte=Wd(10).m,
+            lengte=pc.W(10).m,
             nx=200,  # de ligger wordt standaard op 200 plaatsen doorgerekend
         ).toevoegen_F(
-            F=Wd(4).kN, x=Wd(2).m
+            F=pc.W(4).kN, x=pc.W(2).m
         ).toevoegen_q(
             q=Wd(3).kN_m, x1=Wd(1).m, x2=Wd(6).m
         )()
@@ -51,19 +48,19 @@ class LiggerOpTweeSteunpunten(pc.Macro, pc.BiebItem):
 
         @doc
         class invoer:
-            L = Wd(self.lengte).m   >>\
+            L = pc.W(self.lengte).m   >>\
             'lengte van ligger (afstand tussen de twee steunpunten)'
 
-            F = Ls([F for F, _ in self.F_data]).kN   >>\
+            F = pc.L([F for F, _ in self.F_data]).kN   >>\
             'grootte van puntlast(en)'
-            x_F = Ls([x for _, x in self.F_data]).m   >>\
+            x_F = pc.L([x for _, x in self.F_data]).m   >>\
             'afstand van linker steunpunt (A) tot aan puntlast(en)'
 
-            q = Ls([q for q, _, _ in self.q_data]).kN_m   >>\
+            q = pc.L([q for q, _, _ in self.q_data]).kN_m   >>\
             'grootte van gelijkmatig verdeelde belasting'
-            x1_q = Ls([x1 for _, x1, _ in self.q_data]).m   >>\
+            x1_q = pc.L([x1 for _, x1, _ in self.q_data]).m   >>\
             'afstand van linker steunpunt (A) tot aan begin (linker kant) belasting'
-            x2_q = Ls([x2 for _, _, x2 in self.q_data]).m   >>\
+            x2_q = pc.L([x2 for _, _, x2 in self.q_data]).m   >>\
             'afstand van linker steunpunt (A) tot aan einde (rechter kant) belasting'
 
             # weergeven geometrie in figuur:
@@ -137,22 +134,22 @@ class LiggerOpTweeSteunpunten(pc.Macro, pc.BiebItem):
         class berekening:
             n_x = self.nx  # aantal horizontale intervallen
 
-            x = pc.van_totmet_n(Wd(0).m, invoer.L, n_x)   >>\
+            x = pc.van_totmet_n(pc.W(0).m, invoer.L, n_x)   >>\
             'alle x-waarden waar snedekrachten berekend worden'
 
             dx = (x.i(1) - x.i(0)).mm   >>\
             'foutmarge van x-waarden'
 
-            F_A = Wd(0).kN   >>\
+            F_A = pc.W(0).kN   >>\
             'container voor gesommeerde reactiekrachten in linker scharnier (A)'
 
-            F_B = Wd(0).kN   >>\
+            F_B = pc.W(0).kN   >>\
             'container voor gesommeerde reactiekrachten in rechter scharnier (B)'
 
-            V = Ls((x * 0).array).kN   >>\
+            V = pc.L((x * 0).array).kN   >>\
             'container voor gesommeerde dwarskrachten'
 
-            M = Ls((x * 0).array).kNm  >>\
+            M = pc.L((x * 0).array).kNm  >>\
             'container voor gesommeerde momenten'
 
             def VM_F(L, x, F, x_F):

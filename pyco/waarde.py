@@ -108,7 +108,7 @@ class Waarde(pc.BasisObject):
         bijvoorbeeld: "m3*kPa/s4*m"
 
     STANDAARD EENHEDEN          deze kan je combineren in een eenheid tekst
-        dimensieloos            -
+        dimensieloos            - proc prom
         massa                   ag fg pg ng mug mg cg g hg kg Mg Gg Tg Pg Eg
                                 ton kton Mton ounce pound kip stone grain
         lengte                  am fm pm nm mum mm cm dm m dam hm km Mm Gm Tm
@@ -138,7 +138,8 @@ class Waarde(pc.BasisObject):
     ml_j ml_min ml_s Mm mm mm2 mm3 mm3_d mm3_h mm3_j mm3_min mm3_s mm4 mm_d
     mm_h mm_j mm_min mm_s MN MNm MNmm MN_m2 MN_mm2 MPa Ms ms Mton mug mum mus
     m_d m_h m_j m_min m_s N ng Nm nm Nmm ns N_m N_mm N_m2 N_mm2 ounce Pa Pg pg
-    pint Pm pm pound Ps ps rad s stone tbs Tg Tm TN ton TPa Ts tsp yard zeemijl
+    pint Pm pm pound proc prom Ps ps rad s stone tbs Tg Tm TN ton TPa Ts tsp
+    yard zeemijl
     """
 
     # hulp functie om lijst hierboven te gegeneren; hierna nog bepaalde eigenschappen/methodes verwijderen
@@ -202,6 +203,8 @@ class Waarde(pc.BasisObject):
 
         # DIMENSIELOOS
         '-': ('dimensieloos', _TYPE['DIMENSIELOOS'], 1), # standaard
+        'proc': ('procent', _TYPE['DIMENSIELOOS'], 1.0e-2),
+        'prom': ('procent', _TYPE['DIMENSIELOOS'], 1.0e-3),
 
         # MASSA
         'ag': ('attogram', _TYPE['MASSA'], 1.0e-21),
@@ -1029,18 +1032,18 @@ class Waarde(pc.BasisObject):
             return self
 
     def __format__(self, config:str=None):
-       """Geeft tekst met geformatteerd getal en eenheid."""
-       if config is None:
-           return str(self)
-       if self._is_getal:
-           waarde_getal, waarde_eenheid = tuple(self)
-           format_str = '{:' + config + '} {}'
-           return format_str.format(waarde_getal,
+        """Geeft tekst met geformatteerd getal en eenheid."""
+        if config is None:
+            return str(self)
+        if self._is_getal:
+            waarde_getal, waarde_eenheid = tuple(self)
+            format_str = '{:' + config + '} {}'
+            return format_str.format(waarde_getal,
                             waarde_eenheid).strip().split(' None', 1)[0]
-       else:
-           waarde_getal, _ = tuple(self)
-           format_str = '{:' + config + '}'
-           return format_str.format(waarde_getal)
+        else:
+            waarde_getal, _ = tuple(self)
+            format_str = '{:' + config + '}'
+            return format_str.format(waarde_getal)
 
     def __repr__(self):
         """Geeft representatie object."""
@@ -1116,6 +1119,16 @@ class Waarde(pc.BasisObject):
 ###############################################################################
 #  ALLES HIERONDER MOET ZELFDE ZIJN ALS BIJ LIJST OBJECT
 ############################################################################### 
+
+    # DIMENSIELOOS
+
+    @property
+    def proc(self):
+        return self._verander_eenheid('proc')
+
+    @property
+    def prom(self):
+        return self._verander_eenheid('prom')
 
     # MASSA
 

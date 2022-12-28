@@ -56,7 +56,7 @@ Document = pyco.document.Document
 import pyco.macro
 Macro = pyco.macro.Macro
 
-
+#-------------------------------------
  
 def import_bieb(pad=None, verbose=False):
     import os.path, glob, importlib, inspect
@@ -70,30 +70,30 @@ def import_bieb(pad=None, verbose=False):
     if verbose:
         print('Importeer bieb modules uit de map: {}'.format(pad))
         
-    if hasattr(pyco, 'macro'):
-        macro_container = getattr(pyco, 'macro')
-    else:
-        class macro_container: pass
-    
-    if hasattr(pyco, 'data'):
-        data_container = getattr(pyco, 'data')
-    else:
-        class data_container: pass
-    
-    if hasattr(pyco, 'figuur'):
-        figuur_container = getattr(pyco, 'figuur')
-    else:
-        class figuur_container: pass
-    
-    if hasattr(pyco, 'document'):
-        document_container = getattr(pyco, 'document')
-    else:
-        class document_container: pass
-    
     if hasattr(pyco, 'bieb'):
         bieb_container = getattr(pyco, 'bieb')
     else:
         class bieb_container: pass
+        
+    if hasattr(pyco, 'bieb') and hasattr(pyco.bieb, 'macro'):
+        macro_container = getattr(pyco.bieb, 'macro')
+    else:
+        class macro_container: pass
+    
+    if hasattr(pyco, 'bieb') and hasattr(pyco.bieb, 'data'):
+        data_container = getattr(pyco.bieb, 'data')
+    else:
+        class data_container: pass
+    
+    if hasattr(pyco, 'bieb') and hasattr(pyco.bieb, 'figuur'):
+        figuur_container = getattr(pyco.bieb, 'figuur')
+    else:
+        class figuur_container: pass
+    
+    if hasattr(pyco, 'bieb') and hasattr(pyco.bieb, 'document'):
+        document_container = getattr(pyco.bieb, 'document')
+    else:
+        class document_container: pass
 
     for module_naam in [os.path.basename(f)[:-3] for f in glob.glob(
                 os.path.join(pad, '*.py')
@@ -102,6 +102,8 @@ def import_bieb(pad=None, verbose=False):
         bieb_klasses = [o for o in dir(module_obj) if not o.startswith('_')]
         for bieb_klasse in bieb_klasses:
             bieb_klasse_obj = getattr(module_obj, bieb_klasse)
+            if verbose:
+                print('Importeer: {}'.format(bieb_klasse))
             if inspect.isclass(bieb_klasse_obj) and issubclass(bieb_klasse_obj, BiebItem):
                 if issubclass(bieb_klasse_obj, Macro):
                     setattr(macro_container, bieb_klasse, bieb_klasse_obj)
@@ -113,11 +115,11 @@ def import_bieb(pad=None, verbose=False):
                     setattr(document_container, bieb_klasse, bieb_klasse_obj)
                 else:
                     setattr(bieb_container, bieb_klasse, bieb_klasse_obj)
-                
-    setattr(pyco, 'macro', macro_container)
-    setattr(pyco, 'data', data_container)
-    setattr(pyco, 'figuur', figuur_container)
-    setattr(pyco, 'document', document_container)
-    setattr(pyco, 'bieb', bieb_container)
+    
+    setattr(pyco, 'bieb', bieb_container)      
+    setattr(pyco.bieb, 'macro', macro_container)
+    setattr(pyco.bieb, 'data', data_container)
+    setattr(pyco.bieb, 'figuur', figuur_container)
+    setattr(pyco.bieb, 'document', document_container)
         
 import_bieb()
