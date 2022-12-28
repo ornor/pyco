@@ -29,7 +29,7 @@ class Data(pc.BasisObject):
     
     DATARIJ
         dr1 = d.DataRij(eigenschap1=waarde1, eigenschap2=waarde2)
-        dr2.waardes()             retourneert een Python dict met Waarde objecten
+        dr2.waardes                   retourneert attributen met Waarde objecten
         
     TOEVOEGEN DATA REGEL    in onderstaande gevallen: 4 eigenschappen (kolommen)
         d.toevoegen(d.DataRij( ... ))      een DataRij object
@@ -45,16 +45,22 @@ class Data(pc.BasisObject):
     OPHALEN DATA EIGENSCHAP       
         d['eigenschap1']          een Lijst object (kolom uit dataframe)
         d.eigenschap1             ook beschikbaar als attribuut van object
-        d[0]                      Python list met waardes van 1e invoer (DataRij)
+        d[0]                      DataRij object van 1e invoer
         d[3:8]                    Python list met waardes (in Datarij)
                                                             van 4e t/m 8e invoer
         d[::2]                    Python list met alle oneven rijnummers
         d[:, 1:3]                 Python list met 2e en 3e kolom
                                                   (alleen waarden, geen eenheid) 
                                                   
-    METHODES
-        d.coordinaten(eigenschap1, eigenschap2)
-                                  retourneert een tuple met tuples (es1, es2)
+        d[0].eigenschap1          is alleen getal (of tekst) zelf (van 1e rij)
+        d[0].waardes.eigenschap1  is pc.Waarde object dat dit getal bevat
+                                                  
+    ZOEKEN EN INTERPOLEREN IN INDEX KOLOM        1e kolom wordt als index gezien
+        d.zoek('waarde 1e kolom') geeft een DataRij object horende bij waarde
+        d.zoek(exact_getal)       geeft een DataRij object horende bij waarde                      
+        d.zoek(getal)             interpoleert getal in 1e kolom en geeft DataRij
+        d.zoek(waarde, eigenschap='es3')  gebruik andere kolom als index kolom
+
     """
 
     def __init__(self, **lijst_dict):
@@ -105,14 +111,17 @@ class Data(pc.BasisObject):
         eenheden = self.eenheden
         cls = namedtuple('DataRij', eigenschappen)
         
+        @property
         def waardes(cls_self):
-            """Methode van DataRij class die dict met Waarde objecten retourneert."""
-            return {es: pc.Waarde(w).eh(
-                        eenheden[eigenschappen.index(es)]
-                    ) for es, w in cls_self._asdict().items()}
+            """Methode van DataRij attributen met Waarde objecten retourneert."""
+            class waarde_klasse: pass
+        
+            for es, w in cls_self._asdict().items():
+                setattr(waarde_klasse, es, pc.Waarde(w).eh(
+                                              eenheden[eigenschappen.index(es)]))
+            return waarde_klasse
         
         cls.waardes = waardes
-        cls.waarden = waardes
         
         return cls
 
@@ -166,6 +175,56 @@ class Data(pc.BasisObject):
         """Retourneert een tuple met tuples (eigenschap1, eigenschap2)"""
         return tuple(zip(self[eigenschap1].array, self[eigenschap2].array))
     
+    
+    def zoek(self, waarde, eigenschap=None):
+        """Zoek waarde in index kolom, en geef corresponderende RijData.
+        Als getal dan interpoleer waardes. Standaard index is 1e kolom."""
+        i_index = 0
+        eigenschappen = self.eigenschappen
+        if eigenschap is not None:
+            if eigenschap not in eigenschappen:
+                raise ValueError('Eigenschap is niet geldig: {}'.format(eigenschap))
+            i_index = eigenschappen.index(eigenschap)
+            
+        if isinstance(waarde, str):
+            kolom_1 = self.__getitem__(eigenschappen[i_index]).array.tolist()
+            if not waarde in kolom_1:
+                return None
+            idx = kolom_1.index(waarde)
+            return self.__getitem__(idx)
+        elif isinstance(waarde, int) or isinstance(waarde, float):
+            kolom_1 = self.__getitem__(eigenschappen[i_index]).array.tolist()
+            if len(kolom_1) < 1:
+                return None
+            if waarde in kolom_1:
+                idx = kolom_1.index(waarde)
+                return self.__getitem__(idx)
+            # interpoleer waardes
+            def zijn_getallen(a, b):
+                return ((isinstance(a, float) or isinstance(a, int))
+                            and (isinstance(b, float) or isinstance(b, int)))
+            berekende_lijst = []
+            for i_rij in range(1, len(kolom_1)):
+                vorige_waardes = self.df.iloc[i_rij-1].values.tolist()
+                deze_waardes = self.df.iloc[i_rij].values.tolist()
+                vorige_index = vorige_waardes[i_index]
+                deze_index = deze_waardes[i_index]
+                if (zijn_getallen(vorige_index, deze_index)
+                        and ((waarde > vorige_index and waarde < deze_index)
+                            or (waarde < vorige_index and waarde > deze_index))
+                        and (deze_index - vorige_index) != 0
+                        and (waarde - vorige_index) != 0):
+                    for a, b in zip(vorige_waardes, deze_waardes):
+                        if zijn_getallen(a, b):
+                            berekende_lijst.append(a + 
+                                ((waarde - vorige_index) / (deze_index - vorige_index))
+                                * (b - a))
+                        else:
+                            berekende_lijst.append(np.nan)
+                    return self.DataRij(*berekende_lijst)
+        else:
+            return None
+    
     def __getitem__(self, eigenschap_bereik):
         """Retourneert een eigenschap als Lijst (tekst invoer) of een aantal rijen van DataFrame (getal/bereik invoer)."""
         eigenschappen = self.eigenschappen
@@ -198,8 +257,10 @@ class Data(pc.BasisObject):
         object_str = self.__str__()
         lijn = len(object_str.split('\n')[0])*'-'
         bronnen = ''
-        if len(self.bronnen) > 0:
-            bronnen = 'Bronvermelding:\n' + '\n'.join(['* {}'.format(b) for b in self.bronnen])
+        if len(self.bronnen) == 1:
+            bronnen = self.bronnen[0]
+        elif len(self.bronnen) > 1:
+            bronnen = '\n'.join(['* {}'.format(b) for b in self.bronnen])
         return ('pyco.Data object:\n' 
                     + lijn + '\n' 
                     + object_str + '\n' 

@@ -681,7 +681,8 @@ class Waarde(pc.BasisObject):
     def _verander_eenheid(self, eenheid:str, check_type:bool=True):
         """Helper functie voor eigenschappen qua afronding."""
         if not self._is_getal:
-            raise ValueError('huide waarde is geen getal: {}'.format(self._getal))
+            # niets veranderen
+            return self 
         if self._eenheidbreuk == Fraction(1):
             # waarde was dimensieloos; dan mogelijk om eenheid te veranderen
             self.__init__(self._getal, eenheid)

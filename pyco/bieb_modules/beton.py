@@ -25,10 +25,11 @@ class BetonEigenschappen(pc.Data, pc.BiebItem):
             bronnen = ('NEN-EN 1992-1-1+C2:2011+NB:2007 tabel 3.1')
         )
 
-class BetonMateriaalfactoren(pc.Data, pc.BiebItem):
+class BetonMateriaalFactoren(pc.Data, pc.BiebItem):
     def __new__(cls):
         return pc.Data(
-            materiaal=None, blijvend_tijdelijk=None, buitengewoon=None, vermoeiing=None,
+            materiaal=None, blijvend_tijdelijk=None,
+            buitengewoon=None, vermoeiing=None,
             data = (
                 ('beton', 1.5, 1.2, 1.35),
                 ('betonstaal', 1.15, 1.0, 1.15),
